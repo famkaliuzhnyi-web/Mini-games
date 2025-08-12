@@ -1,0 +1,379 @@
+/**
+ * Tetris Game - Classic falling blocks puzzle game
+ */
+import React, { useCallback, useEffect, useRef } from 'react';
+import { useGameSave } from '../../hooks/useGameSave';
+import type { GameController, GameState, GameConfig } from '../../types/game';
+import type { TetrisGameData, TetrisAction } from './types';
+import { TetrisBoard } from './components/TetrisBoard';
+import { TetrisControls } from './components/TetrisControls';
+import './TetrisGame.css';
+import {
+  createEmptyGrid,
+  createActivePiece,
+  createInitialStats,
+  getRandomPieceType,
+  isValidPosition,
+  movePiece,
+  rotatePiece,
+  placePiece,
+  clearCompletedLines,
+  isGameOver,
+  updateStats,
+  calculateDropSpeed,
+  INITIAL_DROP_SPEED
+} from './logic';
+
+// Tetris game configuration
+const TETRIS_CONFIG: GameConfig = {
+  id: 'tetris',
+  name: 'Tetris',
+  description: 'Classic falling blocks puzzle game',
+  version: '1.0.0',
+  autoSaveEnabled: true,
+  autoSaveIntervalMs: 30000 // Save every 30 seconds
+};
+
+// Tetris game controller
+class TetrisGameController implements GameController<TetrisGameData> {
+  config = TETRIS_CONFIG;
+
+  getInitialState(): GameState<TetrisGameData> {
+    const now = new Date().toISOString();
+    const firstPieceType = getRandomPieceType();
+    
+    return {
+      gameId: 'tetris',
+      playerId: '',
+      version: this.config.version,
+      createdAt: now,
+      lastModified: now,
+      data: {
+        grid: createEmptyGrid(),
+        activePiece: createActivePiece(firstPieceType),
+        nextPiece: getRandomPieceType(),
+        stats: createInitialStats(),
+        gameOver: false,
+        paused: false,
+        lastMoveTime: Date.now(),
+        dropSpeed: INITIAL_DROP_SPEED
+      },
+      isComplete: false,
+      score: 0
+    };
+  }
+
+  validateState(state: GameState<TetrisGameData>): boolean {
+    return !!(
+      state &&
+      state.data &&
+      Array.isArray(state.data.grid) &&
+      typeof state.data.gameOver === 'boolean' &&
+      state.data.stats &&
+      typeof state.data.stats.score === 'number'
+    );
+  }
+
+  onSaveLoad(state: GameState<TetrisGameData>): void {
+    console.log('Tetris game loaded:', {
+      score: state.data.stats.score,
+      level: state.data.stats.level,
+      lines: state.data.stats.lines
+    });
+  }
+
+  onSaveDropped(): void {
+    console.log('Tetris game save dropped');
+  }
+}
+
+interface TetrisGameProps {
+  playerId: string;
+}
+
+export const TetrisGame: React.FC<TetrisGameProps> = ({ playerId }) => {
+  const controller = new TetrisGameController();
+  const gameLoopRef = useRef<number | null>(null);
+  
+  const {
+    gameState,
+    setGameState,
+    hasSave,
+    isLoading,
+    autoSaveEnabled,
+    toggleAutoSave
+  } = useGameSave<TetrisGameData>({
+    gameId: 'tetris',
+    playerId,
+    gameConfig: TETRIS_CONFIG,
+    initialState: { ...controller.getInitialState(), playerId },
+    onSaveLoad: controller.onSaveLoad,
+    onSaveDropped: controller.onSaveDropped
+  });
+
+  // Game action dispatcher
+  const dispatch = useCallback((action: TetrisAction) => {
+    const prevState = gameState;
+    if (prevState.data.gameOver && action.type !== 'RESET') {
+      return;
+    }
+    
+    if (prevState.data.paused && !['PAUSE', 'UNPAUSE', 'RESET'].includes(action.type)) {
+      return;
+    }
+
+    const newState = { ...prevState };
+    const data = { ...newState.data };
+
+    switch (action.type) {
+      case 'MOVE': {
+        if (!data.activePiece) break;
+        
+        const movedPiece = movePiece(data.activePiece, action.direction);
+        if (isValidPosition(data.grid, movedPiece)) {
+          data.activePiece = movedPiece;
+          if (action.direction === 'down') {
+            data.lastMoveTime = Date.now();
+          }
+        } else if (action.direction === 'down') {
+          // Piece can't move down anymore, place it
+          data.grid = placePiece(data.grid, data.activePiece);
+          
+          // Check for line clears
+          const { grid: clearedGrid, linesCleared } = clearCompletedLines(data.grid);
+          data.grid = clearedGrid;
+          data.stats = updateStats(data.stats, linesCleared);
+          
+          // Spawn next piece
+          data.activePiece = createActivePiece(data.nextPiece);
+          data.nextPiece = getRandomPieceType();
+          
+          // Check game over
+          if (isGameOver(data.grid, data.activePiece)) {
+            data.gameOver = true;
+            newState.isComplete = true;
+          }
+          
+          // Update drop speed based on level
+          data.dropSpeed = calculateDropSpeed(data.stats.level);
+          data.stats.pieces++;
+        }
+        break;
+      }
+
+      case 'ROTATE': {
+        if (!data.activePiece) break;
+        
+        const rotatedPiece = rotatePiece(data.activePiece, action.direction);
+        if (isValidPosition(data.grid, rotatedPiece)) {
+          data.activePiece = rotatedPiece;
+        }
+        break;
+      }
+
+      case 'DROP': {
+        if (!data.activePiece) break;
+        
+        // Hard drop - move piece down until it can't move anymore
+        let dropPiece = data.activePiece;
+        let dropDistance = 0;
+        
+        while (true) {
+          const nextPiece = movePiece(dropPiece, 'down');
+          if (isValidPosition(data.grid, nextPiece)) {
+            dropPiece = nextPiece;
+            dropDistance++;
+          } else {
+            break;
+          }
+        }
+        
+        if (dropDistance > 0) {
+          data.activePiece = dropPiece;
+          // Award points for hard drop
+          data.stats.score += dropDistance * 2;
+          // Trigger placement by setting lastMoveTime to force TICK to place piece
+          data.lastMoveTime = 0;
+        }
+        break;
+      }
+
+      case 'PAUSE':
+        data.paused = !data.paused;
+        break;
+
+      case 'UNPAUSE':
+        data.paused = false;
+        break;
+
+      case 'RESET': {
+        const resetState = controller.getInitialState();
+        setGameState({
+          ...newState,
+          data: { ...resetState.data },
+          isComplete: false,
+          score: 0,
+          lastModified: new Date().toISOString()
+        });
+        return;
+      }
+
+      case 'TICK': {
+        const now = Date.now();
+        if (now - data.lastMoveTime >= data.dropSpeed) {
+          // Use the MOVE logic directly instead of recursive dispatch
+          if (!data.activePiece) break;
+          
+          const movedPiece = movePiece(data.activePiece, 'down');
+          if (isValidPosition(data.grid, movedPiece)) {
+            data.activePiece = movedPiece;
+            data.lastMoveTime = Date.now();
+          } else {
+            // Piece can't move down anymore, place it
+            data.grid = placePiece(data.grid, data.activePiece);
+            
+            // Check for line clears
+            const { grid: clearedGrid, linesCleared } = clearCompletedLines(data.grid);
+            data.grid = clearedGrid;
+            data.stats = updateStats(data.stats, linesCleared);
+            
+            // Spawn next piece
+            data.activePiece = createActivePiece(data.nextPiece);
+            data.nextPiece = getRandomPieceType();
+            
+            // Check game over
+            if (isGameOver(data.grid, data.activePiece)) {
+              data.gameOver = true;
+              newState.isComplete = true;
+            }
+            
+            // Update drop speed based on level
+            data.dropSpeed = calculateDropSpeed(data.stats.level);
+            data.stats.pieces++;
+            data.lastMoveTime = Date.now();
+          }
+        }
+        break;
+      }
+    }
+
+    newState.data = data;
+    newState.score = data.stats.score;
+    newState.lastModified = new Date().toISOString();
+    setGameState(newState);
+  }, [gameState, setGameState, controller]);
+
+  // Keyboard controls
+  const handleKeyPress = useCallback((event: KeyboardEvent) => {
+    if (isLoading) return;
+    
+    switch (event.code) {
+      case 'ArrowLeft':
+        event.preventDefault();
+        dispatch({ type: 'MOVE', direction: 'left' });
+        break;
+      case 'ArrowRight':
+        event.preventDefault();
+        dispatch({ type: 'MOVE', direction: 'right' });
+        break;
+      case 'ArrowDown':
+        event.preventDefault();
+        dispatch({ type: 'MOVE', direction: 'down' });
+        break;
+      case 'ArrowUp':
+        event.preventDefault();
+        dispatch({ type: 'ROTATE', direction: 'clockwise' });
+        break;
+      case 'Space':
+        event.preventDefault();
+        dispatch({ type: 'DROP' });
+        break;
+      case 'KeyP':
+        event.preventDefault();
+        dispatch({ type: 'PAUSE' });
+        break;
+    }
+  }, [dispatch, isLoading]);
+
+  // Set up keyboard listeners
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [handleKeyPress]);
+
+  // Game loop for automatic piece falling
+  useEffect(() => {
+    if (gameState.data.gameOver || gameState.data.paused || isLoading) {
+      if (gameLoopRef.current) {
+        clearInterval(gameLoopRef.current);
+        gameLoopRef.current = null;
+      }
+      return;
+    }
+
+    gameLoopRef.current = setInterval(() => {
+      dispatch({ type: 'TICK' });
+    }, 50) as unknown as number; // Check every 50ms for smooth movement
+
+    return () => {
+      if (gameLoopRef.current) {
+        clearInterval(gameLoopRef.current);
+      }
+    };
+  }, [gameState.data.gameOver, gameState.data.paused, isLoading, dispatch]);
+
+  // Control handlers
+  const handlePause = useCallback(() => {
+    dispatch({ type: 'PAUSE' });
+  }, [dispatch]);
+
+  const handleReset = useCallback(() => {
+    dispatch({ type: 'RESET' });
+  }, [dispatch]);
+
+  if (isLoading) {
+    return (
+      <div style={{ padding: '2rem', textAlign: 'center' }}>
+        <h2>Loading Tetris...</h2>
+      </div>
+    );
+  }
+
+  return (
+    <div className="tetris-game">
+      <div className="tetris-header">
+        <h2>{TETRIS_CONFIG.name}</h2>
+        <p>{TETRIS_CONFIG.description}</p>
+      </div>
+      
+      <div className="tetris-content">
+        <TetrisBoard
+          grid={gameState.data.grid}
+          activePiece={gameState.data.activePiece}
+          gameOver={gameState.data.gameOver}
+        />
+        
+        <TetrisControls
+          stats={gameState.data.stats}
+          nextPiece={gameState.data.nextPiece}
+          paused={gameState.data.paused}
+          gameOver={gameState.data.gameOver}
+          onPause={handlePause}
+          onReset={handleReset}
+        />
+      </div>
+      
+      <div className="tetris-save-info">
+        <small>
+          💾 Auto-save: {autoSaveEnabled ? 'Enabled' : 'Disabled'} | 
+          {hasSave ? ' Save available' : ' No save data'}
+        </small>
+        <button onClick={toggleAutoSave} className="toggle-save-btn">
+          {autoSaveEnabled ? 'Disable' : 'Enable'} Auto-save
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default TetrisGame;

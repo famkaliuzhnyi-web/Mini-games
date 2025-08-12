@@ -15,6 +15,13 @@ interface GamesListProps {
 
 const AVAILABLE_GAMES: GameInfo[] = [
   {
+    id: 'tetris',
+    name: 'Tetris',
+    description: 'Classic falling blocks puzzle game',
+    emoji: '🧱',
+    category: 'Puzzle'
+  },
+  {
     id: 'sudoku',
     name: 'Sudoku',
     description: 'Classic number puzzle with multiple difficulty levels',
