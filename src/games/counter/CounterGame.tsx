@@ -175,168 +175,137 @@ export const CounterGame: React.FC<CounterGameProps> = ({ playerId }) => {
   return (
     <div style={{ 
       padding: '2rem', 
-      textAlign: 'center', 
-      maxWidth: '600px', 
-      margin: '0 auto',
-      border: '1px solid #ddd',
-      borderRadius: '8px',
-      backgroundColor: '#f9f9f9'
+      textAlign: 'center' as const, 
+      maxWidth: '700px', 
+      margin: '0 auto'
     }}>
-      <h2>{COUNTER_CONFIG.name}</h2>
-      <p>{COUNTER_CONFIG.description}</p>
+      <h2 style={{ marginBottom: '0.5rem', color: 'rgba(255, 255, 255, 0.9)' }}>{COUNTER_CONFIG.name}</h2>
+      <p style={{ marginBottom: '2rem', color: 'rgba(255, 255, 255, 0.7)' }}>{COUNTER_CONFIG.description}</p>
       
       {/* Game Status */}
-      <div style={{ 
-        marginBottom: '1.5rem', 
-        padding: '1rem', 
-        backgroundColor: '#fff', 
-        borderRadius: '4px',
-        border: '1px solid #eee'
-      }}>
-        <div style={{ fontSize: '3rem', fontWeight: 'bold', color: gameState.data.count >= 100 ? '#4CAF50' : '#333' }}>
+      <div className="card" style={{ marginBottom: '1.5rem' }}>
+        <div className={`counter-display ${gameState.isComplete ? 'complete' : ''}`}>
           {gameState.data.count}
         </div>
-        <div style={{ marginTop: '0.5rem', color: '#666' }}>
+        <div className="game-stats">
           Total Clicks: {gameState.data.clicks} | High Score: {gameState.data.highScore}
         </div>
         {gameState.isComplete && (
-          <div style={{ marginTop: '0.5rem', color: '#4CAF50', fontWeight: 'bold' }}>
+          <div style={{ 
+            marginTop: '1rem', 
+            padding: '1rem',
+            background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%)',
+            borderRadius: '12px',
+            color: '#10b981', 
+            fontWeight: 'bold',
+            border: '1px solid rgba(16, 185, 129, 0.3)'
+          }}>
             🎉 Game Complete! You reached 100! 🎉
           </div>
         )}
       </div>
 
       {/* Game Controls */}
-      <div style={{ marginBottom: '1.5rem' }}>
-        <button 
-          onClick={handleIncrement}
-          style={{ 
-            fontSize: '1.2rem', 
-            padding: '0.75rem 1.5rem', 
-            margin: '0 0.5rem',
-            backgroundColor: '#4CAF50',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer'
-          }}
-        >
-          + Increment
-        </button>
-        <button 
-          onClick={handleDecrement}
-          disabled={gameState.data.count === 0}
-          style={{ 
-            fontSize: '1.2rem', 
-            padding: '0.75rem 1.5rem', 
-            margin: '0 0.5rem',
-            backgroundColor: gameState.data.count === 0 ? '#ccc' : '#f44336',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: gameState.data.count === 0 ? 'not-allowed' : 'pointer'
-          }}
-        >
-          - Decrement
-        </button>
-        <button 
-          onClick={handleReset}
-          style={{ 
-            fontSize: '1.2rem', 
-            padding: '0.75rem 1.5rem', 
-            margin: '0 0.5rem',
-            backgroundColor: '#FF9800',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer'
-          }}
-        >
-          Reset
-        </button>
+      <div className="card" style={{ marginBottom: '1.5rem' }}>
+        <h3 style={{ marginBottom: '1rem', color: 'rgba(255, 255, 255, 0.9)' }}>Game Controls</h3>
+        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <button 
+            onClick={handleIncrement}
+            className="game-button"
+            style={{ 
+              fontSize: '1.2rem', 
+              padding: '1rem 2rem'
+            }}
+          >
+            ➕ Increment
+          </button>
+          <button 
+            onClick={handleDecrement}
+            disabled={gameState.data.count === 0}
+            className="warning-button"
+            style={{ 
+              fontSize: '1.2rem', 
+              padding: '1rem 2rem'
+            }}
+          >
+            ➖ Decrement
+          </button>
+          <button 
+            onClick={handleReset}
+            className="danger-button"
+            style={{ 
+              fontSize: '1.2rem', 
+              padding: '1rem 2rem'
+            }}
+          >
+            🔄 Reset
+          </button>
+        </div>
       </div>
 
       {/* Save/Load Controls */}
-      <div style={{ 
-        marginBottom: '1.5rem',
-        padding: '1rem',
-        backgroundColor: '#fff',
-        borderRadius: '4px',
-        border: '1px solid #eee'
-      }}>
-        <h3 style={{ margin: '0 0 1rem 0' }}>Save Management</h3>
+      <div className="card" style={{ marginBottom: '1.5rem' }}>
+        <h3 style={{ margin: '0 0 1rem 0', color: 'rgba(255, 255, 255, 0.9)' }}>Save Management</h3>
         
         <div style={{ marginBottom: '1rem' }}>
-          <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+          <label style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            gap: '0.5rem',
+            color: 'rgba(255, 255, 255, 0.8)',
+            fontSize: '1rem'
+          }}>
             <input
               type="checkbox"
               checked={autoSaveEnabled}
               onChange={toggleAutoSave}
+              style={{ transform: 'scale(1.2)' }}
             />
             Auto-save enabled (saves every {COUNTER_CONFIG.autoSaveIntervalMs / 1000}s)
           </label>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
           <button 
             onClick={handleManualSave}
-            style={{ 
-              padding: '0.5rem 1rem',
-              backgroundColor: '#2196F3',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer'
-            }}
+            style={{ padding: '0.75rem 1.25rem' }}
           >
-            Manual Save
+            💾 Manual Save
           </button>
           
           <button 
             onClick={handleManualLoad}
             disabled={!hasSave}
-            style={{ 
-              padding: '0.5rem 1rem',
-              backgroundColor: hasSave ? '#4CAF50' : '#ccc',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: hasSave ? 'pointer' : 'not-allowed'
-            }}
+            className={hasSave ? 'game-button' : ''}
+            style={{ padding: '0.75rem 1.25rem' }}
           >
-            Load Game
+            📂 Load Game
           </button>
           
           <button 
             onClick={handleDropSave}
             disabled={!hasSave}
-            style={{ 
-              padding: '0.5rem 1rem',
-              backgroundColor: hasSave ? '#f44336' : '#ccc',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: hasSave ? 'pointer' : 'not-allowed'
-            }}
+            className={hasSave ? 'danger-button' : ''}
+            style={{ padding: '0.75rem 1.25rem' }}
           >
-            Delete Save
+            🗑️ Delete Save
           </button>
         </div>
 
-        <div style={{ marginTop: '1rem', fontSize: '0.9rem', color: '#666' }}>
+        <div style={{ 
+          marginTop: '1rem', 
+          fontSize: '0.9rem', 
+          color: hasSave ? '#10b981' : '#ef4444',
+          fontWeight: '600'
+        }}>
           {hasSave ? '💾 Save available' : '❌ No save data'}
         </div>
       </div>
 
       {/* Save Event Status */}
       {lastSaveEvent && (
-        <div style={{ 
-          padding: '0.5rem',
-          backgroundColor: lastSaveEvent.success ? '#e8f5e8' : '#fde8e8',
-          border: `1px solid ${lastSaveEvent.success ? '#4CAF50' : '#f44336'}`,
-          borderRadius: '4px',
-          fontSize: '0.9rem'
-        }}>
+        <div className={`save-status ${lastSaveEvent.success ? 'success' : 'error'}`}>
           {lastSaveEvent.success ? '✅' : '❌'} 
           {lastSaveEvent.action === 'auto-save' ? 'Auto-saved' : 
            lastSaveEvent.action === 'save' ? 'Saved' : 
@@ -344,7 +313,7 @@ export const CounterGame: React.FC<CounterGameProps> = ({ playerId }) => {
            lastSaveEvent.action === 'drop' ? 'Save deleted' : lastSaveEvent.action}
           {lastSaveEvent.error && ` (${lastSaveEvent.error})`}
           <br />
-          <small>{new Date(lastSaveEvent.timestamp).toLocaleString()}</small>
+          <small style={{ opacity: 0.8 }}>{new Date(lastSaveEvent.timestamp).toLocaleString()}</small>
         </div>
       )}
     </div>

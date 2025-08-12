@@ -193,11 +193,11 @@ function App() {
       
       {/* Connection Status */}
       <div className="card" style={{ marginBottom: '1rem' }}>
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', justifyContent: 'center' }}>
-          <span style={{ color: isOnline ? 'green' : 'red' }}>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <span className={`status-indicator ${isOnline ? 'status-online' : 'status-offline'}`}>
             🌐 {isOnline ? 'Online' : 'Offline'}
           </span>
-          <span style={{ color: isConnected ? 'green' : 'orange' }}>
+          <span className={`status-indicator ${isConnected ? 'status-online' : 'status-disconnected'}`}>
             🔌 WebSocket: {connectionState}
           </span>
         </div>
@@ -206,29 +206,23 @@ function App() {
       {/* Game Selection */}
       <div className="card" style={{ marginBottom: '1rem' }}>
         <h3>Select a Game</h3>
-        <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
           <button 
             onClick={() => setCurrentGame('counter')}
+            className={`game-button ${currentGame === 'counter' ? 'active' : ''}`}
             style={{ 
-              padding: '0.75rem 1.5rem',
-              backgroundColor: currentGame === 'counter' ? '#4CAF50' : '#2196F3',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer'
+              padding: '1rem 2rem',
+              fontSize: '1.1rem'
             }}
           >
             🎯 Counter Game
           </button>
           <button 
             onClick={() => setCurrentGame('demo')}
+            className={currentGame === 'demo' ? 'active' : ''}
             style={{ 
-              padding: '0.75rem 1.5rem',
-              backgroundColor: currentGame === 'demo' ? '#4CAF50' : '#2196F3',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer'
+              padding: '1rem 2rem',
+              fontSize: '1.1rem'
             }}
           >
             🔧 WebSocket Demo
