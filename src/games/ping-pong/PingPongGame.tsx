@@ -1,7 +1,7 @@
 /**
  * Ping Pong Game React Component
  */
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { useGameSave } from '../../hooks/useGameSave';
 import { PingPongGameController } from './controller';
 import type { PingPongGameData, KeyState } from './types';
@@ -21,18 +21,20 @@ interface PingPongGameProps {
 }
 
 export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
-  const controller = new PingPongGameController();
+  const controller = useMemo(() => new PingPongGameController(), []);
   const gameLoopRef = useRef<number | null>(null);
   const lastFrameTime = useRef<number>(0);
-  
-  // Key state for paddle control
-  const [keyState, setKeyState] = useState<KeyState>({
+  const gameStateRef = useRef<GameState<PingPongGameData> | null>(null);
+  const keyStateRef = useRef<KeyState>({
     up: false,
     down: false,
     w: false,
     s: false,
     space: false
   });
+  
+  // Key state for paddle control
+  const [keyState, setKeyState] = useState<KeyState>(keyStateRef.current);
 
   const {
     gameState,
@@ -53,6 +55,43 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
     onSaveLoad: controller.onSaveLoad,
     onSaveDropped: controller.onSaveDropped
   });
+
+  // Update refs when state changes
+  useEffect(() => {
+    gameStateRef.current = gameState;
+  }, [gameState]);
+
+  useEffect(() => {
+    keyStateRef.current = keyState;
+  }, [keyState]);
+
+  /**
+   * Pause game
+   */
+  const pauseGame = useCallback(() => {
+    setGameState({
+      ...gameState,
+      data: {
+        ...gameState.data,
+        gameStatus: 'paused'
+      },
+      lastModified: new Date().toISOString()
+    });
+  }, [gameState, setGameState]);
+
+  /**
+   * Resume game
+   */
+  const resumeGame = useCallback(() => {
+    setGameState({
+      ...gameState,
+      data: {
+        ...gameState.data,
+        gameStatus: 'playing'
+      },
+      lastModified: new Date().toISOString()
+    });
+  }, [gameState, setGameState]);
 
   /**
    * Handle keyboard input
@@ -83,7 +122,7 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
         event.preventDefault();
         break;
     }
-  }, [gameState.data.gameStatus]);
+  }, [gameState.data.gameStatus, pauseGame, resumeGame]);
 
   const handleKeyUp = useCallback((event: KeyboardEvent) => {
     switch (event.code) {
@@ -109,7 +148,10 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
    * Game loop function
    */
   const gameLoop = useCallback((timestamp: number) => {
-    if (gameState.data.gameStatus !== 'playing') {
+    const currentGameState = gameStateRef.current;
+    const currentKeyState = keyStateRef.current;
+    
+    if (!currentGameState || currentGameState.data.gameStatus !== 'playing') {
       return;
     }
 
@@ -120,10 +162,10 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
     }
     lastFrameTime.current = timestamp;
 
-    const currentData = gameState.data;
+    const currentData = currentGameState.data;
       
     // Update player paddle
-    const newPlayerPaddle = updatePlayerPaddle(currentData.playerPaddle, keyState, currentData.gameArea);
+    const newPlayerPaddle = updatePlayerPaddle(currentData.playerPaddle, currentKeyState, currentData.gameArea);
     
     // Update AI paddle
     const newAIPaddle = updateAIPaddle(currentData.aiPaddle, currentData.ball, currentData.gameArea);
@@ -169,7 +211,7 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
     }
 
     const newState: GameState<PingPongGameData> = {
-      ...gameState,
+      ...currentGameState,
       data: {
         ...currentData,
         playerPaddle: newPlayerPaddle,
@@ -186,9 +228,8 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
     };
 
     setGameState(newState);
-
     gameLoopRef.current = requestAnimationFrame(gameLoop);
-  }, [gameState.data.gameStatus, keyState, setGameState]);
+  }, [setGameState]);
 
   /**
    * Start new game
@@ -212,52 +253,44 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
   }, [controller, gameState, setGameState]);
 
   /**
-   * Pause game
-   */
-  const pauseGame = useCallback(() => {
-    setGameState({
-      ...gameState,
-      data: {
-        ...gameState.data,
-        gameStatus: 'paused'
-      },
-      lastModified: new Date().toISOString()
-    });
-  }, [gameState, setGameState]);
-
-  /**
-   * Resume game
-   */
-  const resumeGame = useCallback(() => {
-    setGameState({
-      ...gameState,
-      data: {
-        ...gameState.data,
-        gameStatus: 'playing'
-      },
-      lastModified: new Date().toISOString()
-    });
-  }, [gameState, setGameState]);
-
-  /**
-   * Set up keyboard event listeners and game loop
+   * Set up keyboard event listeners
    */
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
     
-    if (gameState.data.gameStatus === 'playing') {
-      gameLoopRef.current = requestAnimationFrame(gameLoop);
-    }
-
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, [handleKeyDown, handleKeyUp]);
+
+  /**
+   * Manage game loop based on game status
+   */
+  useEffect(() => {
+    if (gameState.data.gameStatus === 'playing') {
+      // Cancel any existing animation frame
       if (gameLoopRef.current) {
         cancelAnimationFrame(gameLoopRef.current);
       }
+      // Start the game loop
+      gameLoopRef.current = requestAnimationFrame(gameLoop);
+    } else {
+      // Stop the game loop when not playing
+      if (gameLoopRef.current) {
+        cancelAnimationFrame(gameLoopRef.current);
+        gameLoopRef.current = null;
+      }
+    }
+
+    return () => {
+      if (gameLoopRef.current) {
+        cancelAnimationFrame(gameLoopRef.current);
+        gameLoopRef.current = null;
+      }
     };
-  }, [handleKeyDown, handleKeyUp, gameLoop, gameState.data.gameStatus]);
+  }, [gameState.data.gameStatus, gameLoop]);
 
   /**
    * Handle manual save with user feedback
