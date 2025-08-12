@@ -56,6 +56,8 @@ export const useGameSave = <T extends Record<string, unknown> = Record<string, u
   const gameStateRef = useRef<GameState<T>>(gameState);
   const lastSaveTimeRef = useRef<number>(0);
   const saveDebounceTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isInitializingRef = useRef<boolean>(true);
+  const hasLoadedSaveRef = useRef<boolean>(false);
 
   // Update ref when gameState changes
   useEffect(() => {
@@ -82,6 +84,7 @@ export const useGameSave = <T extends Record<string, unknown> = Record<string, u
           const loadResult = await saveServiceRef.current.loadGame<T>(gameId, playerId);
           if (loadResult.success && loadResult.gameState) {
             setGameStateInternal(loadResult.gameState);
+            hasLoadedSaveRef.current = true;
             onSaveLoad?.(loadResult.gameState);
             console.log(`Auto-loaded save for game ${gameId}`);
           } else {
@@ -91,6 +94,8 @@ export const useGameSave = <T extends Record<string, unknown> = Record<string, u
       } catch (error) {
         console.error(`Error during save check for game ${gameId}:`, error);
       } finally {
+        // Mark initialization as complete
+        isInitializingRef.current = false;
         setIsLoading(false);
       }
     };
@@ -98,6 +103,7 @@ export const useGameSave = <T extends Record<string, unknown> = Record<string, u
     // Set a safety timeout to ensure loading never hangs indefinitely
     const timeoutId = setTimeout(() => {
       console.warn(`Save check timeout for game ${gameId}, forcing loading to complete`);
+      isInitializingRef.current = false;
       setIsLoading(false);
     }, 5000);
 
@@ -157,7 +163,8 @@ export const useGameSave = <T extends Record<string, unknown> = Record<string, u
 
   // Debounced auto-save on state changes
   useEffect(() => {
-    if (!autoSaveEnabled) return;
+    // Skip auto-save during initialization
+    if (!autoSaveEnabled || isInitializingRef.current) return;
 
     // Clear existing timeout
     if (saveDebounceTimeoutRef.current) {
@@ -220,6 +227,7 @@ export const useGameSave = <T extends Record<string, unknown> = Record<string, u
     const result = await saveServiceRef.current.loadGame<T>(gameId, playerId);
     if (result.success && result.gameState) {
       setGameStateInternal(result.gameState);
+      hasLoadedSaveRef.current = true;
       onSaveLoad?.(result.gameState);
     }
     return result;
