@@ -68,7 +68,6 @@ function App() {
       {renderCurrentView()}
     </div>
   )
-  )
 }
 
 export default App
