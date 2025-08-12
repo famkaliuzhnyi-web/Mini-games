@@ -1,6 +1,22 @@
 // PWA Service for handling installation and service worker
+
+interface BeforeInstallPromptEvent extends Event {
+  readonly platforms: string[];
+  readonly userChoice: Promise<{
+    outcome: 'accepted' | 'dismissed';
+    platform: string;
+  }>;
+  prompt(): Promise<void>;
+}
+
+declare global {
+  interface WindowEventMap {
+    beforeinstallprompt: BeforeInstallPromptEvent;
+  }
+}
+
 export class PWAService {
-  private deferredPrompt: any = null;
+  private deferredPrompt: BeforeInstallPromptEvent | null = null;
   private isInstallable = false;
   private isInstalled = false;
 
@@ -58,7 +74,7 @@ export class PWAService {
     }
 
     // Check if running in iOS Safari installed mode
-    if ((window.navigator as any).standalone === true) {
+    if ((window.navigator as never as { standalone?: boolean }).standalone === true) {
       this.isInstalled = true;
     }
   }
