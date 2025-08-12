@@ -1,0 +1,199 @@
+.games-list {
+  padding: 2rem 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: calc(100vh - 60px);
+}
+
+.games-list-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.games-list-header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.games-list-header p {
+  font-size: 1.1rem;
+  color: #666;
+  margin: 0;
+}
+
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.game-card {
+  background: #ffffff;
+  border: 2px solid #e0e0e0;
+  border-radius: 16px;
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.game-card:hover {
+  border-color: #2196F3;
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(33, 150, 243, 0.15);
+}
+
+.game-card:active {
+  transform: translateY(-2px);
+}
+
+.game-emoji {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.game-name {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: #333;
+}
+
+.game-description {
+  color: #666;
+  margin-bottom: 1rem;
+  line-height: 1.4;
+}
+
+.game-category {
+  display: inline-block;
+  background: #f0f0f0;
+  color: #666;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.game-play-btn {
+  background: #4CAF50;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  margin-top: 1rem;
+  transition: background-color 0.2s ease;
+}
+
+.game-card:hover .game-play-btn {
+  background: #45a049;
+}
+
+.games-list-footer {
+  text-align: center;
+  margin-top: 3rem;
+  padding: 2rem;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border: 1px solid #e9ecef;
+}
+
+.footer-text {
+  color: #666;
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.footer-text small {
+  color: #999;
+  font-size: 0.8rem;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .games-list {
+    padding: 1.5rem 0.75rem;
+  }
+  
+  .games-list-header h1 {
+    font-size: 2rem;
+  }
+  
+  .games-list-header p {
+    font-size: 1rem;
+  }
+  
+  .games-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .game-card {
+    padding: 1.5rem;
+  }
+  
+  .game-emoji {
+    font-size: 3rem;
+  }
+  
+  .game-name {
+    font-size: 1.3rem;
+  }
+  
+  .games-list-footer {
+    margin-top: 2rem;
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .games-list {
+    padding: 1rem 0.5rem;
+  }
+  
+  .games-list-header h1 {
+    font-size: 1.75rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .games-list-header {
+    margin-bottom: 2rem;
+  }
+  
+  .game-card {
+    padding: 1.25rem;
+  }
+  
+  .game-emoji {
+    font-size: 2.5rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .game-name {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .game-description {
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .game-play-btn {
+    padding: 0.6rem 1.25rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* Focus styles for accessibility */
+.game-card:focus {
+  outline: 3px solid #2196F3;
+  outline-offset: 2px;
+}
