@@ -5,12 +5,14 @@ interface NavigationProps {
   playerName: string;
   showHomeButton?: boolean;
   onHomeClick?: () => void;
+  onProfileClick?: () => void;
 }
 
 export const Navigation: React.FC<NavigationProps> = ({
   playerName,
   showHomeButton = false,
-  onHomeClick
+  onHomeClick,
+  onProfileClick
 }) => {
   return (
     <nav className="navigation">
@@ -21,7 +23,14 @@ export const Navigation: React.FC<NavigationProps> = ({
           </button>
         )}
         <div className="nav-user">
-          <span className="nav-user-name">{playerName}</span>
+          <button 
+            className="nav-user-name" 
+            onClick={onProfileClick}
+            aria-label="Open profile"
+            title="Click to edit profile"
+          >
+            {playerName}
+          </button>
         </div>
       </div>
     </nav>
