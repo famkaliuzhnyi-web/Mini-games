@@ -317,8 +317,30 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
 
   if (isLoading) {
     return (
-      <div style={{ padding: '2rem', textAlign: 'center' }}>
+      <div style={{ 
+        padding: '2rem', 
+        textAlign: 'center',
+        minHeight: '300px',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center'
+      }}>
         <h2>Loading Ping Pong...</h2>
+        <div style={{ 
+          marginTop: '1rem', 
+          fontSize: '0.9rem', 
+          color: '#666' 
+        }}>
+          Checking for saved games...
+        </div>
+        <div style={{ 
+          marginTop: '2rem', 
+          fontSize: '0.8rem', 
+          color: '#999' 
+        }}>
+          If this takes too long, try refreshing the page
+        </div>
       </div>
     );
   }
