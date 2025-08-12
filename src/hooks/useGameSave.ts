@@ -254,7 +254,7 @@ export const useGameSave = <T extends Record<string, unknown> = Record<string, u
   useEffect(() => {
     if (!autoSaveEnabled) return;
 
-    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+    const handleBeforeUnload = () => {
       // Save current state immediately when user tries to leave
       const currentState = gameStateRef.current;
       try {
