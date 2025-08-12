@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { UserService } from '../services/UserService';
 
 export type ViewType = 'name-entry' | 'games-list' | 'game-playing' | 'profile';
@@ -20,14 +21,27 @@ export interface NavigationActions {
 
 export const useNavigation = () => {
   const userService = UserService.getInstance();
+  const navigate = useNavigate();
+  const { gameId } = useParams<{ gameId: string }>();
+  const location = useLocation();
+  
+  // Determine current view based on URL
+  const getCurrentView = (): ViewType => {
+    if (location.pathname === '/profile') return 'profile';
+    if (location.pathname.startsWith('/game/') && gameId) return 'game-playing';
+    
+    // Check if user has a saved profile to determine if they should see games list or name entry
+    const savedProfile = userService.loadProfile();
+    return savedProfile ? 'games-list' : 'name-entry';
+  };
   
   // Initialize with saved profile or defaults
   const initializeState = (): NavigationState => {
     const savedProfile = userService.loadProfile();
     if (savedProfile) {
       return {
-        currentView: 'games-list',
-        currentGame: null,
+        currentView: getCurrentView(),
+        currentGame: gameId || null,
         playerName: savedProfile.playerName,
         playerId: savedProfile.playerId
       };
@@ -35,7 +49,7 @@ export const useNavigation = () => {
     
     return {
       currentView: 'name-entry',
-      currentGame: null,
+      currentGame: gameId || null,
       playerName: '',
       playerId: userService.generatePlayerId()
     };
@@ -43,13 +57,21 @@ export const useNavigation = () => {
 
   const [navigationState, setNavigationState] = useState<NavigationState>(initializeState);
 
+  // Update state when URL changes
+  useEffect(() => {
+    setNavigationState(prev => ({
+      ...prev,
+      currentView: getCurrentView(),
+      currentGame: gameId || null
+    }));
+  }, [location.pathname, gameId]);
+
   // Load saved profile on mount
   useEffect(() => {
     const savedProfile = userService.loadProfile();
     if (savedProfile && !navigationState.playerName) {
       setNavigationState(prev => ({
         ...prev,
-        currentView: 'games-list',
         playerName: savedProfile.playerName,
         playerId: savedProfile.playerId
       }));
@@ -69,42 +91,28 @@ export const useNavigation = () => {
     setNavigationState(prev => ({
       ...prev,
       playerName: profile.playerName,
-      playerId: profile.playerId,
-      currentView: 'games-list'
+      playerId: profile.playerId
     }));
-  }, [navigationState.playerId, userService]);
+
+    // Navigate to games list after setting name
+    navigate('/');
+  }, [navigationState.playerId, userService, navigate]);
 
   const showGamesList = useCallback(() => {
-    setNavigationState(prev => ({
-      ...prev,
-      currentView: 'games-list',
-      currentGame: null
-    }));
-  }, []);
+    navigate('/');
+  }, [navigate]);
 
   const playGame = useCallback((gameId: string) => {
-    setNavigationState(prev => ({
-      ...prev,
-      currentView: 'game-playing',
-      currentGame: gameId
-    }));
-  }, []);
+    navigate(`/game/${gameId}`);
+  }, [navigate]);
 
   const goHome = useCallback(() => {
-    setNavigationState(prev => ({
-      ...prev,
-      currentView: 'games-list',
-      currentGame: null
-    }));
-  }, []);
+    navigate('/');
+  }, [navigate]);
 
   const showProfile = useCallback(() => {
-    setNavigationState(prev => ({
-      ...prev,
-      currentView: 'profile',
-      currentGame: null
-    }));
-  }, []);
+    navigate('/profile');
+  }, [navigate]);
 
   const actions: NavigationActions = {
     setPlayerName,
