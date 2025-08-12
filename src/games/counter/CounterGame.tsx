@@ -19,7 +19,7 @@ const COUNTER_CONFIG: GameConfig = {
   description: 'A simple clicking game with save/load functionality',
   version: '1.0.0',
   autoSaveEnabled: true,
-  autoSaveIntervalMs: 10000 // Save every 10 seconds
+  autoSaveIntervalMs: 5000 // Debounce time for automatic saves on state changes
 };
 
 // Counter game controller
@@ -76,6 +76,7 @@ export const CounterGame: React.FC<CounterGameProps> = ({ playerId }) => {
     saveGame,
     loadGame,
     dropSave,
+    triggerAutoSave, // Add the new trigger function
     hasSave,
     isLoading,
     lastSaveEvent,
@@ -90,7 +91,7 @@ export const CounterGame: React.FC<CounterGameProps> = ({ playerId }) => {
     onSaveDropped: controller.onSaveDropped
   });
 
-  const handleIncrement = () => {
+  const handleIncrement = async () => {
     const newCount = gameState.data.count + 1;
     const newClicks = gameState.data.clicks + 1;
     const newHighScore = Math.max(gameState.data.highScore, newCount);
@@ -105,9 +106,14 @@ export const CounterGame: React.FC<CounterGameProps> = ({ playerId }) => {
       score: newCount,
       isComplete: newCount >= 100 // Game completes at 100 clicks
     });
+
+    // Trigger auto-save on meaningful actions (every 10 clicks or high score)
+    if (newClicks % 10 === 0 || newCount > gameState.data.highScore) {
+      await triggerAutoSave();
+    }
   };
 
-  const handleDecrement = () => {
+  const handleDecrement = async () => {
     const newCount = Math.max(0, gameState.data.count - 1);
     const newClicks = gameState.data.clicks + 1;
     
@@ -120,9 +126,14 @@ export const CounterGame: React.FC<CounterGameProps> = ({ playerId }) => {
       },
       score: newCount
     });
+
+    // Trigger auto-save on meaningful actions (every 10 clicks)
+    if (newClicks % 10 === 0) {
+      await triggerAutoSave();
+    }
   };
 
-  const handleReset = () => {
+  const handleReset = async () => {
     setGameState({
       ...gameState,
       data: {
@@ -133,6 +144,9 @@ export const CounterGame: React.FC<CounterGameProps> = ({ playerId }) => {
       score: 0,
       isComplete: false
     });
+
+    // Trigger auto-save on game reset (significant action)
+    await triggerAutoSave();
   };
 
   const handleManualSave = async () => {
@@ -273,7 +287,7 @@ export const CounterGame: React.FC<CounterGameProps> = ({ playerId }) => {
               checked={autoSaveEnabled}
               onChange={toggleAutoSave}
             />
-            Auto-save enabled (saves every {COUNTER_CONFIG.autoSaveIntervalMs / 1000}s)
+            Auto-save enabled (triggered on game actions)
           </label>
         </div>
 

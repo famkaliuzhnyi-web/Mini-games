@@ -35,7 +35,7 @@ export interface GameConfig {
   description: string;
   version: string;
   autoSaveEnabled: boolean;
-  autoSaveIntervalMs: number;
+  autoSaveIntervalMs: number; // Kept for compatibility, but now represents debounce time
 }
 
 // Game controller interface that all games should implement
