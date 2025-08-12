@@ -1,6 +1,7 @@
 import React from 'react';
 import { CounterGame } from '../games/counter';
 import { SudokuGame } from '../games/sudoku';
+import { TetrisGame } from '../games/tetris';
 import { TicTacToeGame } from '../games/tic-tac-toe';
 import './GameContainer.css';
 
@@ -16,6 +17,8 @@ export const GameContainer: React.FC<GameContainerProps> = ({
 }) => {
   const renderGame = () => {
     switch (gameId) {
+      case 'tetris':
+        return <TetrisGame playerId={playerId} />;
       case 'tic-tac-toe':
         return <TicTacToeGame playerId={playerId} />;
       case 'counter':
