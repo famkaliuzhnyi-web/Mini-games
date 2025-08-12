@@ -2,6 +2,9 @@
 
 A modern React + TypeScript application with real-time WebSocket communication and offline mode capabilities using Web Workers.
 
+🌐 **Live Demo**: [https://famkaliuzhnyi-web.github.io/Mini-games/](https://famkaliuzhnyi-web.github.io/Mini-games/)  
+📱 **Mobile-Friendly**: Fully responsive and optimized for mobile devices
+
 ## Features
 
 ✅ **React + TypeScript**: Built with Vite for fast development and modern tooling  
@@ -10,6 +13,7 @@ A modern React + TypeScript application with real-time WebSocket communication a
 ✅ **Message Queuing**: Messages are queued when offline and sent when connection is restored  
 ✅ **Automatic Reconnection**: Exponential backoff reconnection strategy  
 ✅ **Multi-player Support**: Player join/leave notifications and state synchronization  
+✅ **Auto-Deploy**: Automatically deploys to GitHub Pages on main branch updates  
 
 ## Quick Start
 
@@ -66,3 +70,16 @@ Built with modern tools:
 - **React 19** for the latest React features
 - **Web Workers** for offline capabilities
 - **WebSocket** for real-time communication
+
+## Deployment
+
+The application automatically deploys to GitHub Pages when changes are pushed to the main branch. The live version is available at: [https://famkaliuzhnyi-web.github.io/Mini-games/](https://famkaliuzhnyi-web.github.io/Mini-games/)
+
+### Manual Deployment
+```bash
+# Build for production
+npm run build
+
+# Preview locally (optional)
+npm run preview
+```
