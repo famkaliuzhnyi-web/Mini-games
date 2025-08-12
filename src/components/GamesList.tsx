@@ -15,6 +15,13 @@ interface GamesListProps {
 
 const AVAILABLE_GAMES: GameInfo[] = [
   {
+    id: 'tic-tac-toe',
+    name: 'Tic-Tac-Toe',
+    description: 'Classic 3x3 grid game - get three in a row to win!',
+    emoji: '⭕',
+    category: 'Strategy'
+  },
+  {
     id: 'sudoku',
     name: 'Sudoku',
     description: 'Classic number puzzle with multiple difficulty levels',
