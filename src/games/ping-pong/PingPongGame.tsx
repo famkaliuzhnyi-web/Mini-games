@@ -306,9 +306,10 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
         return 'Playing - Use W/S or Arrow Keys';
       case 'paused':
         return 'Paused - Press Space to Resume';
-      case 'game-over':
+      case 'game-over': {
         const winner = getWinner(gameState.data.score);
         return winner === 'player' ? '🎉 You Won!' : '😞 Game Over - AI Won';
+      }
       default:
         return '';
     }

@@ -26,10 +26,6 @@ export interface Ball extends Position, Size {
   speed: number;
 }
 
-export interface GameArea extends Size {
-  // Game field dimensions
-}
-
 export type GameStatus = 'playing' | 'paused' | 'game-over';
 
 export interface Score {
@@ -42,7 +38,7 @@ export interface PingPongGameData extends Record<string, unknown> {
   playerPaddle: Paddle;
   aiPaddle: Paddle;
   ball: Ball;
-  gameArea: GameArea;
+  gameArea: Size;
   
   // Game state
   gameStatus: GameStatus;

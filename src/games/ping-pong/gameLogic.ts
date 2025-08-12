@@ -1,7 +1,7 @@
 /**
  * Ping Pong Game Logic
  */
-import type { PingPongGameData, Ball, Paddle, GameArea, KeyState } from './types';
+import type { PingPongGameData, Ball, Paddle, Size, KeyState } from './types';
 
 // Game constants
 export const GAME_CONFIG = {
@@ -74,7 +74,7 @@ export function createInitialGameData(): PingPongGameData {
 /**
  * Update player paddle position based on key state
  */
-export function updatePlayerPaddle(paddle: Paddle, keyState: KeyState, gameArea: GameArea): Paddle {
+export function updatePlayerPaddle(paddle: Paddle, keyState: KeyState, gameArea: Size): Paddle {
   let newY = paddle.y;
   
   if ((keyState.up || keyState.w) && paddle.y > 0) {
@@ -94,7 +94,7 @@ export function updatePlayerPaddle(paddle: Paddle, keyState: KeyState, gameArea:
 /**
  * Update AI paddle position using simple AI logic
  */
-export function updateAIPaddle(paddle: Paddle, ball: Ball, gameArea: GameArea): Paddle {
+export function updateAIPaddle(paddle: Paddle, ball: Ball, gameArea: Size): Paddle {
   const ballCenterY = ball.y + ball.height / 2;
   const paddleCenterY = paddle.y + paddle.height / 2;
   const difference = ballCenterY - paddleCenterY;
@@ -129,11 +129,11 @@ export function checkPaddleCollision(ball: Ball, paddle: Paddle): boolean {
 /**
  * Update ball position and handle collisions
  */
-export function updateBall(ball: Ball, playerPaddle: Paddle, aiPaddle: Paddle, gameArea: GameArea): {
+export function updateBall(ball: Ball, playerPaddle: Paddle, aiPaddle: Paddle, gameArea: Size): {
   ball: Ball;
   scored: 'player' | 'ai' | null;
 } {
-  let newBall = { ...ball };
+  const newBall = { ...ball };
   let scored: 'player' | 'ai' | null = null;
 
   // Update position
@@ -186,7 +186,7 @@ export function updateBall(ball: Ball, playerPaddle: Paddle, aiPaddle: Paddle, g
 /**
  * Reset ball to center position
  */
-export function resetBall(gameArea: GameArea): Ball {
+export function resetBall(gameArea: Size): Ball {
   return {
     x: (gameArea.width - GAME_CONFIG.BALL_SIZE) / 2,
     y: (gameArea.height - GAME_CONFIG.BALL_SIZE) / 2,

@@ -11,7 +11,6 @@ export type {
   Velocity,
   Paddle,
   Ball,
-  GameArea,
   GameStatus,
   Score,
   KeyState
