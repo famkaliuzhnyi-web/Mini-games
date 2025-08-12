@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mini Games - Page Not Found</title>
+  <script>
+    // Redirect to index.html with hash-based routing
+    const path = window.location.pathname.substring(1); // Remove leading slash
+    if (path && path !== 'Mini-games' && path !== 'Mini-games/') {
+      // Extract the path after /Mini-games/ and redirect to hash route
+      const segments = path.split('/');
+      if (segments[0] === 'Mini-games') {
+        segments.shift(); // Remove 'Mini-games' from segments
+      }
+      const hashPath = segments.length > 0 ? '#/' + segments.join('/') : '';
+      window.location.replace('/Mini-games/' + hashPath);
+    } else {
+      window.location.replace('/Mini-games/');
+    }
+  </script>
+</head>
+<body>
+  <p>Redirecting to Mini Games...</p>
+</body>
+</html>
