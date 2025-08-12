@@ -32,15 +32,19 @@
   align-items: flex-start;
   flex-wrap: wrap;
   justify-content: center;
+  max-width: 1000px;
+  margin: 0 auto;
 }
 
-/* Tetris Board Styles */
+/* Make the game board more prominent */
 .tetris-board {
   position: relative;
-  border: 3px solid #333;
+  border: 4px solid #333;
   background-color: #000;
   border-radius: 8px;
-  padding: 4px;
+  padding: 6px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  order: 1; /* Ensure board appears first on smaller screens */
 }
 
 .tetris-board.game-over {
@@ -58,8 +62,8 @@
 }
 
 .tetris-cell {
-  width: 20px;
-  height: 20px;
+  width: 32px;
+  height: 32px;
   border: 1px solid #222;
   box-sizing: border-box;
 }
@@ -127,24 +131,27 @@
   font-size: 1rem;
 }
 
-/* Controls Panel Styles */
+/* Controls Panel Styles - More compact */
 .tetris-controls {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-  min-width: 250px;
-  padding: 1rem;
+  gap: 1rem;
+  max-width: 220px;
+  min-width: 200px;
+  padding: 0.75rem;
   background-color: #f9f9f9;
   border: 1px solid #ddd;
   border-radius: 8px;
+  font-size: 0.9rem;
+  order: 2; /* Appear after board on smaller screens */
 }
 
 .tetris-controls h3 {
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 0.25rem 0;
   color: #333;
-  font-size: 1.2rem;
+  font-size: 1rem;
   border-bottom: 1px solid #ddd;
-  padding-bottom: 0.25rem;
+  padding-bottom: 0.15rem;
 }
 
 /* Game Statistics */
@@ -416,12 +423,13 @@
   
   .tetris-controls {
     width: 100%;
-    max-width: 300px;
+    max-width: 320px;
   }
   
+  /* Keep cells larger than before even on tablets */
   .tetris-cell {
-    width: 18px;
-    height: 18px;
+    width: 28px;
+    height: 28px;
   }
 
   /* Show mobile controls on tablets and smaller */
@@ -439,13 +447,15 @@
     gap: 1rem;
   }
   
+  /* Still keep cells reasonably large on mobile */
   .tetris-cell {
-    width: 16px;
-    height: 16px;
+    width: 24px;
+    height: 24px;
   }
   
   .tetris-controls {
-    padding: 0.75rem;
+    padding: 0.6rem;
+    font-size: 0.85rem;
   }
 
   /* Ensure mobile controls are visible on mobile phones */
