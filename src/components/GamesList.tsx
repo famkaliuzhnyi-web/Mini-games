@@ -15,6 +15,13 @@ interface GamesListProps {
 
 const AVAILABLE_GAMES: GameInfo[] = [
   {
+    id: 'sudoku',
+    name: 'Sudoku',
+    description: 'Classic number puzzle with multiple difficulty levels',
+    emoji: '🧩',
+    category: 'Puzzle'
+  },
+  {
     id: 'counter',
     name: 'Counter Game',
     description: 'A simple clicking game with save/load functionality',
