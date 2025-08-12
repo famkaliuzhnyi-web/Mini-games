@@ -4,6 +4,7 @@ import viteLogo from '/vite.svg'
 import './App.css'
 import { useGameConnection } from './hooks/useGameConnection'
 import { CounterGame } from './games/counter'
+import { SudokuGame } from './games/sudoku'
 import { GameSaveService } from './services/GameSaveService'
 
 function App() {
@@ -11,7 +12,7 @@ function App() {
   const [playerId] = useState(() => `player_${Math.random().toString(36).substr(2, 9)}`)
   const [playerName, setPlayerName] = useState('')
   const [message, setMessage] = useState('')
-  const [currentGame, setCurrentGame] = useState<string>('demo') // 'demo' or 'counter'
+  const [currentGame, setCurrentGame] = useState<string>('demo') // 'demo', 'counter', or 'sudoku'
   const [savedGames, setSavedGames] = useState<Array<{ gameId: string; savedAt: string; autoSave: boolean }>>([])
   
   const {
@@ -208,6 +209,19 @@ function App() {
         <h3>Select a Game</h3>
         <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
           <button 
+            onClick={() => setCurrentGame('sudoku')}
+            style={{ 
+              padding: '0.75rem 1.5rem',
+              backgroundColor: currentGame === 'sudoku' ? '#4CAF50' : '#2196F3',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer'
+            }}
+          >
+            🧩 Sudoku
+          </button>
+          <button 
             onClick={() => setCurrentGame('counter')}
             style={{ 
               padding: '0.75rem 1.5rem',
@@ -264,6 +278,7 @@ function App() {
       )}
 
       {/* Render Current Game */}
+      {currentGame === 'sudoku' && <SudokuGame playerId={playerId} />}
       {currentGame === 'counter' && <CounterGame playerId={playerId} />}
       
       {currentGame === 'demo' && (
@@ -346,7 +361,7 @@ function App() {
       )}
 
       <p className="read-the-docs">
-        Try the Counter Game to see automatic save/load functionality in action!
+        Try the Sudoku or Counter Game to see automatic save/load functionality in action!
       </p>
     </>
   )
