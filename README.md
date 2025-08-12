@@ -1,69 +1,68 @@
-# React + TypeScript + Vite
+# Mini Games - React + TypeScript with WebSocket & Offline Support
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern React + TypeScript application with real-time WebSocket communication and offline mode capabilities using Web Workers.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+✅ **React + TypeScript**: Built with Vite for fast development and modern tooling  
+✅ **WebSocket Communication**: Real-time multiplayer updates with automatic reconnection  
+✅ **Offline Mode**: Web Workers for offline data caching and state management  
+✅ **Message Queuing**: Messages are queued when offline and sent when connection is restored  
+✅ **Automatic Reconnection**: Exponential backoff reconnection strategy  
+✅ **Multi-player Support**: Player join/leave notifications and state synchronization  
 
-## Expanding the ESLint configuration
+## Quick Start
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+```bash
+# Install dependencies
+npm install
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+# Start development server
+npm run dev
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+# Build for production
+npm run build
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Preview production build
+npm run preview
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Architecture
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Services
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- **WebSocketService**: Handles real-time communication with automatic reconnection
+- **OfflineService**: Manages web worker for offline data caching and synchronization
+- **useGameConnection**: React hook that integrates both services seamlessly
+
+### Key Components
+
+- **Web Worker** (`public/worker.js`): Handles offline data storage and sync operations
+- **WebSocket Integration**: Ensures everyone gets updates right away as required
+- **Offline-First Design**: App continues to work even when WebSocket server is unavailable
+
+## Usage
+
+1. **Enter your name** and click "Join Game" to connect as a player
+2. **Local Count**: Click to increment counter (works offline)
+3. **Chat**: Send messages to other players (queued when offline)
+4. **Connection Status**: Shows online/offline and WebSocket connection state
+
+## WebSocket Server
+
+The app expects a WebSocket server on `ws://localhost:8080`. Messages are queued when the server is unavailable and sent when connection is restored.
+
+## Offline Mode
+
+- Data is cached using Web Workers for offline access
+- Game state is synchronized when connection is restored
+- All user actions continue to work in offline mode
+
+## Development
+
+Built with modern tools:
+- **Vite** for fast development and building
+- **TypeScript** for type safety
+- **React 19** for the latest React features
+- **Web Workers** for offline capabilities
+- **WebSocket** for real-time communication
