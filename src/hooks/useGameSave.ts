@@ -135,7 +135,7 @@ export const useGameSave = <T extends Record<string, unknown> = Record<string, u
     };
   }, [gameId]);
 
-  // Debounced auto-save on state changes
+  // Auto-save on state changes - immediate for critical game actions
   useEffect(() => {
     // Skip auto-save during initialization
     if (!autoSaveEnabled || isInitializingRef.current) return;
@@ -145,17 +145,19 @@ export const useGameSave = <T extends Record<string, unknown> = Record<string, u
       clearTimeout(saveDebounceTimeoutRef.current);
     }
 
-    // Don't auto-save too frequently
+    // Check if this is a critical game action that should be saved immediately
+    const isCriticalAction = gameState.score > 0 || gameState.isComplete;
+    
     const now = Date.now();
     const timeSinceLastSave = now - lastSaveTimeRef.current;
     const minInterval = Math.min(gameConfig.autoSaveIntervalMs, 5000); // At least 5 seconds between saves
 
-    if (timeSinceLastSave >= minInterval) {
-      // Save immediately if enough time has passed
+    if (isCriticalAction || timeSinceLastSave >= minInterval) {
+      // Save immediately for critical actions or if enough time has passed
       saveServiceRef.current.saveGame(gameId, playerId, gameState, true);
       lastSaveTimeRef.current = now;
     } else {
-      // Debounce the save
+      // Debounce the save for non-critical updates
       saveDebounceTimeoutRef.current = setTimeout(() => {
         saveServiceRef.current.saveGame(gameId, playerId, gameStateRef.current, true);
         lastSaveTimeRef.current = Date.now();
@@ -221,6 +223,31 @@ export const useGameSave = <T extends Record<string, unknown> = Record<string, u
   const toggleAutoSave = useCallback(() => {
     setAutoSaveEnabled(prev => !prev);
   }, []);
+
+  // Browser beforeunload protection - save state when user navigates away
+  useEffect(() => {
+    if (!autoSaveEnabled) return;
+
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      // Save current state immediately when user tries to leave
+      const currentState = gameStateRef.current;
+      try {
+        saveServiceRef.current.saveGame(gameId, playerId, currentState, true);
+        console.log('Emergency save triggered on page unload');
+      } catch (error) {
+        console.error('Failed to save on page unload:', error);
+      }
+      
+      // Don't show the browser confirmation dialog for auto-saved games
+      // The save happens regardless
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [gameId, playerId, autoSaveEnabled]);
 
   // Cleanup on unmount
   useEffect(() => {

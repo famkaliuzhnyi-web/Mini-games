@@ -414,7 +414,18 @@ export const TicTacToeGame: React.FC<TicTacToeGameProps> = ({ playerId }) => {
         </div>
 
         <div style={{ marginTop: '1rem', fontSize: '0.9rem', color: '#666' }}>
-          {hasSave ? '💾 Save available' : '❌ No save data'}
+          {hasSave ? 
+            (lastSaveEvent?.action === 'auto-save' && 
+             (Date.now() - new Date(lastSaveEvent.timestamp).getTime()) < 5000) ? 
+              '💾 Save available (recently saved)' : 
+              '💾 Save available' 
+            : '❌ No save data'
+          }
+          {autoSaveEnabled && gameState.score > 0 && (
+            <div style={{ fontSize: '0.8rem', color: '#4CAF50', marginTop: '0.25rem' }}>
+              ⚡ Auto-save active - moves saved instantly
+            </div>
+          )}
         </div>
       </div>
 
