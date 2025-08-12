@@ -27,7 +27,7 @@ const SUDOKU_CONFIG: GameConfig = {
   description: 'Classic number placement puzzle with multiple difficulty levels',
   version: '1.0.0',
   autoSaveEnabled: true,
-  autoSaveIntervalMs: 30000 // Save every 30 seconds
+  autoSaveIntervalMs: 5000 // Debounce time for automatic saves on state changes
 };
 
 // Sudoku game controller
@@ -108,6 +108,7 @@ export const SudokuGame: React.FC<SudokuGameProps> = ({ playerId }) => {
     saveGame,
     loadGame,
     dropSave,
+    triggerAutoSave, // Add the new trigger function
     hasSave,
     isLoading,
     lastSaveEvent,
@@ -179,7 +180,7 @@ export const SudokuGame: React.FC<SudokuGameProps> = ({ playerId }) => {
     setSelectedCell({ row, col });
   }, [gameState.data.uiGrid]);
 
-  const handleNumberInput = useCallback((number: CellValue) => {
+  const handleNumberInput = useCallback(async (number: CellValue) => {
     if (!selectedCell || gameState.data.isComplete) return;
     
     const { row, col } = selectedCell;
@@ -225,6 +226,11 @@ export const SudokuGame: React.FC<SudokuGameProps> = ({ playerId }) => {
       lastModified: new Date().toISOString()
     });
 
+    // Trigger auto-save on meaningful actions (number placement, game completion)
+    if (number !== 0 || isGameComplete) {
+      await triggerAutoSave();
+    }
+
     // Game over if too many mistakes
     if (newMistakes >= gameState.data.maxMistakes && !isGameComplete) {
       alert(`Game Over! Too many mistakes. The puzzle will be revealed.`);
@@ -241,10 +247,12 @@ export const SudokuGame: React.FC<SudokuGameProps> = ({ playerId }) => {
         isComplete: true,
         lastModified: new Date().toISOString()
       });
+      // Trigger auto-save when game ends
+      await triggerAutoSave();
     }
-  }, [selectedCell, gameState, solutionGrid, setGameState]);
+  }, [selectedCell, gameState, solutionGrid, setGameState, triggerAutoSave]);
 
-  const handleHint = useCallback(() => {
+  const handleHint = useCallback(async () => {
     if (gameState.data.hintsUsed >= gameState.data.maxHints || gameState.data.isComplete) return;
     
     const hint = getHint(gameState.data.currentGrid, solutionGrid);
@@ -270,7 +278,10 @@ export const SudokuGame: React.FC<SudokuGameProps> = ({ playerId }) => {
     });
     
     setSelectedCell({ row: hint.row, col: hint.col });
-  }, [gameState, solutionGrid, setGameState]);
+
+    // Trigger auto-save after using hint (significant action)
+    await triggerAutoSave();
+  }, [gameState, solutionGrid, setGameState, triggerAutoSave]);
 
   const handleClearCell = useCallback(() => {
     handleNumberInput(0);
@@ -376,7 +387,7 @@ export const SudokuGame: React.FC<SudokuGameProps> = ({ playerId }) => {
               checked={autoSaveEnabled}
               onChange={toggleAutoSave}
             />
-            Auto-save enabled (saves every {SUDOKU_CONFIG.autoSaveIntervalMs / 1000}s)
+            Auto-save enabled (triggered on game actions)
           </label>
         </div>
 

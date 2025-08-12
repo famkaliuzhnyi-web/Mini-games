@@ -223,36 +223,21 @@ export class GameSaveService {
   }
 
   /**
-   * Setup auto-save for a game
+   * Setup auto-save for a game (now used only for cleanup tracking)
    */
   public setupAutoSave<T extends Record<string, unknown>>(
     gameId: string,
-    playerId: string,
-    gameStateProvider: () => GameState<T>,
-    intervalMs: number = 30000 // Default 30 seconds
+    _playerId: string,
+    _gameStateProvider: () => GameState<T>,
+    _intervalMs: number = 30000 // Kept for backward compatibility but not used
   ): void {
-    const timerKey = `${gameId}-${playerId}`;
-    
-    // Clear existing timer if any
-    const existingTimer = this.autoSaveTimers.get(timerKey);
-    if (existingTimer) {
-      clearTimeout(existingTimer);
-    }
-
-    // Setup new auto-save timer
-    const timer = setInterval(async () => {
-      const gameState = gameStateProvider();
-      if (gameState) {
-        await this.saveGame(gameId, playerId, gameState, true);
-      }
-    }, intervalMs);
-
-    this.autoSaveTimers.set(timerKey, timer);
-    console.log(`Auto-save enabled for ${gameId} (interval: ${intervalMs}ms)`);
+    // Auto-save is now game-triggered, not timer-based
+    // This method is kept for API compatibility but doesn't set up timers
+    console.log(`Auto-save enabled for ${gameId} (game-triggered mode)`);
   }
 
   /**
-   * Disable auto-save for a game
+   * Disable auto-save for a game (now mainly for cleanup)
    */
   public disableAutoSave(gameId: string, playerId: string): void {
     const timerKey = `${gameId}-${playerId}`;

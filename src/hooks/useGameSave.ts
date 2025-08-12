@@ -26,6 +26,7 @@ interface UseGameSaveReturn<T extends Record<string, unknown>> {
   saveGame: () => Promise<SaveResult>;
   loadGame: () => Promise<LoadResult<T>>;
   dropSave: () => Promise<SaveResult>;
+  triggerAutoSave: () => Promise<SaveResult>; // New manual trigger function
   hasSave: boolean;
   isLoading: boolean;
   lastSaveEvent: SaveEvent<T> | null;
@@ -167,6 +168,18 @@ export const useGameSave = <T extends Record<string, unknown> = Record<string, u
     setGameStateInternal(updatedState);
   }, []);
 
+  // Manual auto-save trigger function
+  const triggerAutoSave = useCallback(async (): Promise<SaveResult> => {
+    if (!autoSaveEnabled) {
+      return {
+        success: false,
+        error: 'Auto-save is disabled'
+      };
+    }
+    const currentState = gameStateRef.current;
+    return await saveServiceRef.current.saveGame(gameId, playerId, currentState, true);
+  }, [gameId, playerId, autoSaveEnabled]);
+
   // Manual save function
   const saveGame = useCallback(async (): Promise<SaveResult> => {
     const currentState = gameStateRef.current;
@@ -213,6 +226,7 @@ export const useGameSave = <T extends Record<string, unknown> = Record<string, u
     saveGame,
     loadGame,
     dropSave,
+    triggerAutoSave, // Add the new trigger function
     hasSave,
     isLoading,
     lastSaveEvent,
