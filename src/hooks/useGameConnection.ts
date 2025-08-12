@@ -2,16 +2,54 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { WebSocketService, type GameState } from '../services/WebSocketService';
 import { OfflineService } from '../services/OfflineService';
 
+export interface PlayerData {
+  playerId: string;
+  name: string;
+  joinedAt: string;
+  [key: string]: unknown;
+}
+
+export interface GameAction {
+  type: string;
+  payload?: unknown;
+  timestamp?: number;
+}
+
+interface ConnectionData {
+  status: string;
+}
+
+interface PlayerJoinData extends PlayerData {
+  playerId: string;
+}
+
+interface PlayerLeaveData {
+  playerId: string;
+}
+
+interface CachedDataEvent {
+  key: string;
+  data: unknown;
+}
+
+interface SyncRequestEvent {
+  gameState: Partial<GameState>;
+}
+
+interface OfflineStateUpdateEvent {
+  gameState: Partial<GameState>;
+}
+
 export interface GameConnection {
   isOnline: boolean;
   isConnected: boolean;
   connectionState: string;
   gameState: GameState | null;
-  sendMessage: (type: string, payload: any) => void;
+  sendMessage: (type: string, payload: unknown) => void;
   updateGameState: (gameState: Partial<GameState>) => void;
-  joinGame: (playerData: any) => void;
+  joinGame: (playerData: PlayerData) => void;
   leaveGame: (playerId: string) => void;
-  sendGameAction: (action: any) => void;
+  sendGameAction: (action: GameAction) => void;
 }
 
 export const useGameConnection = (serverUrl?: string): GameConnection => {
@@ -60,7 +98,7 @@ export const useGameConnection = (serverUrl?: string): GameConnection => {
 
     const ws = wsService.current;
 
-    const handleConnection = (data: any) => {
+    const handleConnection = (data: ConnectionData) => {
       setIsConnected(data.status === 'connected');
       setConnectionState(data.status);
     };
@@ -74,7 +112,7 @@ export const useGameConnection = (serverUrl?: string): GameConnection => {
       }
     };
 
-    const handlePlayerJoin = (playerData: any) => {
+    const handlePlayerJoin = (playerData: PlayerJoinData) => {
       setGameState(prevState => {
         if (!prevState) return null;
         return {
@@ -88,7 +126,7 @@ export const useGameConnection = (serverUrl?: string): GameConnection => {
       });
     };
 
-    const handlePlayerLeave = (data: { playerId: string }) => {
+    const handlePlayerLeave = (data: PlayerLeaveData) => {
       setGameState(prevState => {
         if (!prevState) return null;
         const newPlayers = { ...prevState.players };
@@ -101,7 +139,7 @@ export const useGameConnection = (serverUrl?: string): GameConnection => {
       });
     };
 
-    const handleGameAction = (actionData: any) => {
+    const handleGameAction = (actionData: GameAction) => {
       // Handle game actions and update local state
       console.log('Game action received:', actionData);
       
@@ -133,28 +171,28 @@ export const useGameConnection = (serverUrl?: string): GameConnection => {
 
     const offline = offlineService.current;
 
-    const handleCachedData = (data: any) => {
+    const handleCachedData = (data: CachedDataEvent) => {
       if (data.key === 'gameState' && data.data && !isOnline) {
         // Use cached game state when offline
-        setGameState(data.data);
+        setGameState(data.data as GameState);
       }
     };
 
-    const handleSyncRequest = (data: any) => {
+    const handleSyncRequest = (data: SyncRequestEvent) => {
       // Handle sync request from worker
       if (wsService.current && isOnline && isConnected) {
         wsService.current.updateGameState(data.gameState);
       }
     };
 
-    const handleOfflineStateUpdated = (data: any) => {
+    const handleOfflineStateUpdated = (data: OfflineStateUpdateEvent) => {
       // Update local game state from offline changes
       if (!isOnline) {
-        setGameState(prevState => ({
+        setGameState(prevState => prevState ? ({
           ...prevState,
           ...data.gameState,
           lastUpdated: new Date().toISOString()
-        }));
+        }) : null);
       }
     };
 
@@ -177,7 +215,7 @@ export const useGameConnection = (serverUrl?: string): GameConnection => {
   }, [isOnline]);
 
   // Callback functions
-  const sendMessage = useCallback((type: string, payload: any) => {
+  const sendMessage = useCallback((type: string, payload: unknown) => {
     if (isOnline && wsService.current) {
       wsService.current.sendMessage({ type, payload });
     } else {
@@ -199,7 +237,7 @@ export const useGameConnection = (serverUrl?: string): GameConnection => {
     }
   }, [isOnline]);
 
-  const joinGame = useCallback((playerData: any) => {
+  const joinGame = useCallback((playerData: PlayerData) => {
     if (isOnline && wsService.current) {
       wsService.current.joinGame(playerData);
     } else {
@@ -221,7 +259,7 @@ export const useGameConnection = (serverUrl?: string): GameConnection => {
     }
   }, [isOnline]);
 
-  const sendGameAction = useCallback((action: any) => {
+  const sendGameAction = useCallback((action: GameAction) => {
     if (isOnline && wsService.current) {
       wsService.current.sendGameAction(action);
     } else {

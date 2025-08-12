@@ -86,27 +86,29 @@ export const useGameSave = <T extends Record<string, unknown> = Record<string, u
 
   // Setup auto-save when enabled
   useEffect(() => {
+    const saveService = saveServiceRef.current;
+    
     if (autoSaveEnabled) {
-      saveServiceRef.current.setupAutoSave(
+      saveService.setupAutoSave(
         gameId,
         playerId,
         () => gameStateRef.current,
         gameConfig.autoSaveIntervalMs
       );
     } else {
-      saveServiceRef.current.disableAutoSave(gameId, playerId);
+      saveService.disableAutoSave(gameId, playerId);
     }
 
     return () => {
-      saveServiceRef.current.disableAutoSave(gameId, playerId);
+      saveService.disableAutoSave(gameId, playerId);
     };
   }, [gameId, playerId, autoSaveEnabled, gameConfig.autoSaveIntervalMs]);
 
   // Setup save event listeners
   useEffect(() => {
-    const handleSaveEvent = (event: SaveEvent<any>) => {
+    const handleSaveEvent = (event: SaveEvent<unknown>) => {
       if (event.gameId === gameId) {
-        setLastSaveEvent(event);
+        setLastSaveEvent(event as SaveEvent<T>);
         
         // Update hasSave status based on save/drop events
         if (event.success) {
@@ -119,10 +121,11 @@ export const useGameSave = <T extends Record<string, unknown> = Record<string, u
       }
     };
 
-    saveServiceRef.current.on('*', handleSaveEvent);
+    const saveService = saveServiceRef.current;
+    saveService.on('*', handleSaveEvent);
 
     return () => {
-      saveServiceRef.current.off('*', handleSaveEvent);
+      saveService.off('*', handleSaveEvent);
     };
   }, [gameId]);
 

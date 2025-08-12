@@ -1,7 +1,7 @@
 /**
  * Tetris Game - Classic falling blocks puzzle game
  */
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useMemo } from 'react';
 import { useGameSave } from '../../hooks/useGameSave';
 import type { GameController, GameState, GameConfig } from '../../types/game';
 import type { TetrisGameData, TetrisAction } from './types';
@@ -92,7 +92,7 @@ interface TetrisGameProps {
 }
 
 export const TetrisGame: React.FC<TetrisGameProps> = ({ playerId }) => {
-  const controller = new TetrisGameController();
+  const controller = useMemo(() => new TetrisGameController(), []);
   const gameLoopRef = useRef<number | null>(null);
   
   const {

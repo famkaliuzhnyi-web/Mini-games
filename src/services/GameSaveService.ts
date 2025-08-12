@@ -11,7 +11,7 @@ import type {
 
 export class GameSaveService {
   private static instance: GameSaveService | null = null;
-  private eventListeners: { [event: string]: ((data: SaveEvent<any>) => void)[] } = {};
+  private eventListeners: { [event: string]: ((data: SaveEvent<unknown>) => void)[] } = {};
   private autoSaveTimers: Map<string, ReturnType<typeof setTimeout>> = new Map();
   
   private constructor() {
@@ -227,9 +227,12 @@ export class GameSaveService {
    */
   public setupAutoSave<T extends Record<string, unknown>>(
     gameId: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _playerId: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _gameStateProvider: () => GameState<T>,
-    _intervalMs: number = 30000 // Kept for backward compatibility but not used
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _intervalMs?: number
   ): void {
     // Auto-save is now game-triggered, not timer-based
     // This method is kept for API compatibility but doesn't set up timers
@@ -283,16 +286,16 @@ export class GameSaveService {
   /**
    * Event listener management
    */
-  public on(event: string, callback: (data: SaveEvent<any>) => void): void {
+  public on<T = unknown>(event: string, callback: (data: SaveEvent<T>) => void): void {
     if (!this.eventListeners[event]) {
       this.eventListeners[event] = [];
     }
-    this.eventListeners[event].push(callback);
+    this.eventListeners[event].push(callback as (data: SaveEvent<unknown>) => void);
   }
 
-  public off(event: string, callback: (data: SaveEvent<any>) => void): void {
+  public off<T = unknown>(event: string, callback: (data: SaveEvent<T>) => void): void {
     if (this.eventListeners[event]) {
-      this.eventListeners[event] = this.eventListeners[event].filter(cb => cb !== callback);
+      this.eventListeners[event] = this.eventListeners[event].filter(cb => cb !== (callback as (data: SaveEvent<unknown>) => void));
     }
   }
 
@@ -365,7 +368,7 @@ export class GameSaveService {
               keysToRemove.push(key);
             }
           }
-        } catch (error) {
+        } catch {
           // If we can't parse it, it's probably corrupted, so remove it
           keysToRemove.push(key);
         }
