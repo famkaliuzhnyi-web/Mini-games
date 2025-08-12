@@ -95,39 +95,48 @@ export const TicTacToeGame: React.FC<TicTacToeGameProps> = ({ playerId }) => {
    */
   const handleNewGame = () => {
     const currentStats = gameState.data;
-    let newStats = {
-      gamesPlayed: currentStats.gamesPlayed,
-      xWins: currentStats.xWins,
-      oWins: currentStats.oWins,
-      ties: currentStats.ties
-    };
 
     // Update statistics if previous game was completed
     if (gameState.data.gameStatus !== 'playing') {
-      newStats.gamesPlayed += 1;
-      
-      if (gameState.data.gameStatus === 'X-wins') {
-        newStats.xWins += 1;
-      } else if (gameState.data.gameStatus === 'O-wins') {
-        newStats.oWins += 1;
-      } else if (gameState.data.gameStatus === 'tie') {
-        newStats.ties += 1;
-      }
-    }
+      const newStats = {
+        gamesPlayed: currentStats.gamesPlayed + 1,
+        xWins: currentStats.xWins + (gameState.data.gameStatus === 'X-wins' ? 1 : 0),
+        oWins: currentStats.oWins + (gameState.data.gameStatus === 'O-wins' ? 1 : 0),
+        ties: currentStats.ties + (gameState.data.gameStatus === 'tie' ? 1 : 0)
+      };
 
-    setGameState({
-      ...gameState,
-      data: {
-        board: createEmptyBoard(),
-        currentPlayer: 'X',
-        gameStatus: 'playing',
-        moveHistory: [],
-        ...newStats
-      },
-      score: 0,
-      isComplete: false,
-      lastModified: new Date().toISOString()
-    });
+      setGameState({
+        ...gameState,
+        data: {
+          board: createEmptyBoard(),
+          currentPlayer: 'X',
+          gameStatus: 'playing',
+          moveHistory: [],
+          ...newStats
+        },
+        score: 0,
+        isComplete: false,
+        lastModified: new Date().toISOString()
+      });
+    } else {
+      // No game to complete, just reset
+      setGameState({
+        ...gameState,
+        data: {
+          board: createEmptyBoard(),
+          currentPlayer: 'X',
+          gameStatus: 'playing',
+          moveHistory: [],
+          gamesPlayed: currentStats.gamesPlayed,
+          xWins: currentStats.xWins,
+          oWins: currentStats.oWins,
+          ties: currentStats.ties
+        },
+        score: 0,
+        isComplete: false,
+        lastModified: new Date().toISOString()
+      });
+    }
   };
 
   /**
