@@ -3,6 +3,7 @@ import { CounterGame } from '../games/counter';
 import { SudokuGame } from '../games/sudoku';
 import { TetrisGame } from '../games/tetris';
 import { TicTacToeGame } from '../games/tic-tac-toe';
+import { PingPongGame } from '../games/ping-pong';
 import './GameContainer.css';
 
 interface GameContainerProps {
@@ -25,6 +26,8 @@ export const GameContainer: React.FC<GameContainerProps> = ({
         return <CounterGame playerId={playerId} />;
       case 'sudoku':
         return <SudokuGame playerId={playerId} />;
+      case 'ping-pong':
+        return <PingPongGame playerId={playerId} />;
       case 'demo':
         return (
           <div className="demo-game">
