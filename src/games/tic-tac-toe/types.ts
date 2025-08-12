@@ -26,6 +26,12 @@ export interface Move {
   timestamp: string;
 }
 
+// Winning combination positions
+export interface WinningCombination {
+  positions: [number, number][]; // Array of [row, col] positions
+  type: 'row' | 'column' | 'diagonal';
+}
+
 // Tic-Tac-Toe specific game data that extends base game requirements
 export interface TicTacToeGameData extends Record<string, unknown> {
   board: Board;
@@ -36,4 +42,5 @@ export interface TicTacToeGameData extends Record<string, unknown> {
   xWins: number;
   oWins: number;
   ties: number;
+  winningCombination?: WinningCombination;
 }

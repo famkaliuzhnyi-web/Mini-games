@@ -8,7 +8,7 @@ import type { TicTacToeGameData } from './types';
 import { 
   isValidMove, 
   makeMove, 
-  getGameStatus, 
+  getGameStatusWithCombination,
   getNextPlayer, 
   createEmptyBoard 
 } from './gameLogic';
@@ -57,7 +57,7 @@ export const TicTacToeGame: React.FC<TicTacToeGameProps> = ({ playerId }) => {
     try {
       // Make the move
       const newBoard = makeMove(gameState.data.board, row, col, gameState.data.currentPlayer);
-      const newGameStatus = getGameStatus(newBoard);
+      const { status: newGameStatus, winningCombination } = getGameStatusWithCombination(newBoard);
       const newPlayer = getNextPlayer(gameState.data.currentPlayer);
       
       // Create move record
@@ -79,7 +79,8 @@ export const TicTacToeGame: React.FC<TicTacToeGameProps> = ({ playerId }) => {
           board: newBoard,
           currentPlayer: newPlayer,
           gameStatus: newGameStatus,
-          moveHistory: [...gameState.data.moveHistory, move]
+          moveHistory: [...gameState.data.moveHistory, move],
+          winningCombination
         },
         score: newScore,
         isComplete: newGameStatus !== 'playing',
@@ -112,6 +113,7 @@ export const TicTacToeGame: React.FC<TicTacToeGameProps> = ({ playerId }) => {
           currentPlayer: 'X',
           gameStatus: 'playing',
           moveHistory: [],
+          winningCombination: undefined,
           ...newStats
         },
         score: 0,
@@ -127,6 +129,7 @@ export const TicTacToeGame: React.FC<TicTacToeGameProps> = ({ playerId }) => {
           currentPlayer: 'X',
           gameStatus: 'playing',
           moveHistory: [],
+          winningCombination: undefined,
           gamesPlayed: currentStats.gamesPlayed,
           xWins: currentStats.xWins,
           oWins: currentStats.oWins,
@@ -154,8 +157,20 @@ export const TicTacToeGame: React.FC<TicTacToeGameProps> = ({ playerId }) => {
     const baseClass = 'tic-tac-toe-cell';
     const isEmpty = gameState.data.board[row][col] === null;
     const isPlayable = gameState.data.gameStatus === 'playing' && isEmpty;
+    const isWinningCell = isPartOfWinningCombination(row, col);
     
-    return `${baseClass} ${isPlayable ? 'playable' : ''} ${isEmpty ? 'empty' : 'filled'}`;
+    return `${baseClass} ${isPlayable ? 'playable' : ''} ${isEmpty ? 'empty' : 'filled'} ${isWinningCell ? 'winning-cell' : ''}`;
+  };
+
+  /**
+   * Check if a cell is part of the winning combination
+   */
+  const isPartOfWinningCombination = (row: number, col: number): boolean => {
+    if (!gameState.data.winningCombination) return false;
+    
+    return gameState.data.winningCombination.positions.some(
+      ([winRow, winCol]) => winRow === row && winCol === col
+    );
   };
 
   /**
@@ -283,8 +298,8 @@ export const TicTacToeGame: React.FC<TicTacToeGameProps> = ({ playerId }) => {
                 className={getCellClass(rowIndex, colIndex)}
                 onClick={() => handleCellClick(rowIndex, colIndex)}
                 style={{
-                  backgroundColor: '#fff',
-                  border: 'none',
+                  backgroundColor: isPartOfWinningCombination(rowIndex, colIndex) ? '#ffeb3b' : '#fff',
+                  border: isPartOfWinningCombination(rowIndex, colIndex) ? '3px solid #ff9800' : 'none',
                   fontSize: '2rem',
                   fontWeight: 'bold',
                   cursor: gameState.data.gameStatus === 'playing' && cell === null ? 'pointer' : 'default',
@@ -292,15 +307,18 @@ export const TicTacToeGame: React.FC<TicTacToeGameProps> = ({ playerId }) => {
                   alignItems: 'center',
                   justifyContent: 'center',
                   color: cell === 'X' ? '#2196F3' : cell === 'O' ? '#f44336' : '#333',
-                  transition: 'background-color 0.2s'
+                  transition: 'all 0.3s',
+                  boxShadow: isPartOfWinningCombination(rowIndex, colIndex) ? '0 0 10px rgba(255, 152, 0, 0.5)' : 'none'
                 }}
                 onMouseEnter={(e) => {
-                  if (gameState.data.gameStatus === 'playing' && cell === null) {
+                  if (gameState.data.gameStatus === 'playing' && cell === null && !isPartOfWinningCombination(rowIndex, colIndex)) {
                     e.currentTarget.style.backgroundColor = '#f0f0f0';
                   }
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#fff';
+                  if (!isPartOfWinningCombination(rowIndex, colIndex)) {
+                    e.currentTarget.style.backgroundColor = '#fff';
+                  }
                 }}
               >
                 {getCellContent(rowIndex, colIndex)}

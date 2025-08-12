@@ -2,7 +2,7 @@
  * Tic-Tac-Toe Game Logic Utilities
  */
 
-import type { Board, Player, GameStatus } from './types';
+import type { Board, Player, GameStatus, WinningCombination } from './types';
 
 /**
  * Create an empty 3x3 board
@@ -37,33 +37,66 @@ export const makeMove = (board: Board, row: number, col: number, player: Player)
 };
 
 /**
- * Check for winning condition
+ * Check for winning condition and return winner with winning combination
  */
-export const checkWinner = (board: Board): Player | null => {
+export const checkWinnerWithCombination = (board: Board): { winner: Player | null; combination?: WinningCombination } => {
   // Check rows
   for (let row = 0; row < 3; row++) {
     if (board[row][0] && board[row][0] === board[row][1] && board[row][1] === board[row][2]) {
-      return board[row][0];
+      return {
+        winner: board[row][0],
+        combination: {
+          positions: [[row, 0], [row, 1], [row, 2]],
+          type: 'row'
+        }
+      };
     }
   }
   
   // Check columns
   for (let col = 0; col < 3; col++) {
     if (board[0][col] && board[0][col] === board[1][col] && board[1][col] === board[2][col]) {
-      return board[0][col];
+      return {
+        winner: board[0][col],
+        combination: {
+          positions: [[0, col], [1, col], [2, col]],
+          type: 'column'
+        }
+      };
     }
   }
   
-  // Check diagonals
+  // Check main diagonal (top-left to bottom-right)
   if (board[0][0] && board[0][0] === board[1][1] && board[1][1] === board[2][2]) {
-    return board[0][0];
+    return {
+      winner: board[0][0],
+      combination: {
+        positions: [[0, 0], [1, 1], [2, 2]],
+        type: 'diagonal'
+      }
+    };
   }
   
+  // Check anti-diagonal (top-right to bottom-left)
   if (board[0][2] && board[0][2] === board[1][1] && board[1][1] === board[2][0]) {
-    return board[0][2];
+    return {
+      winner: board[0][2],
+      combination: {
+        positions: [[0, 2], [1, 1], [2, 0]],
+        type: 'diagonal'
+      }
+    };
   }
   
-  return null;
+  return { winner: null };
+};
+
+/**
+ * Check for winning condition (legacy function for compatibility)
+ */
+export const checkWinner = (board: Board): Player | null => {
+  const result = checkWinnerWithCombination(board);
+  return result.winner;
 };
 
 /**
@@ -74,16 +107,27 @@ export const isBoardFull = (board: Board): boolean => {
 };
 
 /**
- * Determine current game status
+ * Determine current game status with winning combination
+ */
+export const getGameStatusWithCombination = (board: Board): { 
+  status: GameStatus; 
+  winningCombination?: WinningCombination;
+} => {
+  const { winner, combination } = checkWinnerWithCombination(board);
+  
+  if (winner === 'X') return { status: 'X-wins', winningCombination: combination };
+  if (winner === 'O') return { status: 'O-wins', winningCombination: combination };
+  if (isBoardFull(board)) return { status: 'tie' };
+  
+  return { status: 'playing' };
+};
+
+/**
+ * Determine current game status (legacy function for compatibility)
  */
 export const getGameStatus = (board: Board): GameStatus => {
-  const winner = checkWinner(board);
-  
-  if (winner === 'X') return 'X-wins';
-  if (winner === 'O') return 'O-wins';
-  if (isBoardFull(board)) return 'tie';
-  
-  return 'playing';
+  const result = getGameStatusWithCombination(board);
+  return result.status;
 };
 
 /**
