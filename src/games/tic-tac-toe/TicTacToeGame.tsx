@@ -421,7 +421,7 @@ export const TicTacToeGame: React.FC<TicTacToeGameProps> = ({ playerId }) => {
               '💾 Save available' 
             : '❌ No save data'
           }
-          {autoSaveEnabled && gameState.score > 0 && (
+          {autoSaveEnabled && (gameState.score ?? 0) > 0 && (
             <div style={{ fontSize: '0.8rem', color: '#4CAF50', marginTop: '0.25rem' }}>
               ⚡ Auto-save active - moves saved instantly
             </div>
