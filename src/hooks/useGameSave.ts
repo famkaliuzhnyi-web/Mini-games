@@ -172,7 +172,7 @@ export const useGameSave = <T extends Record<string, unknown> = Record<string, u
     }
 
     // Check if this is a critical game action that should be saved immediately
-    const isCriticalAction = gameState.score > 0 || gameState.isComplete;
+    const isCriticalAction = (gameState.score && gameState.score > 0) || gameState.isComplete;
     
     const now = Date.now();
     const timeSinceLastSave = now - lastSaveTimeRef.current;
