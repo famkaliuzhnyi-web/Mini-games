@@ -29,6 +29,13 @@ const AVAILABLE_GAMES: GameInfo[] = [
     category: 'Strategy'
   },
   {
+    id: 'ping-pong',
+    name: 'Ping Pong',
+    description: 'Classic Pong game - control your paddle and beat the AI!',
+    emoji: '🏓',
+    category: 'Sports'
+  },
+  {
     id: 'sudoku',
     name: 'Sudoku',
     description: 'Classic number puzzle with multiple difficulty levels',
