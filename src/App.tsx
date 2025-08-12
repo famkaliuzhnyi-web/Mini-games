@@ -1,5 +1,5 @@
 import './App.css'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { HashRouter, Routes, Route } from 'react-router-dom'
 import { useNavigation } from './hooks/useNavigation'
 import { useGameConnection } from './hooks/useGameConnection'
 import { NameEntry } from './components/NameEntry'
@@ -119,13 +119,13 @@ function ProfilePage() {
 
 function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Routes>
         <Route path="/" element={<MainPage />} />
         <Route path="/game/:gameId" element={<GamePage />} />
         <Route path="/profile" element={<ProfilePage />} />
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   )
 }
 
