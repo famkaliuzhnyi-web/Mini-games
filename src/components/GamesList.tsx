@@ -15,6 +15,13 @@ interface GamesListProps {
 
 const AVAILABLE_GAMES: GameInfo[] = [
   {
+    id: 'ping-pong',
+    name: 'Ping Pong',
+    description: 'Classic ping pong game - compete against AI and improve your skills!',
+    emoji: '🏓',
+    category: 'Sports'
+  },
+  {
     id: 'tetris',
     name: 'Tetris',
     description: 'Classic falling blocks puzzle game',
