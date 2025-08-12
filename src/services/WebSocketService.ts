@@ -1,13 +1,13 @@
 export interface WebSocketMessage {
   type: string;
-  payload: any;
+  payload: unknown;
   timestamp: string;
   id?: string;
 }
 
 export interface GameState {
-  players: { [key: string]: any };
-  gameData: any;
+  players: { [key: string]: unknown };
+  gameData: unknown;
   lastUpdated: string;
 }
 
@@ -18,7 +18,7 @@ export class WebSocketService {
   private reconnectDelay = 1000;
   private isConnecting = false;
   private messageQueue: WebSocketMessage[] = [];
-  private listeners: { [key: string]: ((data: any) => void)[] } = {};
+  private listeners: { [key: string]: ((data: unknown) => void)[] } = {};
   
   private readonly serverUrl: string;
 
@@ -145,20 +145,20 @@ export class WebSocketService {
     }
   }
 
-  public on(event: string, callback: (data: any) => void): void {
+  public on<T = unknown>(event: string, callback: (data: T) => void): void {
     if (!this.listeners[event]) {
       this.listeners[event] = [];
     }
-    this.listeners[event].push(callback);
+    this.listeners[event].push(callback as (data: unknown) => void);
   }
 
-  public off(event: string, callback: (data: any) => void): void {
+  public off<T = unknown>(event: string, callback: (data: T) => void): void {
     if (this.listeners[event]) {
-      this.listeners[event] = this.listeners[event].filter(cb => cb !== callback);
+      this.listeners[event] = this.listeners[event].filter(cb => cb !== (callback as (data: unknown) => void));
     }
   }
 
-  private emit(event: string, data: any): void {
+  private emit(event: string, data: unknown): void {
     if (this.listeners[event]) {
       this.listeners[event].forEach(callback => {
         try {
@@ -201,7 +201,7 @@ export class WebSocketService {
     });
   }
 
-  public joinGame(playerData: any): void {
+  public joinGame(playerData: unknown): void {
     this.sendMessage({
       type: 'PLAYER_JOIN',
       payload: playerData
@@ -215,7 +215,7 @@ export class WebSocketService {
     });
   }
 
-  public sendGameAction(action: any): void {
+  public sendGameAction(action: unknown): void {
     this.sendMessage({
       type: 'GAME_ACTION',
       payload: action

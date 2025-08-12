@@ -26,14 +26,14 @@ export const useNavigation = () => {
   const location = useLocation();
   
   // Determine current view based on URL
-  const getCurrentView = (): ViewType => {
+  const getCurrentView = useCallback((): ViewType => {
     if (location.pathname === '/profile') return 'profile';
     if (location.pathname.startsWith('/game/') && gameId) return 'game-playing';
     
     // Check if user has a saved profile to determine if they should see games list or name entry
     const savedProfile = userService.loadProfile();
     return savedProfile ? 'games-list' : 'name-entry';
-  };
+  }, [location.pathname, gameId, userService]);
   
   // Initialize with saved profile or defaults
   const initializeState = (): NavigationState => {
@@ -64,7 +64,7 @@ export const useNavigation = () => {
       currentView: getCurrentView(),
       currentGame: gameId || null
     }));
-  }, [location.pathname, gameId]);
+  }, [location.pathname, gameId, getCurrentView]);
 
   // Load saved profile on mount
   useEffect(() => {

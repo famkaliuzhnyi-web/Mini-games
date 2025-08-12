@@ -1,11 +1,11 @@
 export interface WorkerMessage {
   type: string;
-  payload: any;
+  payload: unknown;
 }
 
 export class OfflineService {
   private worker: Worker | null = null;
-  private listeners: { [key: string]: ((data: any) => void)[] } = {};
+  private listeners: { [key: string]: ((data: unknown) => void)[] } = {};
 
   constructor() {
     this.initWorker();
@@ -38,7 +38,7 @@ export class OfflineService {
     }
   }
 
-  public cacheData(key: string, value: any): void {
+  public cacheData(key: string, value: unknown): void {
     this.postMessage({
       type: 'CACHE_DATA',
       payload: { key, value }
@@ -52,7 +52,7 @@ export class OfflineService {
     });
   }
 
-  public updateOfflineState(gameState: any): void {
+  public updateOfflineState(gameState: unknown): void {
     this.postMessage({
       type: 'UPDATE_OFFLINE_STATE',
       payload: gameState
@@ -66,20 +66,20 @@ export class OfflineService {
     });
   }
 
-  public on(event: string, callback: (data: any) => void): void {
+  public on<T = unknown>(event: string, callback: (data: T) => void): void {
     if (!this.listeners[event]) {
       this.listeners[event] = [];
     }
-    this.listeners[event].push(callback);
+    this.listeners[event].push(callback as (data: unknown) => void);
   }
 
-  public off(event: string, callback: (data: any) => void): void {
+  public off<T = unknown>(event: string, callback: (data: T) => void): void {
     if (this.listeners[event]) {
-      this.listeners[event] = this.listeners[event].filter(cb => cb !== callback);
+      this.listeners[event] = this.listeners[event].filter(cb => cb !== (callback as (data: unknown) => void));
     }
   }
 
-  private emit(event: string, data: any): void {
+  private emit(event: string, data: unknown): void {
     if (this.listeners[event]) {
       this.listeners[event].forEach(callback => {
         try {
