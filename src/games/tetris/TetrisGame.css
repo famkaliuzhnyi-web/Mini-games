@@ -319,6 +319,94 @@
   background-color: #e9e9e9;
 }
 
+/* Mobile Touch Controls */
+.mobile-controls {
+  display: none; /* Hidden on desktop by default */
+  margin-top: 1rem;
+}
+
+.mobile-controls h3 {
+  margin: 0 0 0.5rem 0;
+  color: #333;
+  font-size: 1.1rem;
+  text-align: center;
+}
+
+.mobile-control-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr;
+  gap: 0.75rem;
+  max-width: 200px;
+  margin: 0 auto;
+}
+
+.mobile-control-btn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 1rem;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobile-control-btn:hover {
+  background-color: #0056b3;
+  transform: scale(1.05);
+}
+
+.mobile-control-btn:active {
+  background-color: #004494;
+  transform: scale(0.95);
+}
+
+.mobile-control-btn:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.mobile-control-btn:disabled:hover {
+  background-color: #6c757d;
+  transform: none;
+}
+
+/* Specific button positioning */
+.mobile-control-btn.move-left {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.mobile-control-btn.rotate {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.mobile-control-btn.move-right {
+  grid-column: 3;
+  grid-row: 2;
+}
+
+.mobile-control-btn.move-down {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.mobile-control-btn.hard-drop {
+  grid-column: 1 / span 3;
+  grid-row: 3;
+  margin-top: 0.5rem;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .tetris-content {
@@ -334,6 +422,11 @@
   .tetris-cell {
     width: 18px;
     height: 18px;
+  }
+
+  /* Show mobile controls on tablets and smaller */
+  .mobile-controls {
+    display: block;
   }
 }
 
@@ -353,5 +446,22 @@
   
   .tetris-controls {
     padding: 0.75rem;
+  }
+
+  /* Ensure mobile controls are visible on mobile phones */
+  .mobile-controls {
+    display: block;
+  }
+
+  /* Larger touch targets on small screens */
+  .mobile-control-btn {
+    min-height: 50px;
+    font-size: 1.3rem;
+    padding: 0.75rem;
+  }
+
+  .mobile-control-grid {
+    max-width: 180px;
+    gap: 0.5rem;
   }
 }

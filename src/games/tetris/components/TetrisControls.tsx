@@ -11,6 +11,11 @@ interface TetrisControlsProps {
   gameOver: boolean;
   onPause: () => void;
   onReset: () => void;
+  onMoveLeft?: () => void;
+  onMoveRight?: () => void;
+  onMoveDown?: () => void;
+  onRotate?: () => void;
+  onHardDrop?: () => void;
 }
 
 export const TetrisControls: React.FC<TetrisControlsProps> = ({
@@ -19,7 +24,12 @@ export const TetrisControls: React.FC<TetrisControlsProps> = ({
   paused,
   gameOver,
   onPause,
-  onReset
+  onReset,
+  onMoveLeft,
+  onMoveRight,
+  onMoveDown,
+  onRotate,
+  onHardDrop
 }) => {
   const nextPieceEmojis: Record<PieceType, string> = {
     I: '🟦', // Cyan bar
@@ -106,6 +116,77 @@ export const TetrisControls: React.FC<TetrisControlsProps> = ({
         >
           🔄 Reset
         </button>
+      </div>
+
+      {/* Mobile Touch Controls */}
+      <div className="mobile-controls">
+        <h3>Touch Controls</h3>
+        <div className="mobile-control-grid">
+          <button
+            onTouchStart={(e) => {
+              e.preventDefault();
+              onMoveLeft?.();
+            }}
+            onClick={onMoveLeft}
+            disabled={gameOver || paused}
+            className="mobile-control-btn move-left"
+            type="button"
+          >
+            ⬅️
+          </button>
+          
+          <button
+            onTouchStart={(e) => {
+              e.preventDefault();
+              onRotate?.();
+            }}
+            onClick={onRotate}
+            disabled={gameOver || paused}
+            className="mobile-control-btn rotate"
+            type="button"
+          >
+            🔄
+          </button>
+          
+          <button
+            onTouchStart={(e) => {
+              e.preventDefault();
+              onMoveRight?.();
+            }}
+            onClick={onMoveRight}
+            disabled={gameOver || paused}
+            className="mobile-control-btn move-right"
+            type="button"
+          >
+            ➡️
+          </button>
+          
+          <button
+            onTouchStart={(e) => {
+              e.preventDefault();
+              onMoveDown?.();
+            }}
+            onClick={onMoveDown}
+            disabled={gameOver || paused}
+            className="mobile-control-btn move-down"
+            type="button"
+          >
+            ⬇️
+          </button>
+          
+          <button
+            onTouchStart={(e) => {
+              e.preventDefault();
+              onHardDrop?.();
+            }}
+            onClick={onHardDrop}
+            disabled={gameOver || paused}
+            className="mobile-control-btn hard-drop"
+            type="button"
+          >
+            ⏬
+          </button>
+        </div>
       </div>
 
       {/* Game Status */}

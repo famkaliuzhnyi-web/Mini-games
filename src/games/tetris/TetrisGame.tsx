@@ -331,6 +331,22 @@ export const TetrisGame: React.FC<TetrisGameProps> = ({ playerId }) => {
     dispatch({ type: 'RESET' });
   }, [dispatch]);
 
+  // Mobile control handlers
+  const handleMobileMove = useCallback((direction: 'left' | 'right' | 'down') => {
+    if (isLoading) return;
+    dispatch({ type: 'MOVE', direction });
+  }, [dispatch, isLoading]);
+
+  const handleMobileRotate = useCallback(() => {
+    if (isLoading) return;
+    dispatch({ type: 'ROTATE', direction: 'clockwise' });
+  }, [dispatch, isLoading]);
+
+  const handleMobileHardDrop = useCallback(() => {
+    if (isLoading) return;
+    dispatch({ type: 'DROP' });
+  }, [dispatch, isLoading]);
+
   if (isLoading) {
     return (
       <div style={{ padding: '2rem', textAlign: 'center' }}>
@@ -360,6 +376,11 @@ export const TetrisGame: React.FC<TetrisGameProps> = ({ playerId }) => {
           gameOver={gameState.data.gameOver}
           onPause={handlePause}
           onReset={handleReset}
+          onMoveLeft={() => handleMobileMove('left')}
+          onMoveRight={() => handleMobileMove('right')}
+          onMoveDown={() => handleMobileMove('down')}
+          onRotate={handleMobileRotate}
+          onHardDrop={handleMobileHardDrop}
         />
       </div>
       
