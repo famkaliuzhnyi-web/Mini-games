@@ -67,27 +67,53 @@ export const useGameSave = <T extends Record<string, unknown> = Record<string, u
   // Check for existing save on mount
   useEffect(() => {
     const checkExistingSave = async () => {
-      setIsLoading(true);
-      const saveExists = saveServiceRef.current.hasSave(gameId, playerId);
-      setHasSave(saveExists);
-
-      // Auto-load if save exists
-      if (saveExists) {
-        const loadResult = await saveServiceRef.current.loadGame<T>(gameId, playerId);
-        if (loadResult.success && loadResult.gameState) {
-          setGameStateInternal(loadResult.gameState);
-          hasLoadedSaveRef.current = true;
-          onSaveLoad?.(loadResult.gameState);
-          console.log(`Auto-loaded save for game ${gameId}`);
+      try {
+        setIsLoading(true);
+        
+        // Validate parameters first
+        if (!gameId || !playerId) {
+          console.warn(`Invalid gameId (${gameId}) or playerId (${playerId}) for save check`);
+          return;
         }
+        
+        const saveExists = saveServiceRef.current.hasSave(gameId, playerId);
+        setHasSave(saveExists);
+
+        // Auto-load if save exists
+        if (saveExists) {
+          const loadResult = await saveServiceRef.current.loadGame<T>(gameId, playerId);
+          if (loadResult.success && loadResult.gameState) {
+            setGameStateInternal(loadResult.gameState);
+            hasLoadedSaveRef.current = true;
+            onSaveLoad?.(loadResult.gameState);
+            console.log(`Auto-loaded save for game ${gameId}`);
+          } else {
+            console.warn(`Failed to load save for ${gameId}: ${loadResult.error}`);
+          }
+        }
+      } catch (error) {
+        console.error(`Error during save check for game ${gameId}:`, error);
+      } finally {
+        // Mark initialization as complete
+        isInitializingRef.current = false;
+        setIsLoading(false);
       }
-      
-      // Mark initialization as complete
-      isInitializingRef.current = false;
-      setIsLoading(false);
     };
 
-    checkExistingSave();
+    // Set a safety timeout to ensure loading never hangs indefinitely
+    const timeoutId = setTimeout(() => {
+      console.warn(`Save check timeout for game ${gameId}, forcing loading to complete`);
+      isInitializingRef.current = false;
+      setIsLoading(false);
+    }, 5000);
+
+    checkExistingSave().finally(() => {
+      clearTimeout(timeoutId);
+    });
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
   }, [gameId, playerId, onSaveLoad]);
 
   // Setup auto-save when enabled
