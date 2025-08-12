@@ -5,6 +5,7 @@ import { NameEntry } from './components/NameEntry'
 import { GamesList } from './components/GamesList'
 import { GameContainer } from './components/GameContainer'
 import { Navigation } from './components/Navigation'
+import { Profile } from './components/Profile'
 import { useEffect } from 'react'
 
 function App() {
@@ -48,6 +49,15 @@ function App() {
           />
         )
       
+      case 'profile':
+        return (
+          <Profile
+            playerName={navigation.playerName}
+            onNameUpdate={navigation.setPlayerName}
+            onBack={navigation.showGamesList}
+          />
+        )
+      
       default:
         return <NameEntry onNameSubmit={navigation.setPlayerName} />
     }
@@ -55,12 +65,13 @@ function App() {
 
   return (
     <div className="app">
-      {/* Show navigation bar only when user has entered name */}
-      {navigation.playerName && (
+      {/* Show navigation bar only when user has entered name and not on profile page */}
+      {navigation.playerName && navigation.currentView !== 'profile' && (
         <Navigation
           playerName={navigation.playerName}
           showHomeButton={navigation.currentView === 'game-playing'}
           onHomeClick={navigation.goHome}
+          onProfileClick={navigation.showProfile}
         />
       )}
       
