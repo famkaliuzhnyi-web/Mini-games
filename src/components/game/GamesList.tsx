@@ -1,5 +1,6 @@
 import React from 'react';
 import './GamesList.css';
+import packageJson from '../../../package.json';
 
 export interface GameInfo {
   id: string;
@@ -105,6 +106,8 @@ export const GamesList: React.FC<GamesListProps> = ({ onGameSelect }) => {
           More games coming soon! 
           <br />
           <small>All games support automatic save/load functionality.</small>
+          <br />
+          <small className="version-info">Version {packageJson.version}</small>
         </p>
       </div>
     </div>

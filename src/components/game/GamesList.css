@@ -115,6 +115,12 @@
   font-size: 0.8rem;
 }
 
+.footer-text .version-info {
+  color: #aaa;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
 /* Mobile responsiveness */
 @media (max-width: 768px) {
   .games-list {
