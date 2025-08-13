@@ -11,13 +11,12 @@ import {
   checkWinnerWithCombination,
   checkWinner,
   getGameStatus,
-  getGameStatusWithCombination,
   isBoardFull,
   getNextPlayer,
   countEmptyCells,
   getPossibleMoves
 } from './gameLogic'
-import type { Board, Player } from './types'
+import type { Board } from './types'
 
 describe('Tic-Tac-Toe Game Logic', () => {
   describe('createEmptyBoard', () => {
