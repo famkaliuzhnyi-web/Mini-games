@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { UserService } from '../services/UserService';
+import { multiplayerService } from '../services/MultiplayerService';
 
 export type ViewType = 'name-entry' | 'games-list' | 'game-playing' | 'profile';
 
@@ -103,6 +104,13 @@ export const useNavigation = () => {
   }, [navigate]);
 
   const playGame = useCallback((gameId: string) => {
+    // Check if user is host of a multiplayer session
+    const session = multiplayerService.getCurrentSession();
+    if (session && multiplayerService.isHost()) {
+      // If host, start the game for all players in the session
+      multiplayerService.startGame(gameId);
+    }
+    
     navigate(`/game/${gameId}`);
   }, [navigate]);
 

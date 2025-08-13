@@ -342,11 +342,6 @@ export const TicTacToeGameField: React.FC<SlotComponentProps> = ({ playerId }) =
     multiplayerService.setPlayerReady(isReady);
   };
 
-  const handleStartGame = () => {
-    // Game can start when ready
-    console.log('Starting multiplayer game');
-  };
-
   if (isLoading) {
     return <div style={{ color: `var(--color-text)` }}>Loading game...</div>;
   }
@@ -360,7 +355,6 @@ export const TicTacToeGameField: React.FC<SlotComponentProps> = ({ playerId }) =
         currentPlayerId={playerId}
         sessionUrl={multiplayerService.getSessionUrl()}
         onPlayerReady={handlePlayerReady}
-        onStartGame={handleStartGame}
         onLeaveSession={leaveMultiplayerSession}
       />
     );
