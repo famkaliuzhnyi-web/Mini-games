@@ -8,7 +8,10 @@
   "theme_color": "#4CAF50",
   "orientation": "portrait-primary",
   "scope": "/",
-  "categories": ["games", "entertainment"],
+  "categories": [
+    "games",
+    "entertainment"
+  ],
   "lang": "en",
   "icons": [
     {
