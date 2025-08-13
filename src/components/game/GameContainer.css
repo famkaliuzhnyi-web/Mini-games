@@ -1,3 +1,89 @@
+/* Fullscreen game field styles */
+.fullscreen-game-field {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 500px; /* Ensure adequate space for games */
+}
+
+/* Hide legacy game containers when in slot mode */
+.fullscreen-game-field .game2048-container,
+.fullscreen-game-field .tetris-game,
+.fullscreen-game-field .tic-tac-toe-game {
+  padding: 0;
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+  max-width: none;
+  width: 100%;
+  height: 100%;
+}
+
+/* Game stats and controls in bottom stripe */
+.game-stats-container {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.game-stats-container > div {
+  padding: 0.25rem 0.5rem;
+  background: #f8f9fa;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.game-controls-container {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.game-controls-container button {
+  padding: 0.4rem 0.8rem;
+  border: 1px solid #ddd;
+  background: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+}
+
+.game-controls-container button:hover:not(:disabled) {
+  background: #f0f0f0;
+}
+
+.game-controls-container button.primary {
+  background: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.game-controls-container button.primary:hover:not(:disabled) {
+  background: #0056b3;
+}
+
+.game-stats-placeholder,
+.game-controls-placeholder {
+  color: #666;
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+/* Temporary wrapper for legacy games until they're refactored */
+.temp-game-wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .game-container {
   min-height: calc(100vh - 60px); /* Account for navigation height */
   background: #f8f9fa;

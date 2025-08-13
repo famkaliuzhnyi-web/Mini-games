@@ -2,7 +2,8 @@
  * GameLayout - Fullscreen layout framework for games
  * Provides slots for game field (fullscreen) and controls/stats (bottom stripe)
  */
-import React, { ReactNode } from 'react';
+import React from 'react';
+import type { ReactNode } from 'react';
 import './GameLayout.css';
 
 export interface GameLayoutSlots {
