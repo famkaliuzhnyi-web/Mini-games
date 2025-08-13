@@ -36,7 +36,7 @@ export class WebRTCMultiplayerService implements MultiplayerService {
     // Initialize event listener arrays
     const events: MultiplayerEvent[] = [
       'session-created', 'session-joined', 'player-connected', 'player-disconnected',
-      'player-ready-changed', 'game-started', 'game-move-received', 'game-state-updated',
+      'player-ready-changed', 'game-selected', 'game-started', 'game-move-received', 'game-state-updated',
       'game-ended', 'connection-error'
     ];
     
@@ -50,7 +50,9 @@ export class WebRTCMultiplayerService implements MultiplayerService {
   }
 
   private emit<T>(event: MultiplayerEvent, data: T): void {
+    console.log(`Emitting event: ${event}`, data);
     const callbacks = this.eventListeners.get(event) || [];
+    console.log(`Found ${callbacks.length} callbacks for event: ${event}`);
     callbacks.forEach(callback => {
       try {
         callback(data);
@@ -84,6 +86,29 @@ export class WebRTCMultiplayerService implements MultiplayerService {
     this.emit('game-started', { gameId });
   }
 
+  // Public method to select a game within the session
+  async selectGame(gameId: string): Promise<void> {
+    if (!this.currentSession || !this.isHostRole) {
+      throw new Error('Only host can select a game');
+    }
+
+    // Update session with selected game
+    this.currentSession.gameId = gameId;
+
+    const message: MultiplayerMessage = {
+      type: 'game-select',
+      sessionId: this.currentSession.id,
+      playerId: this.localPlayerId,
+      timestamp: new Date().toISOString(),
+      data: {
+        gameId
+      }
+    };
+
+    this.broadcastMessage(message);
+    this.emit('game-selected', { gameId });
+  }
+
   // Session Management
   async createSession(options: CreateSessionOptions): Promise<GameSession> {
     if (this.currentSession) {
@@ -104,7 +129,7 @@ export class WebRTCMultiplayerService implements MultiplayerService {
 
     this.currentSession = {
       id: sessionId,
-      gameId: options.gameId,
+      gameId: options.gameId, // Optional - can be undefined
       hostId: this.localPlayerId,
       players: [hostPlayer],
       maxPlayers: options.maxPlayers,
@@ -114,7 +139,7 @@ export class WebRTCMultiplayerService implements MultiplayerService {
 
     this.isHostRole = true;
 
-    console.log(`Created multiplayer session: ${sessionId} for game: ${options.gameId}`);
+    console.log(`Created multiplayer session: ${sessionId}${options.gameId ? ` for game: ${options.gameId}` : ' without game selection'}`);
     this.emit('session-created', this.currentSession);
 
     return this.currentSession;
@@ -143,7 +168,7 @@ export class WebRTCMultiplayerService implements MultiplayerService {
     // to exchange WebRTC offer/answer with the host
     this.currentSession = {
       id: options.sessionId,
-      gameId: 'unknown', // Would be received from host
+      gameId: undefined, // No game selected yet - will be set by host
       hostId: 'unknown', // Would be received from host
       players: [guestPlayer],
       maxPlayers: 4,
@@ -264,6 +289,13 @@ export class WebRTCMultiplayerService implements MultiplayerService {
         break;
       case 'player-ready':
         this.emit('player-ready-changed', message.data);
+        break;
+      case 'game-select':
+        // Update session with selected game
+        if (this.currentSession && message.data && typeof message.data === 'object' && 'gameId' in message.data) {
+          this.currentSession.gameId = message.data.gameId as string;
+        }
+        this.emit('game-selected', message.data);
         break;
       case 'game-start':
         this.emit('game-started', message.data);

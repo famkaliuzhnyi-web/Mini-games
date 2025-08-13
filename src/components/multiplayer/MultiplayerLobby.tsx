@@ -6,6 +6,7 @@
 import React from 'react';
 import type { GameSession } from '../../types/multiplayer';
 import { QRCodeDisplay } from './QRCodeDisplay';
+import { multiplayerService } from '../../services/MultiplayerService';
 
 interface MultiplayerLobbyProps {
   session: GameSession;
@@ -27,7 +28,7 @@ export const MultiplayerLobby: React.FC<MultiplayerLobbyProps> = ({
   onLeaveSession
 }) => {
   const currentPlayer = session.players.find(p => p.id === currentPlayerId);
-  const canStartGame = isHost && session.players.length >= 2 && session.players.every(p => p.isReady);
+  const canStartGame = isHost && session.players.length >= 2 && session.players.every(p => p.isReady) && session.gameId;
 
   const getConnectionStatusColor = (state: string): string => {
     switch (state) {
@@ -84,6 +85,94 @@ export const MultiplayerLobby: React.FC<MultiplayerLobbyProps> = ({
             title="Share this QR code for others to join"
             size={180}
           />
+        </div>
+      )}
+
+      {/* Game Selection (host only) */}
+      {isHost && (
+        <div style={{
+          backgroundColor: '#fff',
+          border: '1px solid #ddd',
+          borderRadius: '8px',
+          padding: '1.5rem',
+          marginBottom: '2rem'
+        }}>
+          <h3 style={{ margin: '0 0 1rem 0' }}>Select Game</h3>
+          <div style={{ 
+            display: 'flex', 
+            gap: '1rem', 
+            justifyContent: 'center',
+            flexWrap: 'wrap'
+          }}>
+            <button
+              onClick={() => multiplayerService.selectGame('tic-tac-toe')}
+              style={{
+                padding: '0.75rem 1.5rem',
+                backgroundColor: session.gameId === 'tic-tac-toe' ? '#4CAF50' : '#f0f0f0',
+                color: session.gameId === 'tic-tac-toe' ? 'white' : '#333',
+                border: '1px solid #ddd',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '1rem'
+              }}
+            >
+              ⭕ Tic Tac Toe
+            </button>
+            <button
+              onClick={() => multiplayerService.selectGame('ping-pong')}
+              style={{
+                padding: '0.75rem 1.5rem',
+                backgroundColor: session.gameId === 'ping-pong' ? '#4CAF50' : '#f0f0f0',
+                color: session.gameId === 'ping-pong' ? 'white' : '#333',
+                border: '1px solid #ddd',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '1rem'
+              }}
+            >
+              🏓 Ping Pong
+            </button>
+          </div>
+          {session.gameId && (
+            <div style={{
+              textAlign: 'center',
+              marginTop: '1rem',
+              color: '#4CAF50',
+              fontWeight: 'bold'
+            }}>
+              ✅ {session.gameId === 'tic-tac-toe' ? 'Tic Tac Toe' : 'Ping Pong'} selected
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Game Selection Display (for guests) */}
+      {!isHost && (
+        <div style={{
+          backgroundColor: '#fff',
+          border: '1px solid #ddd',
+          borderRadius: '8px',
+          padding: '1.5rem',
+          marginBottom: '2rem',
+          textAlign: 'center'
+        }}>
+          <h3 style={{ margin: '0 0 1rem 0' }}>Game</h3>
+          {session.gameId ? (
+            <div style={{
+              fontSize: '1.2rem',
+              color: '#4CAF50',
+              fontWeight: 'bold'
+            }}>
+              🎮 {session.gameId === 'tic-tac-toe' ? 'Tic Tac Toe' : session.gameId === 'ping-pong' ? 'Ping Pong' : session.gameId}
+            </div>
+          ) : (
+            <div style={{
+              color: '#666',
+              fontStyle: 'italic'
+            }}>
+              Waiting for host to select a game...
+            </div>
+          )}
         </div>
       )}
 
@@ -251,7 +340,20 @@ export const MultiplayerLobby: React.FC<MultiplayerLobbyProps> = ({
         </div>
       )}
 
-      {isHost && session.players.length >= 2 && !canStartGame && (
+      {isHost && session.players.length >= 2 && !session.gameId && (
+        <div style={{
+          marginTop: '2rem',
+          padding: '1rem',
+          backgroundColor: '#fff3cd',
+          border: '1px solid #ffeaa7',
+          borderRadius: '6px',
+          textAlign: 'center'
+        }}>
+          ℹ️ Please select a game to continue...
+        </div>
+      )}
+
+      {isHost && session.players.length >= 2 && session.gameId && !session.players.every(p => p.isReady) && (
         <div style={{
           marginTop: '2rem',
           padding: '1rem',

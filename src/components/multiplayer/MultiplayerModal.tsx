@@ -34,15 +34,7 @@ export const MultiplayerModal: React.FC<MultiplayerModalProps> = ({
   useEffect(() => {
     if (!isOpen) return;
 
-    // Check if already in a session
-    const currentSession = multiplayerService.getCurrentSession();
-    if (currentSession) {
-      setSession(currentSession);
-      setIsHost(multiplayerService.isHost());
-      setSessionUrl(multiplayerService.getSessionUrl());
-    }
-
-    // Set up event listeners
+    // Set up event listeners first
     const handleSessionCreated = (newSession: GameSession) => {
       setSession(newSession);
       setIsHost(true);
@@ -56,6 +48,19 @@ export const MultiplayerModal: React.FC<MultiplayerModalProps> = ({
       setSessionUrl(null);
     };
 
+    const handleGameSelected = (data: { gameId: string }) => {
+      // Update session in state when host selects a game
+      setSession(prevSession => {
+        if (prevSession) {
+          return {
+            ...prevSession,
+            gameId: data.gameId
+          };
+        }
+        return prevSession;
+      });
+    };
+
     const handleGameStarted = (data: { gameId: string }) => {
       if (onNavigateToGame) {
         onNavigateToGame(data.gameId);
@@ -65,23 +70,40 @@ export const MultiplayerModal: React.FC<MultiplayerModalProps> = ({
 
     multiplayerService.on('session-created', handleSessionCreated);
     multiplayerService.on('session-joined', handleSessionJoined);
+    multiplayerService.on('game-selected', handleGameSelected);
     multiplayerService.on('game-started', handleGameStarted);
+
+    // Now check if already in a session or create one
+    const currentSession = multiplayerService.getCurrentSession();
+    if (currentSession) {
+      setSession(currentSession);
+      setIsHost(multiplayerService.isHost());
+      setSessionUrl(multiplayerService.getSessionUrl());
+    } else {
+      // Create a session immediately when modal opens
+      handleCreateSession();
+    }
 
     return () => {
       multiplayerService.off('session-created', handleSessionCreated);
       multiplayerService.off('session-joined', handleSessionJoined);
+      multiplayerService.off('game-selected', handleGameSelected);
       multiplayerService.off('game-started', handleGameStarted);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, onNavigateToGame, onClose]);
 
-  const handleCreateSession = async (gameId: string) => {
+  const handleCreateSession = async () => {
     try {
+      console.log('Starting to create session...');
       setIsCreatingSession(true);
-      await multiplayerService.createSession({
-        gameId,
+      console.log('About to call multiplayerService.createSession');
+      const session = await multiplayerService.createSession({
         maxPlayers: 4, // Default max players
         hostName: playerName
+        // No gameId - will be selected later
       });
+      console.log('Session created successfully:', session);
     } catch (error) {
       console.error('Failed to create multiplayer session:', error);
       setIsCreatingSession(false);
@@ -114,7 +136,7 @@ export const MultiplayerModal: React.FC<MultiplayerModalProps> = ({
   };
 
   const handleStartGame = async () => {
-    if (!session || !isHost) return;
+    if (!session || !isHost || !session.gameId) return;
 
     try {
       // Use the service's startGame method which will broadcast to all players
@@ -147,33 +169,15 @@ export const MultiplayerModal: React.FC<MultiplayerModalProps> = ({
               onStartGame={handleStartGame}
               onLeaveSession={handleLeaveSession}
             />
+          ) : isCreatingSession ? (
+            <div className="multiplayer-session-setup">
+              <div style={{ textAlign: 'center', padding: '2rem' }}>
+                <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>⏳</div>
+                <p>Creating multiplayer session...</p>
+              </div>
+            </div>
           ) : (
             <div className="multiplayer-session-setup">
-              <div className="multiplayer-section">
-                <h3>🚀 Create Game Session</h3>
-                <p>Choose a game to start a multiplayer session:</p>
-                <div className="game-selection">
-                  <button 
-                    onClick={() => handleCreateSession('tic-tac-toe')}
-                    disabled={isCreatingSession}
-                    className="game-select-btn"
-                  >
-                    {isCreatingSession ? '⏳' : '⭕'} Tic Tac Toe
-                  </button>
-                  <button 
-                    onClick={() => handleCreateSession('ping-pong')}
-                    disabled={isCreatingSession}
-                    className="game-select-btn"
-                  >
-                    {isCreatingSession ? '⏳' : '🏓'} Ping Pong
-                  </button>
-                </div>
-              </div>
-
-              <div className="multiplayer-divider">
-                <span>or</span>
-              </div>
-
               <div className="multiplayer-section">
                 <h3>🔗 Join Game Session</h3>
                 <p>Enter a session ID to join an existing game:</p>
