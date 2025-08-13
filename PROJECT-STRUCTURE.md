@@ -33,7 +33,7 @@ Mini-games/
 │   ├── index.html               # Main HTML template
 │   └── public/                  # Static assets served directly
 │       ├── vite.svg            # Vite logo asset
-│       └── worker.js           # Web Worker for offline functionality
+│       └── sw.js               # Service Worker for PWA and offline functionality
 │
 └── 💻 Source Code
     └── src/                     # Main application source code
@@ -114,13 +114,14 @@ Each documentation file serves a specific purpose:
 
 ### 🌐 Static Assets (`public/`)
 
-#### `public/worker.js`
-- **Purpose**: Web Worker for offline functionality
+#### `public/sw.js`
+- **Purpose**: Service Worker for PWA functionality and offline support
 - **Functionality**:
-  - Background data synchronization
-  - Offline game state caching
-  - IndexedDB management
-  - Network status handling
+  - Network request caching and offline strategy
+  - Game data storage using IndexedDB
+  - Background synchronization when online
+  - Push notifications support
+  - PWA installation and updates
 
 #### Static Files
 - Files in `public/` are served directly by Vite

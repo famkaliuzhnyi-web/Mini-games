@@ -4,37 +4,47 @@ export interface WorkerMessage {
 }
 
 export class OfflineService {
-  private worker: Worker | null = null;
+  private serviceWorkerRegistration: ServiceWorkerRegistration | null = null;
   private listeners: { [key: string]: ((data: unknown) => void)[] } = {};
+  private clientId: string | null = null;
 
   constructor() {
-    this.initWorker();
+    this.initServiceWorker();
   }
 
-  private initWorker(): void {
+  private async initServiceWorker(): Promise<void> {
     try {
-      this.worker = new Worker('/worker.js');
-      this.worker.onmessage = (event) => {
+      if (!('serviceWorker' in navigator)) {
+        console.warn('Service Worker not supported in this browser');
+        return;
+      }
+
+      // Get or wait for service worker registration
+      this.serviceWorkerRegistration = await navigator.serviceWorker.ready;
+      
+      // Generate a unique client ID for this instance
+      this.clientId = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString();
+
+      // Listen for messages from service worker
+      navigator.serviceWorker.addEventListener('message', (event) => {
         const { type, payload } = event.data;
         this.emit(type.toLowerCase(), payload);
-      };
+      });
 
-      this.worker.onerror = (error) => {
-        console.error('Web Worker error:', error);
-        this.emit('error', { error });
-      };
-
-      console.log('Offline service worker initialized');
+      console.log('Offline service initialized with Service Worker');
     } catch (error) {
-      console.error('Failed to initialize web worker:', error);
+      console.error('Failed to initialize service worker for offline service:', error);
     }
   }
 
   private postMessage(message: WorkerMessage): void {
-    if (this.worker) {
-      this.worker.postMessage(message);
+    if (this.serviceWorkerRegistration?.active) {
+      this.serviceWorkerRegistration.active.postMessage({
+        ...message,
+        clientId: this.clientId
+      });
     } else {
-      console.warn('Worker not available, message not sent:', message);
+      console.warn('Service Worker not available, message not sent:', message);
     }
   }
 
@@ -92,9 +102,10 @@ export class OfflineService {
   }
 
   public terminate(): void {
-    if (this.worker) {
-      this.worker.terminate();
-      this.worker = null;
-    }
+    // Service workers cannot be terminated from client code
+    // They're managed by the browser
+    console.log('Service worker lifecycle is managed by the browser');
+    this.listeners = {};
+    this.clientId = null;
   }
 }
