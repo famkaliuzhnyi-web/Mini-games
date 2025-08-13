@@ -5,19 +5,50 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mini Games - Page Not Found</title>
   <script>
-    // Redirect to index.html with hash-based routing
-    const path = window.location.pathname.substring(1); // Remove leading slash
-    if (path && path !== 'Mini-games' && path !== 'Mini-games/') {
-      // Extract the path after /Mini-games/ and redirect to hash route
-      const segments = path.split('/');
-      if (segments[0] === 'Mini-games') {
-        segments.shift(); // Remove 'Mini-games' from segments
+    // Handle SPA routing for PWA - redirect to base path with hash routing
+    function detectBasePath() {
+      // Try to detect the base path from the current URL
+      const currentPath = window.location.pathname;
+      const pathSegments = currentPath.split('/').filter(segment => segment);
+      
+      // Check if we're in a subdirectory deployment (like GitHub Pages)
+      if (pathSegments.length > 0 && pathSegments[0] === 'Mini-games') {
+        return '/Mini-games/';
       }
-      const hashPath = segments.length > 0 ? '#/' + segments.join('/') : '';
-      window.location.replace('/Mini-games/' + hashPath);
-    } else {
-      window.location.replace('/Mini-games/');
+      
+      // Check if we're at the root level or other deployment
+      return '/';
     }
+    
+    function redirectToApp() {
+      const basePath = detectBasePath();
+      const currentPath = window.location.pathname;
+      
+      // Extract the path that should become a hash route
+      let hashPath = '';
+      
+      if (basePath === '/Mini-games/') {
+        // Remove the base path to get the app route
+        const appPath = currentPath.replace('/Mini-games', '').replace(/^\//, '');
+        if (appPath && appPath !== '') {
+          hashPath = '#/' + appPath;
+        }
+      } else {
+        // For root deployment, use the full path as hash
+        const appPath = currentPath.replace(/^\//, '');
+        if (appPath && appPath !== '') {
+          hashPath = '#/' + appPath;
+        }
+      }
+      
+      // Redirect to the app with hash routing
+      const redirectUrl = basePath + hashPath;
+      console.log('Redirecting to:', redirectUrl);
+      window.location.replace(redirectUrl);
+    }
+    
+    // Redirect immediately
+    redirectToApp();
   </script>
 </head>
 <body>
