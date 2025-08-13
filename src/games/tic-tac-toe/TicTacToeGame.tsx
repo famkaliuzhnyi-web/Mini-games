@@ -23,6 +23,9 @@ export const TicTacToeGame: React.FC<TicTacToeGameProps> = ({ playerId }) => {
   const controller = new TicTacToeGameController();
   const { awardGameCompletion, awardGamePlay } = useCoinService();
   
+  // State for collapsible save section
+  const [saveExpanded, setSaveExpanded] = React.useState(false);
+  
   const {
     gameState,
     setGameState,
@@ -293,10 +296,10 @@ export const TicTacToeGame: React.FC<TicTacToeGameProps> = ({ playerId }) => {
         
         {/* Game Statistics */}
         <div className="tic-tac-toe-stats">
-          Games: {gameState.data.gamesPlayed} | 
-          X: {gameState.data.xWins} | 
-          O: {gameState.data.oWins} | 
-          Ties: {gameState.data.ties}
+          <span>Games: {gameState.data.gamesPlayed}</span>
+          <span>X: {gameState.data.xWins}</span>
+          <span>O: {gameState.data.oWins}</span>
+          <span>Ties: {gameState.data.ties}</span>
         </div>
       </div>
 
@@ -327,97 +330,84 @@ export const TicTacToeGame: React.FC<TicTacToeGameProps> = ({ playerId }) => {
         </button>
       </div>
 
-      {/* Save/Load Controls */}
-      <div style={{ 
-        marginBottom: '1.5rem',
-        padding: '1rem',
-        backgroundColor: '#fff',
-        borderRadius: '4px',
-        border: '1px solid #eee'
-      }}>
-        <h3 style={{ margin: '0 0 1rem 0' }}>Save Management</h3>
+      {/* Collapsible Save Management */}
+      <div className={`tic-tac-toe-save-section ${saveExpanded ? 'expanded' : 'collapsed'}`}>
+        <div className="tic-tac-toe-save-header" onClick={() => setSaveExpanded(!saveExpanded)}>
+          <h3>Save Management</h3>
+          <span className={`tic-tac-toe-save-toggle ${saveExpanded ? 'expanded' : ''}`}>
+            ▼
+          </span>
+        </div>
         
-        <div style={{ marginBottom: '1rem' }}>
-          <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-            <input
-              type="checkbox"
-              checked={autoSaveEnabled}
-              onChange={toggleAutoSave}
-            />
-            Auto-save enabled (saves every {controller.config.autoSaveIntervalMs / 1000}s)
-          </label>
-        </div>
-
-        <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-          <button 
-            onClick={handleManualSave}
-            style={{ 
-              padding: '0.5rem 1rem',
-              backgroundColor: '#2196F3',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer'
-            }}
-          >
-            Manual Save
-          </button>
-          
-          <button 
-            onClick={handleManualLoad}
-            disabled={!hasSave}
-            style={{ 
-              padding: '0.5rem 1rem',
-              backgroundColor: hasSave ? '#4CAF50' : '#ccc',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: hasSave ? 'pointer' : 'not-allowed'
-            }}
-          >
-            Load Game
-          </button>
-          
-          <button 
-            onClick={handleDropSave}
-            disabled={!hasSave}
-            style={{ 
-              padding: '0.5rem 1rem',
-              backgroundColor: hasSave ? '#f44336' : '#ccc',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: hasSave ? 'pointer' : 'not-allowed'
-            }}
-          >
-            Delete Save
-          </button>
-        </div>
-
-        <div style={{ marginTop: '1rem', fontSize: '0.9rem', color: '#666' }}>
-          {hasSave ? 
-            (lastSaveEvent?.action === 'auto-save' && 
-             (Date.now() - new Date(lastSaveEvent.timestamp).getTime()) < 5000) ? 
-              '💾 Save available (recently saved)' : 
-              '💾 Save available' 
-            : '❌ No save data'
-          }
-          {autoSaveEnabled && gameState.score && gameState.score > 0 && (
-            <div style={{ fontSize: '0.8rem', color: '#4CAF50', marginTop: '0.25rem' }}>
-              ⚡ Auto-save active - moves saved instantly
+        {saveExpanded && (
+          <div className="tic-tac-toe-save-content">
+            <div className="tic-tac-toe-autosave-toggle">
+              <input
+                type="checkbox"
+                id="auto-save-toggle"
+                checked={autoSaveEnabled}
+                onChange={toggleAutoSave}
+              />
+              <label htmlFor="auto-save-toggle">
+                Auto-save enabled (saves every {controller.config.autoSaveIntervalMs / 1000}s)
+              </label>
             </div>
-          )}
-        </div>
+
+            <div className="tic-tac-toe-save-status">
+              {hasSave ? 
+                (lastSaveEvent?.action === 'auto-save' && 
+                 (Date.now() - new Date(lastSaveEvent.timestamp).getTime()) < 5000) ? 
+                  '💾 Save available (recently saved)' : 
+                  '💾 Save available' 
+                : '❌ No save data'
+              }
+              {autoSaveEnabled && gameState.score && gameState.score > 0 && (
+                <div style={{ fontSize: '0.8rem', color: 'var(--color-success, #4CAF50)', marginTop: '0.5rem' }}>
+                  ⚡ Auto-save active - moves saved instantly
+                </div>
+              )}
+            </div>
+
+            <div className="tic-tac-toe-save-buttons">
+              <button 
+                onClick={handleManualSave}
+                className="tic-tac-toe-save-btn save"
+              >
+                Manual Save
+              </button>
+              
+              <button 
+                onClick={handleManualLoad}
+                disabled={!hasSave}
+                className="tic-tac-toe-save-btn load"
+              >
+                Load Game
+              </button>
+              
+              <button 
+                onClick={handleDropSave}
+                disabled={!hasSave}
+                className="tic-tac-toe-save-btn delete"
+              >
+                Delete Save
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Save Event Status */}
       {lastSaveEvent && (
         <div style={{ 
-          padding: '0.5rem',
-          backgroundColor: lastSaveEvent.success ? '#e8f5e8' : '#fde8e8',
-          border: `1px solid ${lastSaveEvent.success ? '#4CAF50' : '#f44336'}`,
-          borderRadius: '4px',
-          fontSize: '0.9rem'
+          padding: '1rem',
+          background: lastSaveEvent.success ? 
+            'rgba(76, 175, 80, 0.1)' : 'rgba(244, 67, 54, 0.1)',
+          border: `1px solid ${lastSaveEvent.success ? 'var(--color-success, #4CAF50)' : 'var(--color-error, #f44336)'}`,
+          borderRadius: '12px',
+          fontSize: '0.9rem',
+          fontWeight: '500',
+          color: lastSaveEvent.success ? 'var(--color-success, #4CAF50)' : 'var(--color-error, #f44336)',
+          animation: 'fadeIn 0.3s ease'
         }}>
           {lastSaveEvent.success ? '✅' : '❌'} 
           {lastSaveEvent.action === 'auto-save' ? 'Auto-saved' : 
@@ -426,7 +416,9 @@ export const TicTacToeGame: React.FC<TicTacToeGameProps> = ({ playerId }) => {
            lastSaveEvent.action === 'drop' ? 'Save deleted' : lastSaveEvent.action}
           {lastSaveEvent.error && ` (${lastSaveEvent.error})`}
           <br />
-          <small>{new Date(lastSaveEvent.timestamp).toLocaleString()}</small>
+          <small style={{ opacity: 0.8 }}>
+            {new Date(lastSaveEvent.timestamp).toLocaleString()}
+          </small>
         </div>
       )}
     </div>
