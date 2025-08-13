@@ -32,16 +32,20 @@ self.addEventListener('install', event => {
 // Activate event - clean up old caches
 self.addEventListener('activate', event => {
   console.log('Service Worker: Activating...');
+  const currentCaches = [STATIC_CACHE_NAME, DYNAMIC_CACHE_NAME];
+  
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
-          if (cacheName !== STATIC_CACHE_NAME && cacheName !== DYNAMIC_CACHE_NAME) {
+          if (!currentCaches.includes(cacheName)) {
             console.log('Service Worker: Deleting old cache', cacheName);
             return caches.delete(cacheName);
           }
         })
       );
+    }).then(() => {
+      console.log('Service Worker: All old caches cleaned up');
     })
   );
   self.clients.claim(); // Take control of all pages

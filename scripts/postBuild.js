@@ -13,6 +13,23 @@ if (!fs.existsSync(distSwPath)) {
 
 let swContent = fs.readFileSync(distSwPath, 'utf8')
 
+// Generate a version timestamp for cache busting
+const version = Date.now()
+
+// Update cache names with dynamic versioning
+swContent = swContent.replace(
+  /const CACHE_NAME = '[^']*';/,
+  `const CACHE_NAME = 'mini-games-v${version}';`
+)
+swContent = swContent.replace(
+  /const STATIC_CACHE_NAME = '[^']*';/,
+  `const STATIC_CACHE_NAME = 'mini-games-static-v${version}';`
+)
+swContent = swContent.replace(
+  /const DYNAMIC_CACHE_NAME = '[^']*';/,
+  `const DYNAMIC_CACHE_NAME = 'mini-games-dynamic-v${version}';`
+)
+
 // Define the static assets with correct base path including built assets
 const staticAssets = [
   basePath + '/',
@@ -61,4 +78,5 @@ swContent = swContent.replace(
 fs.writeFileSync(distSwPath, swContent)
 
 console.log('Post-build: Service worker updated with base path:', basePath)
+console.log('Post-build: Cache version:', version)
 console.log('Post-build: Total static assets to cache:', staticAssets.length)
