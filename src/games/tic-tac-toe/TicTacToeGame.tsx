@@ -191,7 +191,7 @@ export const TicTacToeGame: React.FC<TicTacToeGameProps> = ({ playerId }) => {
     const isPlayable = gameState.data.gameStatus === 'playing' && isEmpty;
     const isWinningCell = isPartOfWinningCombination(row, col);
     
-    let classes = [baseClass];
+    const classes = [baseClass];
     
     if (isPlayable) classes.push('playable');
     if (isEmpty) classes.push('empty');
