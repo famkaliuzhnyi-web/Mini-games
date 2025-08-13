@@ -15,7 +15,7 @@ import {
   getWinner,
   GAME_CONFIG
 } from './gameLogic'
-import type { PingPongGameData, KeyState, Ball, Paddle } from './types'
+import type { PingPongGameData, KeyState, Ball } from './types'
 
 describe('Ping Pong Game Logic', () => {
   let gameData: PingPongGameData

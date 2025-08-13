@@ -25,15 +25,13 @@ import {
   PIECE_COLORS,
   INITIAL_DROP_SPEED
 } from './logic'
-import type { TetrisGrid, ActivePiece, PieceType, GameStats } from './types'
+import type { TetrisGrid, PieceType } from './types'
 
 describe('Tetris Game Logic', () => {
   let grid: TetrisGrid
-  let activePiece: ActivePiece
 
   beforeEach(() => {
     grid = createEmptyGrid()
-    activePiece = createActivePiece('T')
   })
 
   describe('Grid Management', () => {
