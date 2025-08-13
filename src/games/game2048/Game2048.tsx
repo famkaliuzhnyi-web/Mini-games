@@ -456,8 +456,6 @@ export const Game2048: React.FC<Game2048Props> = ({ playerId }) => {
         </p>
       </div>
 
-
-
       {/* Save Status */}
       {lastSaveEvent && (
         <div style={{ 

@@ -5,6 +5,8 @@ import { TetrisGame } from '../../games/tetris';
 import { TicTacToeGame } from '../../games/tic-tac-toe';
 import { PingPongGame } from '../../games/ping-pong';
 import { Game2048 } from '../../games/game2048';
+import { Game2048GameField, Game2048Stats, Game2048Controls } from '../../games/game2048/SlotComponents';
+import { TetrisGameField, TetrisStats, TetrisControls } from '../../games/tetris/SlotComponents';
 import { GameLayout } from '../layout/GameLayout';
 import type { GameLayoutSlots } from '../layout/GameLayout';
 import './GameContainer.css';
@@ -70,28 +72,11 @@ export const GameContainer: React.FC<GameContainerProps> = ({
 
     switch (gameId) {
       case 'game2048':
-        // For now, render the entire game in the gameField slot but with better styling
+        // Use the proper slots system with dedicated slot components
         return {
-          gameField: (
-            <div className="fullscreen-game-field">
-              {renderLegacyGame()}
-            </div>
-          ),
-          stats: (
-            <div className="game-stats-container">
-              <div>Score: Loading...</div>
-              <div>Best: Loading...</div>
-              <div>Moves: Loading...</div>
-            </div>
-          ),
-          controls: (
-            <div className="game-controls-container">
-              <button className="primary">New Game</button>
-              <button>Undo</button>
-              <button>Save</button>
-              <button>Load</button>
-            </div>
-          ),
+          gameField: <Game2048GameField playerId={playerId} />,
+          stats: <Game2048Stats playerId={playerId} />,
+          controls: <Game2048Controls playerId={playerId} />,
           gameInfo: (
             <div>
               <h2>{gameInfo.name}</h2>
@@ -100,11 +85,23 @@ export const GameContainer: React.FC<GameContainerProps> = ({
           )
         };
       case 'tetris':
+        // Use the proper slots system with dedicated slot components
+        return {
+          gameField: <TetrisGameField playerId={playerId} />,
+          stats: <TetrisStats playerId={playerId} />,
+          controls: <TetrisControls playerId={playerId} />,
+          gameInfo: (
+            <div>
+              <h2>{gameInfo.name}</h2>
+              <p>{gameInfo.description}</p>
+            </div>
+          )
+        };
       case 'tic-tac-toe':
       case 'counter':
       case 'sudoku':
       case 'ping-pong':
-        // For other games, similar approach
+        // For other games, use legacy approach until they are updated
         return {
           gameField: (
             <div className="fullscreen-game-field">
