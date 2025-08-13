@@ -15,6 +15,13 @@ interface GamesListProps {
 
 const AVAILABLE_GAMES: GameInfo[] = [
   {
+    id: 'game2048',
+    name: '2048',
+    description: 'Classic number puzzle - combine tiles to reach 2048!',
+    emoji: '🔢',
+    category: 'Puzzle'
+  },
+  {
     id: 'tetris',
     name: 'Tetris',
     description: 'Classic falling blocks puzzle game',
