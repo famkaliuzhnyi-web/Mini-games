@@ -1,0 +1,221 @@
+/* GameLayout - Fullscreen layout framework styles */
+
+.game-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  background: #f8f9fa;
+  font-family: Arial, sans-serif;
+}
+
+/* Main game field takes up most of the screen */
+.game-layout__field {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  overflow: hidden;
+  background: #f8f9fa;
+  min-height: 0; /* Important for flex shrinking */
+}
+
+/* Bottom stripe with controls and stats */
+.game-layout__bottom-stripe {
+  flex-shrink: 0;
+  background: #ffffff;
+  border-top: 2px solid #e9ecef;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  align-items: center;
+  justify-content: space-between;
+  max-height: 25vh; /* Limit height to keep it as a "stripe" */
+  overflow-y: auto;
+  z-index: 20;
+}
+
+/* Game info section (title, description) */
+.game-layout__info {
+  flex: 0 0 auto;
+  min-width: 200px;
+}
+
+.game-layout__info h1,
+.game-layout__info h2 {
+  margin: 0 0 0.25rem 0;
+  color: #333;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.game-layout__info p {
+  margin: 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+/* Stats section */
+.game-layout__stats {
+  flex: 1 1 auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  min-width: 200px;
+}
+
+.game-layout__stats > * {
+  flex: 0 0 auto;
+}
+
+/* Controls section */
+.game-layout__controls {
+  flex: 0 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  min-width: 200px;
+  justify-content: flex-end;
+}
+
+.game-layout__controls button {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ddd;
+  background: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.game-layout__controls button:hover:not(:disabled) {
+  background: #f8f9fa;
+  border-color: #adb5bd;
+}
+
+.game-layout__controls button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.game-layout__controls button.primary {
+  background: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.game-layout__controls button.primary:hover:not(:disabled) {
+  background: #0056b3;
+  border-color: #0056b3;
+}
+
+.game-layout__controls button.danger {
+  background: #dc3545;
+  color: white;
+  border-color: #dc3545;
+}
+
+.game-layout__controls button.danger:hover:not(:disabled) {
+  background: #c82333;
+  border-color: #c82333;
+}
+
+.game-layout__controls button.success {
+  background: #28a745;
+  color: white;
+  border-color: #28a745;
+}
+
+.game-layout__controls button.success:hover:not(:disabled) {
+  background: #218838;
+  border-color: #218838;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .game-layout__field {
+    padding: 0.5rem;
+  }
+  
+  .game-layout__bottom-stripe {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0.5rem;
+    gap: 0.5rem;
+    max-height: 30vh;
+  }
+  
+  .game-layout__info,
+  .game-layout__stats,
+  .game-layout__controls {
+    min-width: auto;
+    flex: 1 1 auto;
+  }
+  
+  .game-layout__stats {
+    justify-content: space-between;
+  }
+  
+  .game-layout__controls {
+    justify-content: center;
+  }
+  
+  .game-layout__controls button {
+    flex: 1 1 auto;
+    min-width: 80px;
+  }
+}
+
+@media (max-width: 480px) {
+  .game-layout__field {
+    padding: 0.25rem;
+  }
+  
+  .game-layout__bottom-stripe {
+    max-height: 35vh;
+    padding: 0.5rem 0.25rem;
+  }
+  
+  .game-layout__info h1,
+  .game-layout__info h2 {
+    font-size: 1.1rem;
+  }
+  
+  .game-layout__info p {
+    font-size: 0.8rem;
+  }
+  
+  .game-layout__controls button {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.75rem;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .game-layout__controls button {
+    transition: none;
+  }
+}
+
+/* Print styles */
+@media print {
+  .game-layout__bottom-stripe {
+    display: none;
+  }
+  
+  .game-layout {
+    position: static;
+    height: auto;
+  }
+}
