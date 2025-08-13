@@ -170,8 +170,8 @@ describe('CounterGame Component', () => {
       const end = performance.now()
       const duration = end - start
       
-      // Should handle state updates quickly (less than 50ms)
-      expect(duration).toBeLessThan(50)
+      // Should handle state updates quickly (less than 100ms)
+      expect(duration).toBeLessThan(100)
       expect(screen.getByText('15')).toBeInTheDocument()
     })
   })

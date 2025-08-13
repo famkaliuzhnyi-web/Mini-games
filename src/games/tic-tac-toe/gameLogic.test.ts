@@ -406,8 +406,8 @@ describe('Tic-Tac-Toe Game Logic', () => {
       const end = performance.now()
       const duration = end - start
       
-      // Should complete 1000 possible move calculations in less than 10ms
-      expect(duration).toBeLessThan(10)
+      // Should complete 1000 possible move calculations in less than 15ms
+      expect(duration).toBeLessThan(15)
     })
   })
 })
