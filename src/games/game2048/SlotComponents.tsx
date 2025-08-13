@@ -1,5 +1,5 @@
 /**
- * 2048 Game - Classic number puzzle game  
+ * Game2048 Slot Components - Components that work with the GameLayout slots system
  */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useGameSave } from '../../hooks/useGameSave';
@@ -14,19 +14,18 @@ import {
   canMove,
   getHighestTile
 } from './logic';
-import './Game2048.css';
 
-// 2048 game configuration
+// Game configuration (shared)
 const GAME2048_CONFIG: GameConfig = {
   id: 'game2048',
   name: '2048',
   description: 'Classic number puzzle - combine tiles to reach 2048!',
   version: '1.0.0',
   autoSaveEnabled: true,
-  autoSaveIntervalMs: 10000 // Save every 10 seconds or on significant moves
+  autoSaveIntervalMs: 10000
 };
 
-// 2048 game controller
+// Game controller (shared)
 class Game2048Controller implements GameController<Game2048Data> {
   config = GAME2048_CONFIG;
 
@@ -81,13 +80,9 @@ class Game2048Controller implements GameController<Game2048Data> {
   }
 }
 
-interface Game2048Props {
-  playerId: string;
-}
-
-export const Game2048: React.FC<Game2048Props> = ({ playerId }) => {
+// Shared hook for game state and logic
+export const useGame2048State = (playerId: string) => {
   const controller = useMemo(() => new Game2048Controller(), []);
-  const gameContainerRef = useRef<HTMLDivElement>(null);
   
   // Animation state for tiles
   const [animatingTiles, setAnimatingTiles] = useState<Set<string>>(new Set());
@@ -114,36 +109,27 @@ export const Game2048: React.FC<Game2048Props> = ({ playerId }) => {
     onSaveDropped: controller.onSaveDropped
   });
 
-  // Handle keyboard input
+  // Handle move logic
   const handleMove = useCallback(async (direction: Direction) => {
     if (gameState.data.gameOver) return;
 
-    // Store current state for undo and comparison
     const previousGrid = copyGrid(gameState.data.grid);
     const previousScore = gameState.data.score;
-
-    // Attempt the move
     const moveResult = moveGrid(gameState.data.grid, direction);
     
-    if (!moveResult.moved) {
-      return; // No valid move
-    }
+    if (!moveResult.moved) return;
 
-    // Clear previous animation states
+    // Animation logic
     setAnimatingTiles(new Set());
     setMergedTiles(new Set());
     setNewTiles(new Set());
 
-    // Detect merged tiles by comparing grids and finding score increase sources
     const mergedPositions = new Set<string>();
     if (moveResult.scoreIncrease > 0) {
-      // Find positions where tiles likely merged
       for (let row = 0; row < 4; row++) {
         for (let col = 0; col < 4; col++) {
           const currentTile = moveResult.newGrid[row][col];
           const previousTile = previousGrid[row][col];
-          
-          // If a tile value increased compared to previous position, it likely merged
           if (currentTile > 0 && currentTile > previousTile) {
             mergedPositions.add(`${row}-${col}`);
           }
@@ -152,11 +138,9 @@ export const Game2048: React.FC<Game2048Props> = ({ playerId }) => {
       setMergedTiles(mergedPositions);
     }
 
-    // Add a new random tile after successful move
     const newGrid = copyGrid(moveResult.newGrid);
     const newTileAdded = addRandomTile(newGrid);
 
-    // Track new tile position for animation
     if (newTileAdded) {
       const newTilePositions = new Set<string>();
       for (let row = 0; row < 4; row++) {
@@ -173,13 +157,11 @@ export const Game2048: React.FC<Game2048Props> = ({ playerId }) => {
     const newBestScore = Math.max(gameState.data.bestScore, newScore);
     const newMoves = gameState.data.moves + 1;
 
-    // Animate score if it increased
     if (moveResult.scoreIncrease > 0) {
       setScoreAnimated(true);
       setTimeout(() => setScoreAnimated(false), 400);
     }
 
-    // Check if game is over after adding new tile
     const finalGameOver = moveResult.gameOver || !canMove(newGrid);
 
     const newGameState: GameState<Game2048Data> = {
@@ -203,21 +185,121 @@ export const Game2048: React.FC<Game2048Props> = ({ playerId }) => {
 
     setGameState(newGameState);
 
-    // Clear animations after delays
-    setTimeout(() => {
-      setMergedTiles(new Set());
-    }, 200);
-    
-    setTimeout(() => {
-      setNewTiles(new Set());
-    }, 300);
+    setTimeout(() => setMergedTiles(new Set()), 200);
+    setTimeout(() => setNewTiles(new Set()), 300);
 
-    // Trigger auto-save on significant moves (every 5 moves or high score)
     if (newMoves % 5 === 0 || newScore > gameState.data.bestScore) {
       await triggerAutoSave();
     }
   }, [gameState, setGameState, triggerAutoSave]);
 
+  // Additional handler functions
+  const handleUndo = useCallback(async () => {
+    if (!gameState.data.canUndo || !gameState.data.previousGrid) return;
+
+    const newGameState: GameState<Game2048Data> = {
+      ...gameState,
+      data: {
+        ...gameState.data,
+        grid: gameState.data.previousGrid,
+        score: gameState.data.previousScore || 0,
+        gameOver: false,
+        canUndo: false,
+        previousGrid: undefined,
+        previousScore: undefined
+      },
+      score: gameState.data.previousScore || 0,
+      lastModified: new Date().toISOString()
+    };
+
+    setGameState(newGameState);
+    await triggerAutoSave();
+  }, [gameState, setGameState, triggerAutoSave]);
+
+  const handleNewGame = useCallback(async () => {
+    const newState = controller.getInitialState();
+    const newGameState: GameState<Game2048Data> = {
+      ...newState,
+      playerId,
+      data: {
+        ...newState.data,
+        bestScore: gameState.data.bestScore
+      }
+    };
+
+    setGameState(newGameState);
+    await triggerAutoSave();
+  }, [controller, playerId, gameState.data.bestScore, setGameState, triggerAutoSave]);
+
+  const handleManualSave = async () => {
+    const result = await saveGame();
+    if (result.success) {
+      alert('Game saved successfully!');
+    } else {
+      alert(`Save failed: ${result.error}`);
+    }
+  };
+
+  const handleManualLoad = async () => {
+    const result = await loadGame();
+    if (result.success) {
+      alert('Game loaded successfully!');
+    } else {
+      alert(`Load failed: ${result.error}`);
+    }
+  };
+
+  // Get CSS class for tile
+  const getTileClass = useCallback((value: number, row: number, col: number) => {
+    const tileKey = `${row}-${col}`;
+    let className = 'game2048-cell';
+    
+    if (value === 0) return className;
+    
+    className += ` game2048-tile-${value}`;
+    
+    if (newTiles.has(tileKey)) {
+      className += ' game2048-cell-new';
+    }
+    
+    if (mergedTiles.has(tileKey)) {
+      className += ' game2048-cell-merged';
+    }
+    
+    if (animatingTiles.has(tileKey)) {
+      className += ' game2048-cell-moving';
+    }
+    
+    return className;
+  }, [newTiles, mergedTiles, animatingTiles]);
+
+  return {
+    gameState,
+    isLoading,
+    scoreAnimated,
+    autoSaveEnabled,
+    hasSave,
+    lastSaveEvent,
+    handleMove,
+    handleUndo,
+    handleNewGame,
+    handleManualSave,
+    handleManualLoad,
+    getTileClass
+  };
+};
+
+// Game Field Component (only the grid and status messages)
+export const Game2048GameField: React.FC<{ playerId: string }> = ({ playerId }) => {
+  const gameContainerRef = useRef<HTMLDivElement>(null);
+  const {
+    gameState,
+    isLoading,
+    handleMove,
+    getTileClass
+  } = useGame2048State(playerId);
+
+  // Keyboard event handler
   const handleKeyPress = useCallback(async (event: KeyboardEvent) => {
     if (gameState.data.gameOver) return;
 
@@ -254,46 +336,6 @@ export const Game2048: React.FC<Game2048Props> = ({ playerId }) => {
     }
   }, [gameState.data.gameOver, handleMove]);
 
-  // Handle undo
-  const handleUndo = useCallback(async () => {
-    if (!gameState.data.canUndo || !gameState.data.previousGrid) return;
-
-    const newGameState: GameState<Game2048Data> = {
-      ...gameState,
-      data: {
-        ...gameState.data,
-        grid: gameState.data.previousGrid,
-        score: gameState.data.previousScore || 0,
-        gameOver: false,
-        canUndo: false,
-        previousGrid: undefined,
-        previousScore: undefined
-      },
-      score: gameState.data.previousScore || 0,
-      lastModified: new Date().toISOString()
-    };
-
-    setGameState(newGameState);
-    await triggerAutoSave();
-  }, [gameState, setGameState, triggerAutoSave]);
-
-  // Handle new game
-  const handleNewGame = useCallback(async () => {
-    const newState = controller.getInitialState();
-    const newGameState: GameState<Game2048Data> = {
-      ...newState,
-      playerId,
-      data: {
-        ...newState.data,
-        bestScore: gameState.data.bestScore // Keep best score
-      }
-    };
-
-    setGameState(newGameState);
-    await triggerAutoSave();
-  }, [controller, playerId, gameState.data.bestScore, setGameState, triggerAutoSave]);
-
-  // Keyboard event listener
   useEffect(() => {
     window.addEventListener('keydown', handleKeyPress);
     return () => {
@@ -312,109 +354,12 @@ export const Game2048: React.FC<Game2048Props> = ({ playerId }) => {
     preventDefault: true
   });
 
-
-
-  // Get CSS class for tile value with animation states
-  const getTileClass = useCallback((value: number, row: number, col: number) => {
-    const tileKey = `${row}-${col}`;
-    let className = 'game2048-cell';
-    
-    if (value === 0) return className;
-    
-    className += ` game2048-tile-${value}`;
-    
-    // Add animation classes
-    if (newTiles.has(tileKey)) {
-      className += ' game2048-cell-new';
-    }
-    
-    if (mergedTiles.has(tileKey)) {
-      className += ' game2048-cell-merged';
-    }
-    
-    if (animatingTiles.has(tileKey)) {
-      className += ' game2048-cell-moving';
-    }
-    
-    return className;
-  }, [newTiles, mergedTiles, animatingTiles]);
-
-  // Handle manual save/load
-  const handleManualSave = async () => {
-    const result = await saveGame();
-    if (result.success) {
-      alert('Game saved successfully!');
-    } else {
-      alert(`Save failed: ${result.error}`);
-    }
-  };
-
-  const handleManualLoad = async () => {
-    const result = await loadGame();
-    if (result.success) {
-      alert('Game loaded successfully!');
-    } else {
-      alert(`Load failed: ${result.error}`);
-    }
-  };
-
   if (isLoading) {
-    return (
-      <div className="game2048-container">
-        <h2>Loading 2048 Game...</h2>
-      </div>
-    );
+    return <div>Loading game...</div>;
   }
 
   return (
-    <div className="game2048-container" ref={gameContainerRef}>
-      <div className="game2048-header">
-        <h1 className="game2048-title">2048</h1>
-        <p className="game2048-subtitle">Join numbers and get to the 2048 tile!</p>
-      </div>
-
-      <div className="game2048-score-container">
-        <div className="game2048-score-box">
-          <div className="game2048-score-label">Score</div>
-          <div className={`game2048-score-value ${scoreAnimated ? 'game2048-score-animated' : ''}`}>
-            {gameState.data.score}
-          </div>
-        </div>
-        <div className="game2048-score-box">
-          <div className="game2048-score-label">Best</div>
-          <div className="game2048-score-value">{gameState.data.bestScore}</div>
-        </div>
-      </div>
-
-      <div className="game2048-controls">
-        <button 
-          className="game2048-btn game2048-btn-primary"
-          onClick={handleNewGame}
-        >
-          New Game
-        </button>
-        <button 
-          className="game2048-btn game2048-btn-secondary"
-          onClick={handleUndo}
-          disabled={!gameState.data.canUndo}
-        >
-          Undo
-        </button>
-        <button 
-          className="game2048-btn game2048-btn-secondary"
-          onClick={handleManualSave}
-        >
-          Save
-        </button>
-        <button 
-          className="game2048-btn game2048-btn-secondary"
-          onClick={handleManualLoad}
-          disabled={!hasSave}
-        >
-          Load
-        </button>
-      </div>
-
+    <div className="game2048-game-field" ref={gameContainerRef}>
       {/* Game Status Messages */}
       {gameState.data.gameWon && (
         <div className="game2048-status game2048-status-won">
@@ -442,29 +387,49 @@ export const Game2048: React.FC<Game2048Props> = ({ playerId }) => {
           )}
         </div>
       </div>
+    </div>
+  );
+};
 
-      <div className="game2048-instructions">
-        <p>
-          <strong>HOW TO PLAY:</strong> Use arrow keys (↑↓←→), WASD, or swipe gestures to move tiles. 
-          When two tiles with the same number touch, they merge into one!
-        </p>
-        <p>
-          <small>Moves: {gameState.data.moves} | Auto-save: {autoSaveEnabled ? 'On' : 'Off'}</small>
-        </p>
-        <p className="game2048-swipe-hint">
-          📱 <strong>Touch Controls:</strong> Swipe up, down, left, or right on the game board to move tiles.
-        </p>
+// Stats Component 
+export const Game2048Stats: React.FC<{ playerId: string }> = ({ playerId }) => {
+  const {
+    gameState,
+    isLoading,
+    scoreAnimated,
+    autoSaveEnabled,
+    lastSaveEvent
+  } = useGame2048State(playerId);
+
+  if (isLoading) {
+    return <div>Loading stats...</div>;
+  }
+
+  return (
+    <div className="game2048-stats">
+      <div className="game2048-score-container">
+        <div className="game2048-score-box">
+          <div className="game2048-score-label">Score</div>
+          <div className={`game2048-score-value ${scoreAnimated ? 'game2048-score-animated' : ''}`}>
+            {gameState.data.score}
+          </div>
+        </div>
+        <div className="game2048-score-box">
+          <div className="game2048-score-label">Best</div>
+          <div className="game2048-score-value">{gameState.data.bestScore}</div>
+        </div>
       </div>
-
-      {/* Save Status */}
+      <div className="game2048-stats-info">
+        <small>Moves: {gameState.data.moves} | Auto-save: {autoSaveEnabled ? 'On' : 'Off'}</small>
+      </div>
       {lastSaveEvent && (
-        <div style={{ 
-          marginTop: '1rem',
-          padding: '0.5rem',
+        <div className="game2048-save-status" style={{ 
+          marginTop: '0.5rem',
+          padding: '0.25rem',
           backgroundColor: lastSaveEvent.success ? '#e8f5e8' : '#fde8e8',
           border: `1px solid ${lastSaveEvent.success ? '#4CAF50' : '#f44336'}`,
           borderRadius: '4px',
-          fontSize: '0.8rem',
+          fontSize: '0.7rem',
           textAlign: 'center'
         }}>
           {lastSaveEvent.success ? '✅' : '❌'} 
@@ -479,4 +444,60 @@ export const Game2048: React.FC<Game2048Props> = ({ playerId }) => {
   );
 };
 
-export default Game2048;
+// Controls Component
+export const Game2048Controls: React.FC<{ playerId: string }> = ({ playerId }) => {
+  const {
+    gameState,
+    isLoading,
+    hasSave,
+    handleNewGame,
+    handleUndo,
+    handleManualSave,
+    handleManualLoad
+  } = useGame2048State(playerId);
+
+  if (isLoading) {
+    return <div>Loading controls...</div>;
+  }
+
+  return (
+    <div className="game2048-controls">
+      <div className="game2048-control-buttons">
+        <button 
+          className="game2048-btn game2048-btn-primary"
+          onClick={handleNewGame}
+        >
+          New Game
+        </button>
+        <button 
+          className="game2048-btn game2048-btn-secondary"
+          onClick={handleUndo}
+          disabled={!gameState.data.canUndo}
+        >
+          Undo
+        </button>
+        <button 
+          className="game2048-btn game2048-btn-secondary"
+          onClick={handleManualSave}
+        >
+          Save
+        </button>
+        <button 
+          className="game2048-btn game2048-btn-secondary"
+          onClick={handleManualLoad}
+          disabled={!hasSave}
+        >
+          Load
+        </button>
+      </div>
+      <div className="game2048-instructions">
+        <p>
+          <strong>Controls:</strong> Arrow keys, WASD, or swipe to move tiles.
+        </p>
+        <p>
+          📱 <strong>Mobile:</strong> Swipe in any direction on the game board.
+        </p>
+      </div>
+    </div>
+  );
+};
