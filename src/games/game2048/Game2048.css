@@ -284,25 +284,25 @@
   }
   
   .game2048-grid {
-    width: 280px;
-    height: 280px;
+    width: 320px;
+    height: 320px;
   }
   
   .game2048-cell {
-    width: 60px;
-    height: 60px;
-    font-size: 1.5rem;
+    width: 72px;
+    height: 72px;
+    font-size: 1.8rem;
   }
   
   .game2048-tile-128,
   .game2048-tile-256,
   .game2048-tile-512 {
-    font-size: 1.3rem;
+    font-size: 1.5rem;
   }
   
   .game2048-tile-1024,
   .game2048-tile-2048 {
-    font-size: 1.1rem;
+    font-size: 1.3rem;
   }
   
   .game2048-title {
@@ -310,17 +310,22 @@
   }
   
   .game2048-controls {
-    flex-direction: column;
-    align-items: center;
+    justify-content: center;
+    gap: 1rem;
   }
   
   .game2048-score-container {
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
+    justify-content: center;
+    gap: 1rem;
   }
 
+  .game2048-instructions {
+    margin-top: 0.5rem;
+  }
 
+  .game2048-instructions p {
+    margin: 0.25rem 0;
+  }
 }
 
 /* Animation for new tiles - enhanced pop-in effect */

@@ -109,7 +109,7 @@ export const TetrisGameField: React.FC<{ playerId: string }> = ({ playerId }) =>
 
 // Stats Component (game statistics and next piece)
 export const TetrisStats: React.FC<{ playerId: string }> = ({ playerId }) => {
-  const { gameState, isLoading, hasSave, autoSaveEnabled } = useTetrisState(playerId);
+  const { gameState, isLoading, autoSaveEnabled } = useTetrisState(playerId);
 
   if (isLoading) {
     return <div>Loading stats...</div>;
@@ -131,10 +131,6 @@ export const TetrisStats: React.FC<{ playerId: string }> = ({ playerId }) => {
           <span className="stat-label">Lines:</span>
           <span className="stat-value">{gameState.data.stats.lines}</span>
         </div>
-        <div className="stat-row">
-          <span className="stat-label">Pieces:</span>
-          <span className="stat-value">{gameState.data.stats.pieces}</span>
-        </div>
       </div>
 
       {/* Next Piece Preview */}
@@ -148,10 +144,7 @@ export const TetrisStats: React.FC<{ playerId: string }> = ({ playerId }) => {
 
       {/* Save Info */}
       <div className="tetris-save-info">
-        <small>
-          💾 Auto-save: {autoSaveEnabled ? 'Enabled' : 'Disabled'} | 
-          {hasSave ? ' Save available' : ' No save data'}
-        </small>
+        <small>💾 Auto-save: {autoSaveEnabled ? 'On' : 'Off'}</small>
       </div>
     </div>
   );
@@ -162,8 +155,6 @@ export const TetrisControls: React.FC<{ playerId: string }> = ({ playerId }) => 
   const {
     gameState,
     isLoading,
-    autoSaveEnabled,
-    toggleAutoSave,
     handlePause,
     handleReset,
     handleMobileMove,
@@ -193,47 +184,10 @@ export const TetrisControls: React.FC<{ playerId: string }> = ({ playerId }) => 
         >
           🔄 Reset
         </button>
-
-        <button
-          onClick={toggleAutoSave} 
-          className="action-btn toggle-save"
-        >
-          {autoSaveEnabled ? 'Disable' : 'Enable'} Auto-save
-        </button>
-      </div>
-
-      {/* Game Controls Info */}
-      <div className="game-controls">
-        <div className="controls-info">
-          <div className="control-row">
-            <span className="control-key">←→</span>
-            <span className="control-action">Move</span>
-          </div>
-          <div className="control-row">
-            <span className="control-key">↓</span>
-            <span className="control-action">Soft Drop</span>
-          </div>
-          <div className="control-row">
-            <span className="control-key">↑</span>
-            <span className="control-action">Rotate</span>
-          </div>
-          <div className="control-row">
-            <span className="control-key">Space</span>
-            <span className="control-action">Hard Drop</span>
-          </div>
-          <div className="control-row">
-            <span className="control-key">P</span>
-            <span className="control-action">Pause</span>
-          </div>
-        </div>
-        <div className="swipe-info">
-          <p>📱 <strong>Mobile:</strong> Swipe to move, up to rotate</p>
-        </div>
       </div>
 
       {/* Mobile Touch Controls */}
       <div className="mobile-controls">
-        <h4>Touch Controls</h4>
         <div className="mobile-control-grid">
           <button
             onClick={() => handleMobileMove('left')}
@@ -280,17 +234,6 @@ export const TetrisControls: React.FC<{ playerId: string }> = ({ playerId }) => 
             ⏬
           </button>
         </div>
-      </div>
-
-      {/* Tips */}
-      <div className="tips">
-        <h4>Tips</h4>
-        <ul className="tips-list">
-          <li>Clear lines by filling complete rows</li>
-          <li>Clearing multiple lines gives bonus points</li>
-          <li>Game speeds up every 10 lines</li>
-          <li>Use soft drop for better control</li>
-        </ul>
       </div>
     </div>
   );

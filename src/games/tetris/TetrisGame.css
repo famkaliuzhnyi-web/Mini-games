@@ -434,56 +434,85 @@
   .tetris-content {
     flex-direction: column;
     align-items: center;
+    gap: 1rem;
   }
   
   .tetris-controls {
     width: 100%;
-    max-width: 300px;
+    max-width: 350px;
+    padding: 0.75rem;
   }
   
   .tetris-cell {
-    width: 18px;
-    height: 18px;
+    width: 22px;
+    height: 22px;
   }
 
   /* Show mobile controls on tablets and smaller */
   .mobile-controls {
     display: block;
   }
+
+  /* Simplify controls panel on mobile */
+  .tetris-controls h3 {
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .tips-list li {
+    font-size: 0.8rem;
+    margin-bottom: 0.1rem;
+  }
 }
 
 @media (max-width: 480px) {
   .tetris-game {
-    padding: 0.5rem;
+    padding: 0.25rem;
   }
   
   .tetris-content {
-    gap: 1rem;
+    gap: 0.5rem;
   }
   
   .tetris-cell {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
   }
   
   .tetris-controls {
-    padding: 0.75rem;
+    padding: 0.5rem;
+    max-width: 320px;
+  }
+
+  .tetris-header h2 {
+    font-size: 1.5rem;
+    margin-bottom: 0.25rem;
   }
 
   /* Ensure mobile controls are visible on mobile phones */
   .mobile-controls {
     display: block;
+    margin-top: 0.5rem;
   }
 
-  /* Larger touch targets on small screens */
+  /* Smaller touch targets on small screens for more space efficiency */
   .mobile-control-btn {
-    min-height: 50px;
-    font-size: 1.3rem;
-    padding: 0.75rem;
+    min-height: 45px;
+    font-size: 1.2rem;
+    padding: 0.5rem;
   }
 
   .mobile-control-grid {
-    max-width: 180px;
-    gap: 0.5rem;
+    max-width: 160px;
+    gap: 0.4rem;
+  }
+
+  /* Compact stats display */
+  .stat-row {
+    margin-bottom: 0.1rem;
+  }
+
+  .stat-label, .stat-value {
+    font-size: 0.85rem;
   }
 }

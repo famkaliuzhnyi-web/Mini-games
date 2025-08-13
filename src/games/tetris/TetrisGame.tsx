@@ -100,10 +100,8 @@ export const TetrisGame: React.FC<TetrisGameProps> = ({ playerId }) => {
   const {
     gameState,
     setGameState,
-    hasSave,
     isLoading,
-    autoSaveEnabled,
-    toggleAutoSave
+    autoSaveEnabled
   } = useGameSave<TetrisGameData>({
     gameId: 'tetris',
     playerId,
@@ -388,7 +386,6 @@ export const TetrisGame: React.FC<TetrisGameProps> = ({ playerId }) => {
     <div className="tetris-game" ref={gameContainerRef}>
       <div className="tetris-header">
         <h2>{TETRIS_CONFIG.name}</h2>
-        <p>{TETRIS_CONFIG.description}</p>
       </div>
       
       <div className="tetris-content">
@@ -415,12 +412,8 @@ export const TetrisGame: React.FC<TetrisGameProps> = ({ playerId }) => {
       
       <div className="tetris-save-info">
         <small>
-          💾 Auto-save: {autoSaveEnabled ? 'Enabled' : 'Disabled'} | 
-          {hasSave ? ' Save available' : ' No save data'}
+          💾 {autoSaveEnabled ? 'Auto-save: On' : 'Auto-save: Off'}
         </small>
-        <button onClick={toggleAutoSave} className="toggle-save-btn">
-          {autoSaveEnabled ? 'Disable' : 'Enable'} Auto-save
-        </button>
       </div>
     </div>
   );
