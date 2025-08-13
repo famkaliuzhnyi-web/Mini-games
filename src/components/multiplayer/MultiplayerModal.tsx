@@ -131,17 +131,6 @@ export const MultiplayerModal: React.FC<MultiplayerModalProps> = ({
     await multiplayerService.setPlayerReady(isReady);
   };
 
-  const handleStartGame = async () => {
-    if (!session || !isHost || !session.gameId) return;
-
-    try {
-      // Use the service's startGame method which will broadcast to all players
-      await multiplayerService.startGame(session.gameId);
-    } catch (error) {
-      console.error('Failed to start multiplayer game:', error);
-    }
-  };
-
   if (!isOpen) return null;
 
   return (
@@ -162,7 +151,6 @@ export const MultiplayerModal: React.FC<MultiplayerModalProps> = ({
               currentPlayerId={playerId}
               sessionUrl={sessionUrl}
               onPlayerReady={handlePlayerReady}
-              onStartGame={handleStartGame}
               onLeaveSession={handleLeaveSession}
             />
           ) : isCreatingSession ? (
