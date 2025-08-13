@@ -434,7 +434,6 @@ export const TicTacToeGameField: React.FC<SlotComponentProps> = ({ playerId }) =
                          cell === 'O' ? `var(--color-error)` : `var(--color-text)`,
                   transition: 'all 0.3s ease',
                   aspectRatio: '1',
-                  minHeight: '44px', // Touch-friendly
                   touchAction: 'manipulation'
                 }}
                 onMouseEnter={(e) => {
