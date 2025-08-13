@@ -24,7 +24,7 @@ export type SessionState = 'creating' | 'waiting' | 'ready' | 'playing' | 'finis
 // Multiplayer game session
 export interface GameSession {
   id: string;
-  gameId: string;
+  gameId?: string; // Optional - set when a game is selected
   hostId: string;
   players: MultiplayerPlayer[];
   maxPlayers: number;
@@ -38,6 +38,7 @@ export type MessageType =
   | 'player-join' 
   | 'player-leave' 
   | 'player-ready' 
+  | 'game-select'
   | 'game-start' 
   | 'game-move' 
   | 'game-state' 
@@ -89,7 +90,7 @@ export interface RTCConfiguration {
 
 // Session creation options
 export interface CreateSessionOptions {
-  gameId: string;
+  gameId?: string; // Optional - can be set later when selecting a game
   maxPlayers: number;
   hostName: string;
 }
@@ -107,6 +108,7 @@ export type MultiplayerEvent =
   | 'player-connected'
   | 'player-disconnected'
   | 'player-ready-changed'
+  | 'game-selected'
   | 'game-started'
   | 'game-move-received'
   | 'game-state-updated'
@@ -127,6 +129,7 @@ export interface MultiplayerService {
   sendGameMove(move: Record<string, unknown>): Promise<void>;
   sendGameState(state: Record<string, unknown>): Promise<void>;
   startGame(gameId: string): Promise<void>;
+  selectGame(gameId: string): Promise<void>; // New method for selecting games within session
   
   // Player management
   setPlayerReady(isReady: boolean): Promise<void>;
@@ -139,6 +142,7 @@ export interface MultiplayerService {
   getCurrentSession(): GameSession | null;
   isHost(): boolean;
   isConnected(): boolean;
+  getSessionUrl(): string | null;
   
   // Cleanup
   destroy(): void;

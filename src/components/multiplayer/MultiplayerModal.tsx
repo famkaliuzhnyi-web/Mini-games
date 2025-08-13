@@ -31,29 +31,60 @@ export const MultiplayerModal: React.FC<MultiplayerModalProps> = ({
   // Generate a unique player ID
   const [playerId] = useState(() => Math.random().toString(36).substring(2, 15));
 
+  // Create session immediately when modal opens
   useEffect(() => {
     if (!isOpen) return;
 
-    // Check if already in a session
-    const currentSession = multiplayerService.getCurrentSession();
-    if (currentSession) {
-      setSession(currentSession);
-      setIsHost(multiplayerService.isHost());
-      setSessionUrl(multiplayerService.getSessionUrl());
-    }
-
-    // Set up event listeners
-    const handleSessionCreated = (newSession: GameSession) => {
-      setSession(newSession);
-      setIsHost(true);
-      setSessionUrl(multiplayerService.getSessionUrl());
-      setIsCreatingSession(false);
+    const initializeSession = async () => {
+      // Check if already in a session
+      const currentSession = multiplayerService.getCurrentSession();
+      console.log('Current session check:', currentSession);
+      
+      if (currentSession) {
+        console.log('Found existing session, setting state');
+        setSession(currentSession);
+        setIsHost(multiplayerService.isHost());
+        setSessionUrl(multiplayerService.getSessionUrl());
+      } else {
+        console.log('No existing session, creating new one');
+        try {
+          setIsCreatingSession(true);
+          const newSession = await multiplayerService.createSession({
+            maxPlayers: 4,
+            hostName: playerName
+          });
+          console.log('Session created successfully:', newSession);
+          
+          // Directly update the state
+          setSession(newSession);
+          setIsHost(true);
+          setSessionUrl(multiplayerService.getSessionUrl());
+          setIsCreatingSession(false);
+        } catch (error) {
+          console.error('Failed to create multiplayer session:', error);
+          setIsCreatingSession(false);
+        }
+      }
     };
 
-    const handleSessionJoined = (newSession: GameSession) => {
-      setSession(newSession);
-      setIsHost(false);
-      setSessionUrl(null);
+    initializeSession();
+  }, [isOpen, playerName]);
+
+  // Set up event listeners for multiplayer events
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleGameSelected = (data: { gameId: string }) => {
+      // Update session in state when host selects a game
+      setSession(prevSession => {
+        if (prevSession) {
+          return {
+            ...prevSession,
+            gameId: data.gameId
+          };
+        }
+        return prevSession;
+      });
     };
 
     const handleGameStarted = (data: { gameId: string }) => {
@@ -63,39 +94,26 @@ export const MultiplayerModal: React.FC<MultiplayerModalProps> = ({
       }
     };
 
-    multiplayerService.on('session-created', handleSessionCreated);
-    multiplayerService.on('session-joined', handleSessionJoined);
+    multiplayerService.on('game-selected', handleGameSelected);
     multiplayerService.on('game-started', handleGameStarted);
 
     return () => {
-      multiplayerService.off('session-created', handleSessionCreated);
-      multiplayerService.off('session-joined', handleSessionJoined);
+      multiplayerService.off('game-selected', handleGameSelected);
       multiplayerService.off('game-started', handleGameStarted);
     };
   }, [isOpen, onNavigateToGame, onClose]);
-
-  const handleCreateSession = async (gameId: string) => {
-    try {
-      setIsCreatingSession(true);
-      await multiplayerService.createSession({
-        gameId,
-        maxPlayers: 4, // Default max players
-        hostName: playerName
-      });
-    } catch (error) {
-      console.error('Failed to create multiplayer session:', error);
-      setIsCreatingSession(false);
-    }
-  };
 
   const handleJoinSession = async () => {
     if (!joinSessionId.trim()) return;
 
     try {
-      await multiplayerService.joinSession({
+      const newSession = await multiplayerService.joinSession({
         sessionId: joinSessionId.trim(),
         playerName
       });
+      setSession(newSession);
+      setIsHost(false);
+      setSessionUrl(null);
       setJoinSessionId('');
     } catch (error) {
       console.error('Failed to join multiplayer session:', error);
@@ -114,7 +132,7 @@ export const MultiplayerModal: React.FC<MultiplayerModalProps> = ({
   };
 
   const handleStartGame = async () => {
-    if (!session || !isHost) return;
+    if (!session || !isHost || !session.gameId) return;
 
     try {
       // Use the service's startGame method which will broadcast to all players
@@ -147,33 +165,15 @@ export const MultiplayerModal: React.FC<MultiplayerModalProps> = ({
               onStartGame={handleStartGame}
               onLeaveSession={handleLeaveSession}
             />
+          ) : isCreatingSession ? (
+            <div className="multiplayer-session-setup">
+              <div style={{ textAlign: 'center', padding: '2rem' }}>
+                <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>⏳</div>
+                <p>Creating multiplayer session...</p>
+              </div>
+            </div>
           ) : (
             <div className="multiplayer-session-setup">
-              <div className="multiplayer-section">
-                <h3>🚀 Create Game Session</h3>
-                <p>Choose a game to start a multiplayer session:</p>
-                <div className="game-selection">
-                  <button 
-                    onClick={() => handleCreateSession('tic-tac-toe')}
-                    disabled={isCreatingSession}
-                    className="game-select-btn"
-                  >
-                    {isCreatingSession ? '⏳' : '⭕'} Tic Tac Toe
-                  </button>
-                  <button 
-                    onClick={() => handleCreateSession('ping-pong')}
-                    disabled={isCreatingSession}
-                    className="game-select-btn"
-                  >
-                    {isCreatingSession ? '⏳' : '🏓'} Ping Pong
-                  </button>
-                </div>
-              </div>
-
-              <div className="multiplayer-divider">
-                <span>or</span>
-              </div>
-
               <div className="multiplayer-section">
                 <h3>🔗 Join Game Session</h3>
                 <p>Enter a session ID to join an existing game:</p>
