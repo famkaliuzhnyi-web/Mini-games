@@ -6,6 +6,7 @@ import { TicTacToeGame } from '../../games/tic-tac-toe';
 import { PingPongGame } from '../../games/ping-pong';
 import { Game2048 } from '../../games/game2048';
 import { Game2048GameField, Game2048Stats, Game2048Controls } from '../../games/game2048/SlotComponents';
+import { TetrisGameField, TetrisStats, TetrisControls } from '../../games/tetris/SlotComponents';
 import { GameLayout } from '../layout/GameLayout';
 import type { GameLayoutSlots } from '../layout/GameLayout';
 import './GameContainer.css';
@@ -84,11 +85,23 @@ export const GameContainer: React.FC<GameContainerProps> = ({
           )
         };
       case 'tetris':
+        // Use the proper slots system with dedicated slot components
+        return {
+          gameField: <TetrisGameField playerId={playerId} />,
+          stats: <TetrisStats playerId={playerId} />,
+          controls: <TetrisControls playerId={playerId} />,
+          gameInfo: (
+            <div>
+              <h2>{gameInfo.name}</h2>
+              <p>{gameInfo.description}</p>
+            </div>
+          )
+        };
       case 'tic-tac-toe':
       case 'counter':
       case 'sudoku':
       case 'ping-pong':
-        // For other games, similar approach
+        // For other games, use legacy approach until they are updated
         return {
           gameField: (
             <div className="fullscreen-game-field">
