@@ -2,7 +2,7 @@ import React from 'react';
 import { Game2048GameField, Game2048Stats, Game2048Controls } from '../../games/game2048/SlotComponents';
 import { TetrisGameField, TetrisStats, TetrisControls } from '../../games/tetris/SlotComponents';
 import { TicTacToeGameField, TicTacToeStats, TicTacToeControls } from '../../games/tic-tac-toe/SlotComponents';
-import { CounterGameField, CounterStats, CounterControls } from '../../games/counter/SlotComponents';
+
 import { SudokuGameField, SudokuStats, SudokuControls } from '../../games/sudoku/SlotComponents';
 import { PingPongGameField, PingPongStats, PingPongControls } from '../../games/ping-pong/SlotComponents';
 import { GameLayout } from '../layout/GameLayout';
@@ -37,11 +37,6 @@ export const GameContainer: React.FC<GameContainerProps> = ({
           name: 'Tic Tac Toe',
           description: 'Classic strategy game for two players'
         };
-      case 'counter':
-        return {
-          name: 'Counter',
-          description: 'Simple counter game'
-        };
       case 'sudoku':
         return {
           name: 'Sudoku',
@@ -51,11 +46,6 @@ export const GameContainer: React.FC<GameContainerProps> = ({
         return {
           name: 'Ping Pong',
           description: 'Classic arcade paddle game'
-        };
-      case 'demo':
-        return {
-          name: 'WebSocket Demo',
-          description: 'Demo showcasing WebSocket functionality'
         };
       default:
         return {
@@ -105,18 +95,6 @@ export const GameContainer: React.FC<GameContainerProps> = ({
             </div>
           )
         };
-      case 'counter':
-        // Use the proper slots system with dedicated slot components
-        return {
-          gameField: <CounterGameField playerId={playerId} />,
-          stats: <CounterStats playerId={playerId} />,
-          controls: <CounterControls playerId={playerId} />,
-          gameInfo: (
-            <div>
-              <h2>{gameInfo.name}</h2>
-            </div>
-          )
-        };
       case 'sudoku':
         // Use the proper slots system with dedicated slot components
         return {
@@ -138,35 +116,6 @@ export const GameContainer: React.FC<GameContainerProps> = ({
           gameInfo: (
             <div>
               <h2>{gameInfo.name}</h2>
-            </div>
-          )
-        };
-      case 'demo':
-        return {
-          gameField: (
-            <div className="demo-game">
-              <h2>🔧 WebSocket Demo</h2>
-              <p>This is a demo game showcasing WebSocket functionality.</p>
-              <div className="demo-features">
-                <h3>Features demonstrated:</h3>
-                <ul>
-                  <li>✅ Real-time WebSocket communication</li>
-                  <li>✅ Offline mode with web workers</li>
-                  <li>✅ Automatic reconnection</li>
-                  <li>✅ Data caching for offline use</li>
-                  <li>✅ Multi-player state synchronization</li>
-                </ul>
-              </div>
-              <div className="demo-note">
-                <p><strong>Note:</strong> This demo requires a WebSocket server running on ws://localhost:8080/</p>
-              </div>
-            </div>
-          ),
-          stats: <div>WebSocket Status: Disconnected</div>,
-          controls: <div>Demo controls</div>,
-          gameInfo: (
-            <div>
-              <h2>WebSocket Demo</h2>
             </div>
           )
         };

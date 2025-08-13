@@ -49,20 +49,6 @@ const AVAILABLE_GAMES: GameInfo[] = [
     description: 'Classic number puzzle with multiple difficulty levels',
     emoji: '🧩',
     category: 'Puzzle'
-  },
-  {
-    id: 'counter',
-    name: 'Counter Game',
-    description: 'A simple clicking game with save/load functionality',
-    emoji: '🎯',
-    category: 'Casual'
-  },
-  {
-    id: 'demo',
-    name: 'WebSocket Demo',
-    description: 'Test real-time multiplayer features',
-    emoji: '🔧',
-    category: 'Demo'
   }
 ];
 
