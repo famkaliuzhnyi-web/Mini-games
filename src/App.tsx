@@ -21,6 +21,7 @@ function MainPage() {
         showHomeButton={false}
         onHomeClick={navigation.goHome}
         onProfileClick={navigation.showProfile}
+        onNavigateToGame={navigation.playGame}
       />
       <GamesList onGameSelect={navigation.playGame} />
     </div>
@@ -43,6 +44,7 @@ function GamePage() {
         showHomeButton={true}
         onHomeClick={navigation.goHome}
         onProfileClick={navigation.showProfile}
+        onNavigateToGame={navigation.playGame}
       />
       <GameContainer
         gameId={navigation.currentGame}

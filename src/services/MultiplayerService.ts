@@ -60,6 +60,30 @@ export class WebRTCMultiplayerService implements MultiplayerService {
     });
   }
 
+  // Public method to start a game for all players
+  async startGame(gameId: string): Promise<void> {
+    if (!this.currentSession || !this.isHostRole) {
+      throw new Error('Only host can start a game');
+    }
+
+    // Update session state
+    this.currentSession.state = 'playing';
+    this.currentSession.gameId = gameId;
+
+    const message: MultiplayerMessage = {
+      type: 'game-start',
+      sessionId: this.currentSession.id,
+      playerId: this.localPlayerId,
+      timestamp: new Date().toISOString(),
+      data: {
+        gameId
+      }
+    };
+
+    this.broadcastMessage(message);
+    this.emit('game-started', { gameId });
+  }
+
   // Session Management
   async createSession(options: CreateSessionOptions): Promise<GameSession> {
     if (this.currentSession) {
@@ -240,6 +264,9 @@ export class WebRTCMultiplayerService implements MultiplayerService {
         break;
       case 'player-ready':
         this.emit('player-ready-changed', message.data);
+        break;
+      case 'game-start':
+        this.emit('game-started', message.data);
         break;
       // Handle other message types...
     }

@@ -44,6 +44,7 @@
 .nav-user {
   display: flex;
   align-items: center;
+  gap: 0.25rem;
 }
 
 .nav-right {
@@ -86,6 +87,33 @@
   transform: translateY(1px);
 }
 
+.nav-multiplayer-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-accent, #2196F3);
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(33, 150, 243, 0.3);
+}
+
+.nav-multiplayer-btn:hover {
+  background: var(--color-accent-hover, #1976D2);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(33, 150, 243, 0.4);
+}
+
+.nav-multiplayer-btn:active {
+  transform: translateY(0);
+}
+
 /* Mobile responsiveness */
 @media (max-width: 768px) {
   .nav-content {
@@ -109,6 +137,12 @@
   .nav-user-name {
     font-size: 0.85rem;
     padding: 0.4rem 0.6rem;
+  }
+  
+  .nav-multiplayer-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 1rem;
   }
 }
 
@@ -138,5 +172,11 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     padding: 0.3rem 0.5rem;
+  }
+  
+  .nav-multiplayer-btn {
+    width: 26px;
+    height: 26px;
+    font-size: 0.9rem;
   }
 }
