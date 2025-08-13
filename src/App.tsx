@@ -1,39 +1,11 @@
 import './App.css'
 import { HashRouter, Routes, Route } from 'react-router-dom'
-import { useNavigation } from './hooks/useNavigation'
-import { useGameConnection } from './hooks/useGameConnection'
-import { NameEntry } from './components/NameEntry'
-import { GamesList } from './components/GamesList'
-import { GameContainer } from './components/GameContainer'
-import { Navigation } from './components/Navigation'
-import { Profile } from './components/Profile'
-import { InstallPrompt } from './components/InstallPrompt'
-import { useEffect } from 'react'
+import { useGameSession } from './hooks/useGameSession'
+import { NameEntry, Profile, GameContainer, GamesList, Navigation, InstallPrompt, ErrorBoundary } from './components'
 
 // Component for the main games list/name entry page
 function MainPage() {
-  const navigation = useNavigation()
-  const {
-    joinGame,
-    leaveGame
-  } = useGameConnection()
-
-  // Join/leave game when player name changes
-  useEffect(() => {
-    if (navigation.playerName) {
-      joinGame({
-        playerId: navigation.playerId,
-        name: navigation.playerName,
-        joinedAt: new Date().toISOString()
-      })
-    }
-
-    return () => {
-      if (navigation.playerName) {
-        leaveGame(navigation.playerId)
-      }
-    }
-  }, [navigation.playerName, navigation.playerId, joinGame, leaveGame])
+  const navigation = useGameSession()
 
   // Show name entry if no player name, otherwise show games list
   if (!navigation.playerName) {
@@ -55,28 +27,7 @@ function MainPage() {
 
 // Component for playing a specific game
 function GamePage() {
-  const navigation = useNavigation()
-  const {
-    joinGame,
-    leaveGame
-  } = useGameConnection()
-
-  // Join/leave game when player name changes
-  useEffect(() => {
-    if (navigation.playerName) {
-      joinGame({
-        playerId: navigation.playerId,
-        name: navigation.playerName,
-        joinedAt: new Date().toISOString()
-      })
-    }
-
-    return () => {
-      if (navigation.playerName) {
-        leaveGame(navigation.playerId)
-      }
-    }
-  }, [navigation.playerName, navigation.playerId, joinGame, leaveGame])
+  const navigation = useGameSession()
 
   // Redirect to main page if no player name or no game selected
   if (!navigation.playerName || !navigation.currentGame) {
@@ -102,7 +53,7 @@ function GamePage() {
 
 // Component for the profile page
 function ProfilePage() {
-  const navigation = useNavigation()
+  const navigation = useGameSession()
 
   // Redirect to main page if no player name
   if (!navigation.playerName) {
@@ -120,14 +71,16 @@ function ProfilePage() {
 
 function App() {
   return (
-    <HashRouter>
-      <Routes>
-        <Route path="/" element={<MainPage />} />
-        <Route path="/game/:gameId" element={<GamePage />} />
-        <Route path="/profile" element={<ProfilePage />} />
-      </Routes>
-      <InstallPrompt />
-    </HashRouter>
+    <ErrorBoundary>
+      <HashRouter>
+        <Routes>
+          <Route path="/" element={<MainPage />} />
+          <Route path="/game/:gameId" element={<GamePage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+        </Routes>
+        <InstallPrompt />
+      </HashRouter>
+    </ErrorBoundary>
   )
 }
 

@@ -1,4 +1,4 @@
-import { usePWA } from '../hooks/usePWA';
+import { usePWA } from '../../hooks/usePWA';
 import './InstallPrompt.css';
 
 export function InstallPrompt() {

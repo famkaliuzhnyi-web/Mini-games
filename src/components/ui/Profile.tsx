@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { UserService } from '../services/UserService';
+import { UserService } from '../../services/UserService';
 import './Profile.css';
 
 interface ProfileProps {
