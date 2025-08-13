@@ -103,7 +103,7 @@ const useTicTacToeState = (playerId: string) => {
     }
 
     // In multiplayer, check if it's our turn
-    if (gameState.data.multiplayer.isMultiplayer && gameState.data.multiplayer.waitingForMove) {
+    if (gameState.data.multiplayer?.isMultiplayer && gameState.data.multiplayer?.waitingForMove) {
       return; // Not our turn
     }
 
@@ -130,10 +130,10 @@ const useTicTacToeState = (playerId: string) => {
           gameStatus: newGameStatus,
           moveHistory: [...gameState.data.moveHistory, move],
           winningCombination,
-          multiplayer: gameState.data.multiplayer.isMultiplayer ? {
+          multiplayer: gameState.data.multiplayer?.isMultiplayer ? {
             ...gameState.data.multiplayer,
             waitingForMove: newGameStatus === 'playing' // Wait for opponent's move
-          } : gameState.data.multiplayer
+          } : gameState.data.multiplayer || { isMultiplayer: false }
         },
         score: newScore,
         isComplete: newGameStatus !== 'playing',
@@ -141,7 +141,7 @@ const useTicTacToeState = (playerId: string) => {
       });
 
       // Broadcast move to other players
-      if (gameState.data.multiplayer.isMultiplayer && !skipMultiplayerBroadcast) {
+      if (gameState.data.multiplayer?.isMultiplayer && !skipMultiplayerBroadcast) {
         await multiplayerService.sendGameMove({ row, col, player: gameState.data.currentPlayer });
       }
 
@@ -174,9 +174,9 @@ const useTicTacToeState = (playerId: string) => {
           gameStatus: 'playing',
           moveHistory: [],
           winningCombination: undefined,
-          gameMode: currentStats.gameMode,
+          gameMode: currentStats.gameMode || 'single-player',
           multiplayer: {
-            ...currentStats.multiplayer,
+            ...(currentStats.multiplayer || { isMultiplayer: false }),
             waitingForMove: false
           },
           ...newStats
@@ -194,9 +194,9 @@ const useTicTacToeState = (playerId: string) => {
           gameStatus: 'playing',
           moveHistory: [],
           winningCombination: undefined,
-          gameMode: currentStats.gameMode,
+          gameMode: currentStats.gameMode || 'single-player',
           multiplayer: {
-            ...currentStats.multiplayer,
+            ...(currentStats.multiplayer || { isMultiplayer: false }),
             waitingForMove: false
           },
           gamesPlayed: currentStats.gamesPlayed,
@@ -351,11 +351,11 @@ export const TicTacToeGameField: React.FC<SlotComponentProps> = ({ playerId }) =
   }
 
   // Show multiplayer lobby if in multiplayer mode but not playing yet
-  if (gameState.data.multiplayer.isMultiplayer && multiplayerSession && multiplayerSession.state === 'waiting') {
+  if (gameState.data.multiplayer?.isMultiplayer && multiplayerSession && multiplayerSession.state === 'waiting') {
     return (
       <MultiplayerLobby
         session={multiplayerSession}
-        isHost={gameState.data.multiplayer.isHost || false}
+        isHost={gameState.data.multiplayer?.isHost || false}
         currentPlayerId={playerId}
         sessionUrl={multiplayerService.getSessionUrl()}
         onPlayerReady={handlePlayerReady}
@@ -602,7 +602,7 @@ export const TicTacToeControls: React.FC<SlotComponentProps> = ({ playerId }) =>
         </button>
 
         {/* Multiplayer Button */}
-        {!gameState.data.multiplayer.isMultiplayer ? (
+        {!(gameState.data.multiplayer?.isMultiplayer) ? (
           <button 
             onClick={() => setShowMultiplayerMenu(!showMultiplayerMenu)}
             style={{ 
@@ -640,7 +640,7 @@ export const TicTacToeControls: React.FC<SlotComponentProps> = ({ playerId }) =>
           </button>
         )}
 
-        {!gameState.data.multiplayer.isMultiplayer && (
+        {!(gameState.data.multiplayer?.isMultiplayer) && (
           <button 
             onClick={() => setShowSaveMenu(!showSaveMenu)}
             style={{ 
@@ -661,7 +661,7 @@ export const TicTacToeControls: React.FC<SlotComponentProps> = ({ playerId }) =>
       </div>
 
       {/* Multiplayer Menu */}
-      {showMultiplayerMenu && !gameState.data.multiplayer.isMultiplayer && (
+      {showMultiplayerMenu && !(gameState.data.multiplayer?.isMultiplayer) && (
         <div style={{
           padding: '0.5rem',
           backgroundColor: `var(--color-gameBackground)`,

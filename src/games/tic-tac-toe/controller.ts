@@ -102,16 +102,16 @@ export class TicTacToeGameController implements GameController<TicTacToeGameData
         return false;
       }
 
-      // Validate multiplayer fields
-      if (!data.gameMode || !['single-player', 'multiplayer'].includes(data.gameMode)) {
+      // Validate multiplayer fields (optional for backward compatibility)
+      if (data.gameMode && !['single-player', 'multiplayer'].includes(data.gameMode)) {
         return false;
       }
 
-      if (!data.multiplayer || typeof data.multiplayer !== 'object') {
+      if (data.multiplayer && typeof data.multiplayer !== 'object') {
         return false;
       }
 
-      if (typeof data.multiplayer.isMultiplayer !== 'boolean') {
+      if (data.multiplayer && typeof data.multiplayer.isMultiplayer !== 'boolean') {
         return false;
       }
 
