@@ -1,7 +1,7 @@
 /**
  * 2048 Game - Classic number puzzle game  
  */
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useGameSave } from '../../hooks/useGameSave';
 import { useSwipeGestures } from '../../hooks/useSwipeGestures';
 import type { GameController, GameState, GameConfig } from '../../types/game';
@@ -89,6 +89,12 @@ export const Game2048: React.FC<Game2048Props> = ({ playerId }) => {
   const controller = useMemo(() => new Game2048Controller(), []);
   const gameContainerRef = useRef<HTMLDivElement>(null);
   
+  // Animation state for tiles
+  const [animatingTiles, setAnimatingTiles] = useState<Set<string>>(new Set());
+  const [newTiles, setNewTiles] = useState<Set<string>>(new Set());
+  const [mergedTiles, setMergedTiles] = useState<Set<string>>(new Set());
+  const [scoreAnimated, setScoreAnimated] = useState(false);
+  
   const {
     gameState,
     setGameState,
@@ -112,7 +118,7 @@ export const Game2048: React.FC<Game2048Props> = ({ playerId }) => {
   const handleMove = useCallback(async (direction: Direction) => {
     if (gameState.data.gameOver) return;
 
-    // Store current state for undo
+    // Store current state for undo and comparison
     const previousGrid = copyGrid(gameState.data.grid);
     const previousScore = gameState.data.score;
 
@@ -123,13 +129,55 @@ export const Game2048: React.FC<Game2048Props> = ({ playerId }) => {
       return; // No valid move
     }
 
+    // Clear previous animation states
+    setAnimatingTiles(new Set());
+    setMergedTiles(new Set());
+    setNewTiles(new Set());
+
+    // Detect merged tiles by comparing grids and finding score increase sources
+    const mergedPositions = new Set<string>();
+    if (moveResult.scoreIncrease > 0) {
+      // Find positions where tiles likely merged
+      for (let row = 0; row < 4; row++) {
+        for (let col = 0; col < 4; col++) {
+          const currentTile = moveResult.newGrid[row][col];
+          const previousTile = previousGrid[row][col];
+          
+          // If a tile value increased compared to previous position, it likely merged
+          if (currentTile > 0 && currentTile > previousTile) {
+            mergedPositions.add(`${row}-${col}`);
+          }
+        }
+      }
+      setMergedTiles(mergedPositions);
+    }
+
     // Add a new random tile after successful move
     const newGrid = copyGrid(moveResult.newGrid);
-    addRandomTile(newGrid);
+    const newTileAdded = addRandomTile(newGrid);
+
+    // Track new tile position for animation
+    if (newTileAdded) {
+      const newTilePositions = new Set<string>();
+      for (let row = 0; row < 4; row++) {
+        for (let col = 0; col < 4; col++) {
+          if (newGrid[row][col] !== 0 && moveResult.newGrid[row][col] === 0) {
+            newTilePositions.add(`${row}-${col}`);
+          }
+        }
+      }
+      setNewTiles(newTilePositions);
+    }
 
     const newScore = gameState.data.score + moveResult.scoreIncrease;
     const newBestScore = Math.max(gameState.data.bestScore, newScore);
     const newMoves = gameState.data.moves + 1;
+
+    // Animate score if it increased
+    if (moveResult.scoreIncrease > 0) {
+      setScoreAnimated(true);
+      setTimeout(() => setScoreAnimated(false), 400);
+    }
 
     // Check if game is over after adding new tile
     const finalGameOver = moveResult.gameOver || !canMove(newGrid);
@@ -154,6 +202,15 @@ export const Game2048: React.FC<Game2048Props> = ({ playerId }) => {
     };
 
     setGameState(newGameState);
+
+    // Clear animations after delays
+    setTimeout(() => {
+      setMergedTiles(new Set());
+    }, 200);
+    
+    setTimeout(() => {
+      setNewTiles(new Set());
+    }, 300);
 
     // Trigger auto-save on significant moves (every 5 moves or high score)
     if (newMoves % 5 === 0 || newScore > gameState.data.bestScore) {
@@ -261,11 +318,30 @@ export const Game2048: React.FC<Game2048Props> = ({ playerId }) => {
     await handleMove(direction);
   }, [handleMove, isLoading]);
 
-  // Get CSS class for tile value
-  const getTileClass = useCallback((value: number) => {
-    if (value === 0) return 'game2048-cell';
-    return `game2048-cell game2048-tile-${value}`;
-  }, []);
+  // Get CSS class for tile value with animation states
+  const getTileClass = useCallback((value: number, row: number, col: number) => {
+    const tileKey = `${row}-${col}`;
+    let className = 'game2048-cell';
+    
+    if (value === 0) return className;
+    
+    className += ` game2048-tile-${value}`;
+    
+    // Add animation classes
+    if (newTiles.has(tileKey)) {
+      className += ' game2048-cell-new';
+    }
+    
+    if (mergedTiles.has(tileKey)) {
+      className += ' game2048-cell-merged';
+    }
+    
+    if (animatingTiles.has(tileKey)) {
+      className += ' game2048-cell-moving';
+    }
+    
+    return className;
+  }, [newTiles, mergedTiles, animatingTiles]);
 
   // Handle manual save/load
   const handleManualSave = async () => {
@@ -304,7 +380,9 @@ export const Game2048: React.FC<Game2048Props> = ({ playerId }) => {
       <div className="game2048-score-container">
         <div className="game2048-score-box">
           <div className="game2048-score-label">Score</div>
-          <div className="game2048-score-value">{gameState.data.score}</div>
+          <div className={`game2048-score-value ${scoreAnimated ? 'game2048-score-animated' : ''}`}>
+            {gameState.data.score}
+          </div>
         </div>
         <div className="game2048-score-box">
           <div className="game2048-score-label">Best</div>
@@ -360,7 +438,7 @@ export const Game2048: React.FC<Game2048Props> = ({ playerId }) => {
             row.map((tile, colIndex) => (
               <div 
                 key={`${rowIndex}-${colIndex}`}
-                className={getTileClass(tile)}
+                className={getTileClass(tile, rowIndex, colIndex)}
               >
                 {tile > 0 ? tile : ''}
               </div>

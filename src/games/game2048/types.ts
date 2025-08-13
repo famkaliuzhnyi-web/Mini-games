@@ -31,10 +31,32 @@ export interface MoveResult {
   newGrid: GameGrid;
   gameOver: boolean;
   gameWon: boolean;
+  animationData?: {
+    movedTiles: Array<{ from: Position; to: Position; value: TileValue }>;
+    mergedTiles: Array<{ position: Position; value: TileValue }>;
+    newTilePosition?: Position;
+  };
 }
 
 // Position on the grid
 export interface Position {
   row: number;
   col: number;
+}
+
+// Tile animation state
+export interface TileAnimationState {
+  isNew: boolean;
+  isMerged: boolean;
+  isMoving: boolean;
+  fromPosition?: Position;
+  toPosition?: Position;
+}
+
+// Enhanced tile data with animation info
+export interface AnimatedTile {
+  value: TileValue;
+  position: Position;
+  animationState: TileAnimationState;
+  key: string; // Unique key for React rendering
 }
