@@ -5,9 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && npm run update-pwa-assets && vite build && npm run restore-pwa-assets",
+    "build": "tsc -b && npm run update-manifest && vite build && npm run restore-pwa-assets && npm run post-build",
+    "update-manifest": "NODE_ENV=production node scripts/updateManifest.js",
+    "update-sw-with-assets": "NODE_ENV=production node scripts/updateServiceWorker.js",
     "update-pwa-assets": "NODE_ENV=production node scripts/updateManifest.js && NODE_ENV=production node scripts/updateServiceWorker.js",
     "restore-pwa-assets": "node scripts/restoreAssets.js",
+    "post-build": "node scripts/postBuild.js",
     "lint": "eslint .",
     "preview": "vite preview"
   },

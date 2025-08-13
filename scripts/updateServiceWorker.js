@@ -20,7 +20,29 @@ const staticAssets = [
   basePath + '/manifest.json',
   basePath + '/icon-192x192.png',
   basePath + '/icon-512x512.png',
+  basePath + '/icon-144x144.png',
+  basePath + '/icon-96x96.png',
+  basePath + '/icon-72x72.png',
+  basePath + '/icon-48x48.png',
+  basePath + '/vite.svg',
+  basePath + '/404.html',
 ]
+
+// If in production and dist directory exists, add built assets
+const distPath = path.join(process.cwd(), 'dist')
+if (process.env.NODE_ENV === 'production' && fs.existsSync(distPath)) {
+  try {
+    const assetsDir = path.join(distPath, 'assets')
+    if (fs.existsSync(assetsDir)) {
+      const assetFiles = fs.readdirSync(assetsDir)
+      assetFiles.forEach(file => {
+        staticAssets.push(basePath + '/assets/' + file)
+      })
+    }
+  } catch (error) {
+    console.warn('Could not read assets directory:', error)
+  }
+}
 
 // Replace the STATIC_ASSETS array in the service worker
 const staticAssetsString = JSON.stringify(staticAssets, null, 2)
@@ -31,9 +53,9 @@ swContent = swContent.replace(
   `const STATIC_ASSETS = ${staticAssetsString};`
 )
 
-// Also update the fallback path in the fetch handler
+// Update the fallback path in the fetch handler
 swContent = swContent.replace(
-  /return caches\.match\('\/index\.html'\);/,
+  /return caches\.match\('\/index\.html'\);/g,
   `return caches.match('${basePath}/index.html');`
 )
 
@@ -41,3 +63,4 @@ swContent = swContent.replace(
 fs.writeFileSync(swPath, swContent)
 
 console.log('Service worker updated with base path:', basePath)
+console.log('Total static assets to cache:', staticAssets.length)
