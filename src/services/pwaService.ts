@@ -32,6 +32,7 @@ export class PWAService {
         const swPath = getAbsolutePath('/sw.js')
         const registration = await navigator.serviceWorker.register(swPath, {
           scope: getAbsolutePath('/'),
+          updateViaCache: 'none', // Don't cache the service worker file itself
         });
         
         console.log('Service Worker registered successfully:', registration);
@@ -39,7 +40,25 @@ export class PWAService {
         // Handle service worker updates
         registration.addEventListener('updatefound', () => {
           console.log('Service Worker update found');
+          const newWorker = registration.installing;
+          
+          if (newWorker) {
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                console.log('New service worker available, refresh to use it');
+                // You can dispatch a custom event here to notify the user about the update
+                window.dispatchEvent(new CustomEvent('sw-update-available'));
+              }
+            });
+          }
         });
+
+        // Check for updates periodically (every 5 minutes when active)
+        setInterval(() => {
+          if (document.visibilityState === 'visible') {
+            registration.update();
+          }
+        }, 5 * 60 * 1000);
 
       } catch (error) {
         console.error('Service Worker registration failed:', error);
