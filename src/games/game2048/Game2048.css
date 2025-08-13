@@ -1,5 +1,5 @@
 /**
- * 2048 Game CSS Styles
+ * 2048 Game CSS Styles - Modern Industry Standard Design
  */
 
 /* Game Field Component (SlotComponents) */
@@ -16,128 +16,185 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 1rem;
-  max-width: 500px;
+  padding: 1.5rem;
+  max-width: 520px;
   margin: 0 auto;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  background: linear-gradient(135deg, #faf8ef 0%, #f2ebe5 100%);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1), 0 1px 8px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .game2048-header {
   text-align: center;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .game2048-title {
-  font-size: 2.5rem;
-  font-weight: bold;
-  color: #776e65;
+  font-size: 3.5rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, #776e65, #8f7a66);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
   margin: 0;
+  letter-spacing: -2px;
+  text-shadow: 0 4px 8px rgba(119, 110, 101, 0.3);
 }
 
 .game2048-subtitle {
-  color: #776e65;
-  font-size: 1rem;
+  color: #8f7a66;
+  font-size: 1.1rem;
   margin: 0.5rem 0 0 0;
+  font-weight: 500;
 }
 
 .game2048-score-container {
   display: flex;
-  gap: 1rem;
-  margin-bottom: 1rem;
+  gap: 1.2rem;
+  margin-bottom: 1.5rem;
 }
 
 .game2048-score-box {
-  background: #bbada0;
+  background: linear-gradient(135deg, #bbada0, #a39186);
   color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
+  padding: 0.8rem 1.2rem;
+  border-radius: 12px;
   text-align: center;
-  min-width: 80px;
+  min-width: 90px;
+  box-shadow: 0 4px 12px rgba(187, 173, 160, 0.4), 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.game2048-score-box::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
 }
 
 .game2048-score-label {
-  font-size: 0.8rem;
-  font-weight: bold;
+  font-size: 0.75rem;
+  font-weight: 700;
   text-transform: uppercase;
-  margin-bottom: 0.2rem;
+  letter-spacing: 1px;
+  margin-bottom: 0.3rem;
+  opacity: 0.9;
 }
 
 .game2048-score-value {
-  font-size: 1.2rem;
-  font-weight: bold;
+  font-size: 1.4rem;
+  font-weight: 800;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .game2048-controls {
   display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
+  gap: 0.8rem;
+  margin-bottom: 1.5rem;
   flex-wrap: wrap;
   justify-content: center;
 }
 
 .game2048-btn {
-  padding: 0.5rem 1rem;
+  padding: 0.7rem 1.4rem;
   border: none;
-  border-radius: 4px;
+  border-radius: 10px;
   font-size: 0.9rem;
-  font-weight: bold;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.game2048-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
 }
 
 .game2048-btn:hover {
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2), 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.game2048-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .game2048-btn:disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: not-allowed;
-  transform: none;
+  transform: none !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1) !important;
 }
 
 .game2048-btn-primary {
-  background: #8f7a66;
+  background: linear-gradient(135deg, #8f7a66, #776e65);
   color: white;
 }
 
 .game2048-btn-secondary {
-  background: #bbada0;
+  background: linear-gradient(135deg, #bbada0, #a39186);
   color: white;
 }
 
 .game2048-btn-danger {
-  background: #f65e3b;
+  background: linear-gradient(135deg, #f65e3b, #e54b2d);
   color: white;
 }
 
 .game2048-grid-container {
   position: relative;
-  background: #bbada0;
-  border-radius: 8px;
-  padding: 8px;
-  margin-bottom: 1rem;
+  background: linear-gradient(135deg, #bbada0, #a39186);
+  border-radius: 16px;
+  padding: 12px;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 6px 20px rgba(187, 173, 160, 0.4), 
+              0 2px 8px rgba(0, 0, 0, 0.1),
+              inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .game2048-grid {
   display: grid;
-  grid-template-columns: repeat(4, 70px);
-  grid-template-rows: repeat(4, 70px);
-  gap: 8px;
-  width: 320px;
-  height: 320px;
+  grid-template-columns: repeat(4, 78px);
+  grid-template-rows: repeat(4, 78px);
+  gap: 10px;
+  width: 340px;
+  height: 340px;
 }
 
 .game2048-cell {
-  background: #cdc1b4;
-  border-radius: 4px;
+  background: linear-gradient(135deg, #cdc1b4, #bfb3a6);
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2rem;
-  font-weight: bold;
-  width: 70px;
-  height: 70px;
-  transition: all 0.15s ease-in-out;
+  font-size: 2.2rem;
+  font-weight: 800;
+  width: 78px;
+  height: 78px;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.1),
+              0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 /* Animation classes for tile movements */
@@ -160,82 +217,121 @@
 }
 
 .game2048-tile-2 {
-  background: #eee4da;
+  background: linear-gradient(135deg, #eee4da, #e6dcd2);
   color: #776e65;
+  box-shadow: 0 2px 8px rgba(238, 228, 218, 0.3),
+              inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .game2048-tile-4 {
-  background: #ede0c8;
+  background: linear-gradient(135deg, #ede0c8, #e5d4b8);
   color: #776e65;
+  box-shadow: 0 2px 8px rgba(237, 224, 200, 0.3),
+              inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .game2048-tile-8 {
-  background: #f2b179;
+  background: linear-gradient(135deg, #f2b179, #f0a865);
   color: #f9f6f2;
+  box-shadow: 0 2px 8px rgba(242, 177, 121, 0.4),
+              inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .game2048-tile-16 {
-  background: #f59563;
+  background: linear-gradient(135deg, #f59563, #f3884f);
   color: #f9f6f2;
+  box-shadow: 0 2px 8px rgba(245, 149, 99, 0.4),
+              inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .game2048-tile-32 {
-  background: #f67c5f;
+  background: linear-gradient(135deg, #f67c5f, #f46d4b);
   color: #f9f6f2;
+  box-shadow: 0 2px 8px rgba(246, 124, 95, 0.4),
+              inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
 }
 
 .game2048-tile-64 {
-  background: #f65e3b;
+  background: linear-gradient(135deg, #f65e3b, #f44d27);
   color: #f9f6f2;
+  box-shadow: 0 2px 8px rgba(246, 94, 59, 0.5),
+              inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .game2048-tile-128 {
-  background: #edcf72;
+  background: linear-gradient(135deg, #edcf72, #e6c862);
   color: #f9f6f2;
-  font-size: 1.8rem;
+  font-size: 2rem;
+  box-shadow: 0 3px 12px rgba(237, 207, 114, 0.5),
+              inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .game2048-tile-256 {
-  background: #edcc61;
+  background: linear-gradient(135deg, #edcc61, #e6c551);
   color: #f9f6f2;
-  font-size: 1.8rem;
+  font-size: 2rem;
+  box-shadow: 0 3px 12px rgba(237, 204, 97, 0.5),
+              inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .game2048-tile-512 {
-  background: #edc850;
+  background: linear-gradient(135deg, #edc850, #e6c140);
   color: #f9f6f2;
-  font-size: 1.8rem;
+  font-size: 2rem;
+  box-shadow: 0 3px 12px rgba(237, 200, 80, 0.6),
+              inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .game2048-tile-1024 {
-  background: #edc53f;
+  background: linear-gradient(135deg, #edc53f, #e6be2f);
   color: #f9f6f2;
-  font-size: 1.5rem;
+  font-size: 1.7rem;
+  box-shadow: 0 4px 16px rgba(237, 197, 63, 0.6),
+              inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
 }
 
 .game2048-tile-2048 {
-  background: #edc22e;
+  background: linear-gradient(135deg, #edc22e, #ffdf3a);
   color: #f9f6f2;
-  font-size: 1.5rem;
-  box-shadow: 0 0 10px rgba(237, 194, 46, 0.5);
+  font-size: 1.7rem;
+  box-shadow: 0 4px 20px rgba(237, 194, 46, 0.7),
+              0 0 20px rgba(255, 223, 58, 0.3),
+              inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  animation: pulse-glow 2s ease-in-out infinite alternate;
 }
 
 .game2048-instructions {
   text-align: center;
-  color: #776e65;
-  font-size: 0.9rem;
-  max-width: 320px;
-  line-height: 1.4;
+  color: #8f7a66;
+  font-size: 0.95rem;
+  max-width: 340px;
+  line-height: 1.5;
+  background: rgba(255, 255, 255, 0.4);
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(10px);
 }
 
 .game2048-swipe-hint {
   color: #8f7a66;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   margin-top: 0.5rem;
-  padding: 0.5rem;
-  background: #f9f6f2;
-  border-radius: 4px;
-  border: 1px solid #ededed;
+  padding: 0.7rem;
+  background: rgba(249, 246, 242, 0.8);
+  border-radius: 8px;
+  border: 1px solid rgba(143, 122, 102, 0.2);
+  backdrop-filter: blur(5px);
 }
 
 .game2048-game-over {
@@ -244,46 +340,59 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.95);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
+  border-radius: 16px;
   z-index: 10;
+  backdrop-filter: blur(10px);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.3);
 }
 
 .game2048-game-over-title {
-  font-size: 2rem;
-  font-weight: bold;
-  color: #776e65;
+  font-size: 2.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #776e65, #8f7a66);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
   margin-bottom: 1rem;
+  text-shadow: 0 2px 4px rgba(119, 110, 101, 0.2);
 }
 
 .game2048-game-over-message {
-  color: #776e65;
+  color: #8f7a66;
   margin-bottom: 1rem;
   text-align: center;
+  font-size: 1.1rem;
+  font-weight: 500;
 }
 
 .game2048-status {
   text-align: center;
-  margin-bottom: 1rem;
-  padding: 0.5rem;
-  border-radius: 4px;
-  font-weight: bold;
+  margin-bottom: 1.5rem;
+  padding: 0.8rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .game2048-status-won {
-  background: #e8f5e8;
-  color: #4caf50;
-  border: 1px solid #4caf50;
+  background: linear-gradient(135deg, #e8f5e8, #d4edda);
+  color: #28a745;
+  border-color: #28a745;
+  animation: celebrate 0.6s ease-in-out;
 }
 
 .game2048-status-over {
-  background: #fde8e8;
-  color: #f44336;
-  border: 1px solid #f44336;
+  background: linear-gradient(135deg, #fde8e8, #f8d7da);
+  color: #dc3545;
+  border-color: #dc3545;
 }
 
 
@@ -291,47 +400,54 @@
 /* Mobile responsiveness */
 @media (max-width: 600px) {
   .game2048-container {
-    padding: 0.5rem;
+    padding: 1rem;
+    border-radius: 16px;
+    margin: 0.5rem;
+  }
+  
+  .game2048-title {
+    font-size: 3rem;
   }
   
   .game2048-grid {
-    width: 320px;
-    height: 320px;
+    grid-template-columns: repeat(4, 70px);
+    grid-template-rows: repeat(4, 70px);
+    width: 312px;
+    height: 312px;
+    gap: 8px;
   }
   
   .game2048-cell {
-    width: 72px;
-    height: 72px;
-    font-size: 1.8rem;
+    width: 70px;
+    height: 70px;
+    font-size: 1.9rem;
   }
   
   .game2048-tile-128,
   .game2048-tile-256,
   .game2048-tile-512 {
-    font-size: 1.5rem;
+    font-size: 1.7rem;
   }
   
   .game2048-tile-1024,
   .game2048-tile-2048 {
-    font-size: 1.3rem;
-  }
-  
-  .game2048-title {
-    font-size: 2rem;
+    font-size: 1.4rem;
   }
   
   .game2048-controls {
     justify-content: center;
-    gap: 1rem;
+    gap: 0.6rem;
   }
   
   .game2048-score-container {
     justify-content: center;
-    gap: 1rem;
+    gap: 0.8rem;
   }
 
   .game2048-instructions {
     margin-top: 0.5rem;
+    max-width: 312px;
+    padding: 0.8rem;
   }
 
   .game2048-instructions p {
@@ -339,18 +455,37 @@
   }
 }
 
+/* Celebration animation for winning */
+@keyframes celebrate {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  25% { transform: scale(1.05) rotate(-1deg); }
+  75% { transform: scale(1.05) rotate(1deg); }
+}
+
+/* Enhanced hover effects for tiles */
+.game2048-cell:not([class*="game2048-tile-"]):hover {
+  background: linear-gradient(135deg, #d4c8bb, #c7bbae);
+  transform: scale(1.02);
+}
+
+/* Smooth transitions for all tiles */
+.game2048-cell[class*="game2048-tile-"]:hover {
+  transform: scale(1.02);
+  z-index: 1;
+}
+
 /* Animation for new tiles - enhanced pop-in effect */
 @keyframes tile-appear {
   0% {
     opacity: 0;
-    transform: scale(0.3);
+    transform: scale(0.2) rotate(-5deg);
   }
   50% {
-    transform: scale(1.2);
+    transform: scale(1.15) rotate(2deg);
   }
   100% {
     opacity: 1;
-    transform: scale(1);
+    transform: scale(1) rotate(0deg);
   }
 }
 
@@ -358,14 +493,16 @@
 @keyframes tile-merge {
   0% {
     transform: scale(1);
+    box-shadow: inherit;
   }
   50% {
-    transform: scale(1.2);
-    box-shadow: 0 0 15px rgba(237, 194, 46, 0.6);
+    transform: scale(1.25);
+    box-shadow: 0 4px 20px rgba(237, 194, 46, 0.8),
+                0 0 25px rgba(255, 223, 58, 0.4);
   }
   100% {
     transform: scale(1);
-    box-shadow: none;
+    box-shadow: inherit;
   }
 }
 
@@ -376,21 +513,35 @@
     color: inherit;
   }
   50% {
-    transform: scale(1.15);
+    transform: scale(1.2);
     color: #f67c5f;
-    text-shadow: 0 0 10px rgba(246, 124, 95, 0.5);
+    text-shadow: 0 0 15px rgba(246, 124, 95, 0.6);
   }
   100% {
     transform: scale(1);
     color: inherit;
-    text-shadow: none;
+    text-shadow: inherit;
+  }
+}
+
+/* Pulse glow animation for 2048 tile */
+@keyframes pulse-glow {
+  0% {
+    box-shadow: 0 4px 20px rgba(237, 194, 46, 0.7),
+                0 0 20px rgba(255, 223, 58, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+  100% {
+    box-shadow: 0 4px 25px rgba(237, 194, 46, 0.9),
+                0 0 30px rgba(255, 223, 58, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
   }
 }
 
 .game2048-tile-new {
-  animation: tile-appear 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  animation: tile-appear 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
 .game2048-score-animated {
-  animation: score-increase 0.4s ease-out;
+  animation: score-increase 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
