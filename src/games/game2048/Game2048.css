@@ -129,6 +129,25 @@
   transition: all 0.15s ease-in-out;
 }
 
+/* Animation classes for tile movements */
+.game2048-cell-moving {
+  transition: transform 0.15s ease-in-out;
+  z-index: 2;
+}
+
+.game2048-cell-merging {
+  transition: all 0.2s ease-in-out;
+  z-index: 3;
+}
+
+.game2048-cell-merged {
+  animation: tile-merge 0.2s ease-in-out;
+}
+
+.game2048-cell-new {
+  animation: tile-appear 0.2s ease-in-out;
+}
+
 .game2048-tile-2 {
   background: #eee4da;
   color: #776e65;
@@ -391,11 +410,14 @@
   }
 }
 
-/* Animation for new tiles */
+/* Animation for new tiles - enhanced pop-in effect */
 @keyframes tile-appear {
   0% {
     opacity: 0;
-    transform: scale(0.8);
+    transform: scale(0.3);
+  }
+  50% {
+    transform: scale(1.2);
   }
   100% {
     opacity: 1;
@@ -403,6 +425,43 @@
   }
 }
 
+/* Animation for merged tiles - enhanced merge effect */
+@keyframes tile-merge {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+    box-shadow: 0 0 15px rgba(237, 194, 46, 0.6);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: none;
+  }
+}
+
+/* Animation for score increase */
+@keyframes score-increase {
+  0% {
+    transform: scale(1);
+    color: inherit;
+  }
+  50% {
+    transform: scale(1.15);
+    color: #f67c5f;
+    text-shadow: 0 0 10px rgba(246, 124, 95, 0.5);
+  }
+  100% {
+    transform: scale(1);
+    color: inherit;
+    text-shadow: none;
+  }
+}
+
 .game2048-tile-new {
-  animation: tile-appear 0.2s ease-in-out;
+  animation: tile-appear 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.game2048-score-animated {
+  animation: score-increase 0.4s ease-out;
 }
