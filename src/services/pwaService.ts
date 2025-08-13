@@ -1,4 +1,5 @@
 // PWA Service for handling installation and service worker
+import { getAbsolutePath } from '../utils/basePath'
 
 interface BeforeInstallPromptEvent extends Event {
   readonly platforms: string[];
@@ -28,8 +29,9 @@ export class PWAService {
     // Register service worker
     if ('serviceWorker' in navigator) {
       try {
-        const registration = await navigator.serviceWorker.register('/sw.js', {
-          scope: '/',
+        const swPath = getAbsolutePath('/sw.js')
+        const registration = await navigator.serviceWorker.register(swPath, {
+          scope: getAbsolutePath('/'),
         });
         
         console.log('Service Worker registered successfully:', registration);

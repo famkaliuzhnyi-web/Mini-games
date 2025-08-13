@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && npm run update-pwa-assets && vite build && npm run restore-pwa-assets",
+    "update-pwa-assets": "NODE_ENV=production node scripts/updateManifest.js && NODE_ENV=production node scripts/updateServiceWorker.js",
+    "restore-pwa-assets": "node scripts/restoreAssets.js",
     "lint": "eslint .",
     "preview": "vite preview"
   },
