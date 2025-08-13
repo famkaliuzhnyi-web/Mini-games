@@ -131,7 +131,7 @@ const useTicTacToeState = (playerId: string) => {
           moveHistory: [...gameState.data.moveHistory, move],
           winningCombination,
           multiplayer: gameState.data.multiplayer?.isMultiplayer ? {
-            ...gameState.data.multiplayer,
+            ...(gameState.data.multiplayer || {}),
             waitingForMove: newGameStatus === 'playing' // Wait for opponent's move
           } : gameState.data.multiplayer || { isMultiplayer: false }
         },
@@ -231,7 +231,7 @@ const useTicTacToeState = (playerId: string) => {
             isMultiplayer: true,
             sessionId: session.id,
             isHost: true,
-            playerId: playerId,
+            playerId,
             waitingForMove: false
           }
         },
@@ -262,7 +262,7 @@ const useTicTacToeState = (playerId: string) => {
             isMultiplayer: true,
             sessionId: session.id,
             isHost: false,
-            playerId: playerId,
+            playerId,
             waitingForMove: true // Guest waits for host's first move
           }
         },
@@ -578,18 +578,18 @@ export const TicTacToeControls: React.FC<SlotComponentProps> = ({ playerId }) =>
       <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
         <button 
           onClick={handleNewGame}
-          disabled={gameState.data.multiplayer.isMultiplayer && multiplayerSession?.state === 'waiting'}
+          disabled={gameState.data.multiplayer?.isMultiplayer && multiplayerSession?.state === 'waiting'}
           style={{ 
             padding: '0.5rem 1rem',
-            backgroundColor: (gameState.data.multiplayer.isMultiplayer && multiplayerSession?.state === 'waiting') 
+            backgroundColor: (gameState.data.multiplayer?.isMultiplayer && multiplayerSession?.state === 'waiting') 
               ? `var(--color-surface)` 
               : `var(--color-accent)`,
-            color: (gameState.data.multiplayer.isMultiplayer && multiplayerSession?.state === 'waiting') 
+            color: (gameState.data.multiplayer?.isMultiplayer && multiplayerSession?.state === 'waiting') 
               ? `var(--color-textMuted)` 
               : 'white',
             border: 'none',
             borderRadius: '6px',
-            cursor: (gameState.data.multiplayer.isMultiplayer && multiplayerSession?.state === 'waiting') 
+            cursor: (gameState.data.multiplayer?.isMultiplayer && multiplayerSession?.state === 'waiting') 
               ? 'not-allowed' 
               : 'pointer',
             fontSize: '0.9rem',
