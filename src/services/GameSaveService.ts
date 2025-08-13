@@ -227,11 +227,8 @@ export class GameSaveService {
    */
   public setupAutoSave<T extends Record<string, unknown>>(
     gameId: string,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _playerId: string,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _gameStateProvider: () => GameState<T>,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _intervalMs?: number
   ): void {
     // Auto-save is now game-triggered, not timer-based
