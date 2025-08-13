@@ -321,65 +321,63 @@ export const SudokuGameField: React.FC<SlotComponentProps> = ({ playerId }) => {
       backgroundColor: `var(--color-gameBackground)`,
       color: `var(--color-text)`
     }}>
-      {/* Game Status */}
-      <div style={{
-        fontSize: '1.2rem',
-        fontWeight: 'bold',
-        marginBottom: '1rem',
-        textAlign: 'center'
-      }}>
-        {gameState.data.isComplete ? '🎉 Puzzle Complete!' : `${gameState.data.difficulty.charAt(0).toUpperCase() + gameState.data.difficulty.slice(1)} Sudoku`}
+      {/* Modern Game Status */}
+      <div className="modern-game-status">
+        <div className="status-title">
+          {gameState.data.isComplete ? '🎉 Puzzle Complete!' : `${gameState.data.difficulty.charAt(0).toUpperCase() + gameState.data.difficulty.slice(1)} Sudoku`}
+        </div>
+        {!gameState.data.isComplete && (
+          <div className="progress-hint">
+            Fill each row, column, and 3×3 box with digits 1-9
+          </div>
+        )}
       </div>
 
-      {/* Sudoku Board */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(9, 1fr)',
-          gridTemplateRows: 'repeat(9, 1fr)',
-          gap: '1px',
-          backgroundColor: `var(--color-border)`,
-          padding: '2px',
-          borderRadius: '8px',
-          maxWidth: 'min(80vw, 400px)',
-          maxHeight: 'min(80vw, 400px)',
-          aspectRatio: '1'
-        }}
-      >
+      {/* Modern Sudoku Board */}
+      <div className="modern-sudoku-board">
         {gameState.data.uiGrid.map((row, rowIndex) =>
-          row.map((cell, colIndex) => (
-            <button
-              key={`${rowIndex}-${colIndex}`}
-              onClick={() => handleCellClick(rowIndex, colIndex)}
-              style={{
-                backgroundColor: selectedCell && selectedCell.row === rowIndex && selectedCell.col === colIndex 
-                  ? `var(--color-accent)` 
-                  : cell.isInitial 
-                    ? `var(--color-surface)` 
-                    : `var(--color-gameSurface)`,
-                border: cell.isInvalid ? `2px solid var(--color-error)` : 'none',
-                color: cell.isInitial 
-                  ? `var(--color-text)` 
-                  : cell.value === 0 
-                    ? 'transparent' 
-                    : `var(--color-accent)`,
-                fontSize: 'min(4vw, 1.2rem)',
-                fontWeight: cell.isInitial ? 'bold' : 'normal',
-                cursor: cell.isInitial ? 'default' : 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                minHeight: '32px',
-                aspectRatio: '1',
-                touchAction: 'manipulation',
-                // Add stronger borders for 3x3 boxes
-                borderRight: (colIndex + 1) % 3 === 0 && colIndex < 8 ? `2px solid var(--color-border)` : undefined,
-                borderBottom: (rowIndex + 1) % 3 === 0 && rowIndex < 8 ? `2px solid var(--color-border)` : undefined
-              }}
-            >
-              {cell.value === 0 ? '' : cell.value}
-            </button>
-          ))
+          row.map((cell, colIndex) => {
+            const isSelected = selectedCell && selectedCell.row === rowIndex && selectedCell.col === colIndex;
+            const isRelated = selectedCell && (
+              selectedCell.row === rowIndex || 
+              selectedCell.col === colIndex || 
+              (Math.floor(selectedCell.row / 3) === Math.floor(rowIndex / 3) && 
+               Math.floor(selectedCell.col / 3) === Math.floor(colIndex / 3))
+            );
+            const isSameNumber = selectedCell && cell.value !== 0 && 
+              gameState.data.uiGrid[selectedCell.row][selectedCell.col].value === cell.value;
+            
+            return (
+              <button
+                key={`${rowIndex}-${colIndex}`}
+                onClick={() => handleCellClick(rowIndex, colIndex)}
+                className={`
+                  modern-sudoku-cell
+                  ${cell.isInitial ? 'given' : 'user-entry'}
+                  ${isSelected ? 'selected' : ''}
+                  ${isRelated && !isSelected ? 'related' : ''}
+                  ${isSameNumber && !isSelected ? 'same-number' : ''}
+                  ${cell.isInvalid ? 'invalid' : ''}
+                  ${rowIndex % 3 === 2 && rowIndex < 8 ? 'bottom-box-border' : ''}
+                  ${colIndex % 3 === 2 && colIndex < 8 ? 'right-box-border' : ''}
+                `}
+                aria-label={`Row ${rowIndex + 1}, Column ${colIndex + 1}, ${cell.value === 0 ? 'empty' : `value ${cell.value}`}`}
+                tabIndex={0}
+              >
+                <span className="cell-value">
+                  {cell.value === 0 ? '' : cell.value}
+                </span>
+                {/* Notes placeholder for future implementation */}
+                {cell.value === 0 && cell.notes && cell.notes.length > 0 && (
+                  <div className="cell-notes">
+                    {cell.notes.slice(0, 9).map(note => (
+                      <span key={note} className="note">{note}</span>
+                    ))}
+                  </div>
+                )}
+              </button>
+            );
+          })
         )}
       </div>
     </div>

@@ -27,7 +27,164 @@
   color: var(--color-text, #333);
 }
 
-/* Sudoku Board */
+/* Modern Sudoku Board */
+.modern-sudoku-board {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  grid-template-rows: repeat(9, 1fr);
+  gap: 1px;
+  background-color: var(--color-border, #2c3e50);
+  border: 3px solid var(--color-border, #2c3e50);
+  border-radius: 12px;
+  padding: 3px;
+  margin: 1rem 0;
+  max-width: min(85vw, 450px);
+  aspect-ratio: 1;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* Modern Sudoku Cell */
+.modern-sudoku-cell {
+  background-color: var(--color-surface, #ffffff);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 2px;
+  outline: none;
+}
+
+.modern-sudoku-cell:hover:not(.given) {
+  background-color: var(--color-accent-light, #e3f2fd);
+  transform: scale(1.02);
+}
+
+.modern-sudoku-cell:focus {
+  outline: 2px solid var(--color-accent, #2196f3);
+  outline-offset: -2px;
+  z-index: 1;
+}
+
+/* Cell Value Styling */
+.cell-value {
+  font-size: clamp(1.1rem, 4vw, 1.8rem);
+  font-weight: 600;
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+  line-height: 1;
+}
+
+/* Cell States */
+.modern-sudoku-cell.given {
+  background-color: var(--color-surface-darker, #f8f9fa);
+  cursor: default;
+}
+
+.modern-sudoku-cell.given .cell-value {
+  color: var(--color-text, #1a1a1a);
+  font-weight: 700;
+}
+
+.modern-sudoku-cell.user-entry .cell-value {
+  color: var(--color-accent, #2196f3);
+  font-weight: 600;
+}
+
+.modern-sudoku-cell.selected {
+  background-color: var(--color-accent, #2196f3) !important;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+  z-index: 2;
+}
+
+.modern-sudoku-cell.selected .cell-value {
+  color: white;
+  font-weight: 700;
+}
+
+.modern-sudoku-cell.related {
+  background-color: var(--color-accent-light, #e3f2fd);
+}
+
+.modern-sudoku-cell.same-number {
+  background-color: var(--color-warning-light, #fff3e0);
+  border: 2px solid var(--color-warning, #ff9800);
+}
+
+.modern-sudoku-cell.invalid {
+  background-color: var(--color-error-light, #ffebee) !important;
+  border: 2px solid var(--color-error, #f44336);
+  animation: shake 0.5s ease-in-out;
+}
+
+.modern-sudoku-cell.invalid .cell-value {
+  color: var(--color-error, #f44336);
+}
+
+/* 3x3 Box Borders */
+.modern-sudoku-cell.right-box-border {
+  border-right: 3px solid var(--color-border, #2c3e50);
+}
+
+.modern-sudoku-cell.bottom-box-border {
+  border-bottom: 3px solid var(--color-border, #2c3e50);
+}
+
+/* Notes System */
+.cell-notes {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  right: 2px;
+  bottom: 2px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 1px;
+  pointer-events: none;
+}
+
+.note {
+  font-size: 0.6rem;
+  font-weight: 500;
+  color: var(--color-text-secondary, #666);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+/* Modern Game Status */
+.modern-game-status {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+}
+
+.status-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text, #1a1a1a);
+  margin-bottom: 0.5rem;
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.progress-hint {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary, #666);
+  font-weight: 400;
+}
+
+/* Shake Animation for Errors */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
+}
+
+/* Legacy Board Styles (kept for compatibility) */
 .sudoku-board {
   display: grid;
   grid-template-columns: repeat(9, 1fr);
@@ -85,7 +242,7 @@
   font-weight: bold;
 }
 
-/* 3x3 box borders */
+/* 3x3 box borders - legacy */
 .sudoku-cell:nth-child(3n) {
   border-right: 2px solid var(--color-border, #333);
 }

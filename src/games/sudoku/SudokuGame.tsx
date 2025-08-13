@@ -335,9 +335,15 @@ export const SudokuGame: React.FC<SudokuGameProps> = ({ playerId }) => {
       flexDirection: 'column',
       gap: '1rem'
     }}>
-      <div style={{ textAlign: 'center' }}>
-        <h2>{SUDOKU_CONFIG.name}</h2>
-        <p>{SUDOKU_CONFIG.description}</p>
+      <div className="modern-game-status">
+        <div className="status-title">
+          {gameState.data.isComplete ? '🎉 Puzzle Complete!' : `${gameState.data.difficulty.charAt(0).toUpperCase() + gameState.data.difficulty.slice(1)} Sudoku`}
+        </div>
+        {!gameState.data.isComplete && (
+          <div className="progress-hint">
+            {SUDOKU_CONFIG.description}
+          </div>
+        )}
       </div>
 
       {/* Game Stats */}
