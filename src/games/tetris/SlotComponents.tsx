@@ -109,7 +109,7 @@ export const TetrisGameField: React.FC<{ playerId: string }> = ({ playerId }) =>
 
 // Stats Component (game statistics and next piece)
 export const TetrisStats: React.FC<{ playerId: string }> = ({ playerId }) => {
-  const { gameState, isLoading, hasSave, autoSaveEnabled } = useTetrisState(playerId);
+  const { gameState, isLoading, autoSaveEnabled } = useTetrisState(playerId);
 
   if (isLoading) {
     return <div>Loading stats...</div>;
@@ -155,8 +155,6 @@ export const TetrisControls: React.FC<{ playerId: string }> = ({ playerId }) => 
   const {
     gameState,
     isLoading,
-    autoSaveEnabled,
-    toggleAutoSave,
     handlePause,
     handleReset,
     handleMobileMove,

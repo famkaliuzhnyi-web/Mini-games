@@ -100,10 +100,8 @@ export const TetrisGame: React.FC<TetrisGameProps> = ({ playerId }) => {
   const {
     gameState,
     setGameState,
-    hasSave,
     isLoading,
-    autoSaveEnabled,
-    toggleAutoSave
+    autoSaveEnabled
   } = useGameSave<TetrisGameData>({
     gameId: 'tetris',
     playerId,

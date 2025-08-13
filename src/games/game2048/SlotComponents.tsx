@@ -114,7 +114,6 @@ export const Game2048Stats: React.FC<{ playerId: string }> = ({ playerId }) => {
     gameState,
     isLoading,
     scoreAnimated,
-    autoSaveEnabled,
     lastSaveEvent
   } = useGame2048State(playerId);
 
@@ -161,11 +160,8 @@ export const Game2048Controls: React.FC<{ playerId: string }> = ({ playerId }) =
   const {
     gameState,
     isLoading,
-    hasSave,
     handleNewGame,
-    handleUndo,
-    handleManualSave,
-    handleManualLoad
+    handleUndo
   } = useGame2048State(playerId);
 
   if (isLoading) {

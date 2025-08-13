@@ -98,13 +98,9 @@ export const Game2048: React.FC<Game2048Props> = ({ playerId }) => {
   const {
     gameState,
     setGameState,
-    saveGame,
-    loadGame,
     triggerAutoSave,
-    hasSave,
     isLoading,
-    lastSaveEvent,
-    autoSaveEnabled
+    lastSaveEvent
   } = useGameSave<Game2048Data>({
     gameId: 'game2048',
     playerId,
@@ -338,25 +334,6 @@ export const Game2048: React.FC<Game2048Props> = ({ playerId }) => {
     
     return className;
   }, [newTiles, mergedTiles, animatingTiles]);
-
-  // Handle manual save/load
-  const handleManualSave = async () => {
-    const result = await saveGame();
-    if (result.success) {
-      alert('Game saved successfully!');
-    } else {
-      alert(`Save failed: ${result.error}`);
-    }
-  };
-
-  const handleManualLoad = async () => {
-    const result = await loadGame();
-    if (result.success) {
-      alert('Game loaded successfully!');
-    } else {
-      alert(`Load failed: ${result.error}`);
-    }
-  };
 
   if (isLoading) {
     return (
