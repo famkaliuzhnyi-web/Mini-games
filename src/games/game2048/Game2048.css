@@ -246,6 +246,102 @@
   border: 1px solid #f44336;
 }
 
+/* Mobile Touch Controls */
+.game2048-mobile-controls {
+  display: none; /* Hidden on desktop by default */
+  margin-top: 1.5rem;
+  text-align: center;
+}
+
+.game2048-mobile-controls h3 {
+  margin: 0 0 1rem 0;
+  color: #776e65;
+  font-size: 1.1rem;
+}
+
+.game2048-control-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr;
+  gap: 0.75rem;
+  max-width: 200px;
+  margin: 0 auto 1rem auto;
+}
+
+.game2048-control-btn {
+  background: #8f7a66;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 1rem;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.game2048-control-btn:hover:not(:disabled) {
+  background: #7a6a5a;
+  transform: scale(1.05);
+}
+
+.game2048-control-btn:active:not(:disabled) {
+  background: #6a5a4a;
+  transform: scale(0.95);
+}
+
+.game2048-control-btn:disabled {
+  background: #bbada0;
+  cursor: not-allowed;
+  transform: none;
+  opacity: 0.6;
+}
+
+.game2048-control-btn.game2048-control-center {
+  background: #bbada0;
+  cursor: default;
+}
+
+/* Grid positioning */
+.game2048-control-btn:nth-child(1) {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.game2048-control-btn:nth-child(2) {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.game2048-control-btn:nth-child(3) {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.game2048-control-btn:nth-child(4) {
+  grid-column: 3;
+  grid-row: 2;
+}
+
+.game2048-control-btn:nth-child(5) {
+  grid-column: 2;
+  grid-row: 3;
+}
+
+.game2048-mobile-hint {
+  color: #776e65;
+  font-size: 0.9rem;
+  margin: 0.5rem 0 0 0;
+  line-height: 1.4;
+}
+
 /* Mobile responsiveness */
 @media (max-width: 600px) {
   .game2048-container {
@@ -287,6 +383,11 @@
     flex-direction: column;
     align-items: center;
     gap: 0.5rem;
+  }
+
+  /* Show mobile controls on small screens */
+  .game2048-mobile-controls {
+    display: block;
   }
 }
 

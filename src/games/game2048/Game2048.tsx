@@ -1,8 +1,9 @@
 /**
  * 2048 Game - Classic number puzzle game  
  */
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useGameSave } from '../../hooks/useGameSave';
+import { useSwipeGestures } from '../../hooks/useSwipeGestures';
 import type { GameController, GameState, GameConfig } from '../../types/game';
 import type { Game2048Data, Direction } from './types';
 import {
@@ -86,6 +87,7 @@ interface Game2048Props {
 
 export const Game2048: React.FC<Game2048Props> = ({ playerId }) => {
   const controller = useMemo(() => new Game2048Controller(), []);
+  const gameContainerRef = useRef<HTMLDivElement>(null);
   
   const {
     gameState,
@@ -242,6 +244,23 @@ export const Game2048: React.FC<Game2048Props> = ({ playerId }) => {
     };
   }, [handleKeyPress]);
 
+  // Swipe gesture support
+  useSwipeGestures(gameContainerRef, {
+    onSwipeLeft: () => handleMove('left'),
+    onSwipeRight: () => handleMove('right'),
+    onSwipeUp: () => handleMove('up'),
+    onSwipeDown: () => handleMove('down'),
+    minSwipeDistance: 30,
+    maxSwipeTime: 300,
+    preventDefault: true
+  });
+
+  // Mobile control handlers
+  const handleMobileMove = useCallback(async (direction: Direction) => {
+    if (isLoading) return;
+    await handleMove(direction);
+  }, [handleMove, isLoading]);
+
   // Get CSS class for tile value
   const getTileClass = useCallback((value: number) => {
     if (value === 0) return 'game2048-cell';
@@ -276,7 +295,7 @@ export const Game2048: React.FC<Game2048Props> = ({ playerId }) => {
   }
 
   return (
-    <div className="game2048-container">
+    <div className="game2048-container" ref={gameContainerRef}>
       <div className="game2048-header">
         <h1 className="game2048-title">2048</h1>
         <p className="game2048-subtitle">Join numbers and get to the 2048 tile!</p>
@@ -352,11 +371,64 @@ export const Game2048: React.FC<Game2048Props> = ({ playerId }) => {
 
       <div className="game2048-instructions">
         <p>
-          <strong>HOW TO PLAY:</strong> Use arrow keys (↑↓←→) or WASD to move tiles. 
+          <strong>HOW TO PLAY:</strong> Use arrow keys (↑↓←→), WASD, or swipe gestures to move tiles. 
           When two tiles with the same number touch, they merge into one!
         </p>
         <p>
           <small>Moves: {gameState.data.moves} | Auto-save: {autoSaveEnabled ? 'On' : 'Off'}</small>
+        </p>
+      </div>
+
+      {/* Mobile Touch Controls */}
+      <div className="game2048-mobile-controls">
+        <h3>Touch Controls</h3>
+        <div className="game2048-control-grid">
+          <button
+            className="game2048-control-btn"
+            onClick={() => handleMobileMove('up')}
+            disabled={gameState.data.gameOver || isLoading}
+            type="button"
+          >
+            ⬆️
+          </button>
+          
+          <button
+            className="game2048-control-btn"
+            onClick={() => handleMobileMove('left')}
+            disabled={gameState.data.gameOver || isLoading}
+            type="button"
+          >
+            ⬅️
+          </button>
+          
+          <button
+            className="game2048-control-btn game2048-control-center"
+            disabled={true}
+            type="button"
+          >
+            📱
+          </button>
+          
+          <button
+            className="game2048-control-btn"
+            onClick={() => handleMobileMove('right')}
+            disabled={gameState.data.gameOver || isLoading}
+            type="button"
+          >
+            ➡️
+          </button>
+          
+          <button
+            className="game2048-control-btn"
+            onClick={() => handleMobileMove('down')}
+            disabled={gameState.data.gameOver || isLoading}
+            type="button"
+          >
+            ⬇️
+          </button>
+        </div>
+        <p className="game2048-mobile-hint">
+          💡 <em>Swipe on the game board or use these buttons!</em>
         </p>
       </div>
 
