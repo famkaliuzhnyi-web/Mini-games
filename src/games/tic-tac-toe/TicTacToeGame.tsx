@@ -13,6 +13,7 @@ import {
   getNextPlayer, 
   createEmptyBoard 
 } from './gameLogic';
+import './TicTacToeGame.css';
 
 interface TicTacToeGameProps {
   playerId: string;
@@ -185,11 +186,21 @@ export const TicTacToeGame: React.FC<TicTacToeGameProps> = ({ playerId }) => {
    */
   const getCellClass = (row: number, col: number): string => {
     const baseClass = 'tic-tac-toe-cell';
-    const isEmpty = gameState.data.board[row][col] === null;
+    const cellValue = gameState.data.board[row][col];
+    const isEmpty = cellValue === null;
     const isPlayable = gameState.data.gameStatus === 'playing' && isEmpty;
     const isWinningCell = isPartOfWinningCombination(row, col);
     
-    return `${baseClass} ${isPlayable ? 'playable' : ''} ${isEmpty ? 'empty' : 'filled'} ${isWinningCell ? 'winning-cell' : ''}`;
+    let classes = [baseClass];
+    
+    if (isPlayable) classes.push('playable');
+    if (isEmpty) classes.push('empty');
+    if (!isEmpty) classes.push('filled');
+    if (isWinningCell) classes.push('winning-cell');
+    if (cellValue === 'X') classes.push('x-mark');
+    if (cellValue === 'O') classes.push('o-mark');
+    
+    return classes.join(' ');
   };
 
   /**
@@ -261,95 +272,43 @@ export const TicTacToeGame: React.FC<TicTacToeGameProps> = ({ playerId }) => {
 
   if (isLoading) {
     return (
-      <div style={{ padding: '2rem', textAlign: 'center' }}>
+      <div className="tic-tac-toe-loading">
         <h2>Loading Tic-Tac-Toe...</h2>
       </div>
     );
   }
 
   return (
-    <div style={{ 
-      padding: '2rem', 
-      textAlign: 'center', 
-      maxWidth: '600px', 
-      margin: '0 auto',
-      border: '1px solid #ddd',
-      borderRadius: '8px',
-      backgroundColor: '#f9f9f9'
-    }}>
-      <h2>{controller.config.name}</h2>
-      <p>{controller.config.description}</p>
+    <div className="tic-tac-toe-game">
+      <div className="tic-tac-toe-header">
+        <h2>{controller.config.name}</h2>
+        <p>{controller.config.description}</p>
+      </div>
       
       {/* Game Status */}
-      <div style={{ 
-        marginBottom: '1.5rem', 
-        padding: '1rem', 
-        backgroundColor: '#fff', 
-        borderRadius: '4px',
-        border: '1px solid #eee'
-      }}>
-        <div style={{ 
-          fontSize: '1.5rem', 
-          fontWeight: 'bold', 
-          color: gameState.data.gameStatus === 'playing' ? '#333' : '#4CAF50',
-          marginBottom: '0.5rem'
-        }}>
+      <div className="tic-tac-toe-status">
+        <div className={`tic-tac-toe-status-message ${gameState.data.gameStatus === 'playing' ? 'playing' : 'winner'}`}>
           {getStatusMessage()}
         </div>
         
         {/* Game Statistics */}
-        <div style={{ fontSize: '0.9rem', color: '#666' }}>
+        <div className="tic-tac-toe-stats">
           Games: {gameState.data.gamesPlayed} | 
-          X Wins: {gameState.data.xWins} | 
-          O Wins: {gameState.data.oWins} | 
+          X: {gameState.data.xWins} | 
+          O: {gameState.data.oWins} | 
           Ties: {gameState.data.ties}
         </div>
       </div>
 
       {/* Game Board */}
-      <div style={{ 
-        marginBottom: '1.5rem',
-        display: 'inline-block',
-        border: '2px solid #333',
-        borderRadius: '8px',
-        overflow: 'hidden'
-      }}>
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(3, 80px)', 
-          gridTemplateRows: 'repeat(3, 80px)',
-          gap: '1px',
-          backgroundColor: '#333'
-        }}>
+      <div className="tic-tac-toe-board-container">
+        <div className="tic-tac-toe-board">
           {gameState.data.board.map((row, rowIndex) =>
-            row.map((cell, colIndex) => (
+            row.map((_, colIndex) => (
               <button
                 key={`${rowIndex}-${colIndex}`}
                 className={getCellClass(rowIndex, colIndex)}
                 onClick={() => handleCellClick(rowIndex, colIndex)}
-                style={{
-                  backgroundColor: isPartOfWinningCombination(rowIndex, colIndex) ? '#ffeb3b' : '#fff',
-                  border: isPartOfWinningCombination(rowIndex, colIndex) ? '3px solid #ff9800' : 'none',
-                  fontSize: '2rem',
-                  fontWeight: 'bold',
-                  cursor: gameState.data.gameStatus === 'playing' && cell === null ? 'pointer' : 'default',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: cell === 'X' ? '#2196F3' : cell === 'O' ? '#f44336' : '#333',
-                  transition: 'all 0.3s',
-                  boxShadow: isPartOfWinningCombination(rowIndex, colIndex) ? '0 0 10px rgba(255, 152, 0, 0.5)' : 'none'
-                }}
-                onMouseEnter={(e) => {
-                  if (gameState.data.gameStatus === 'playing' && cell === null && !isPartOfWinningCombination(rowIndex, colIndex)) {
-                    e.currentTarget.style.backgroundColor = '#f0f0f0';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!isPartOfWinningCombination(rowIndex, colIndex)) {
-                    e.currentTarget.style.backgroundColor = '#fff';
-                  }
-                }}
               >
                 {getCellContent(rowIndex, colIndex)}
               </button>
@@ -359,18 +318,10 @@ export const TicTacToeGame: React.FC<TicTacToeGameProps> = ({ playerId }) => {
       </div>
 
       {/* Game Controls */}
-      <div style={{ marginBottom: '1.5rem' }}>
+      <div className="tic-tac-toe-controls">
         <button 
           onClick={handleNewGame}
-          style={{ 
-            fontSize: '1.1rem', 
-            padding: '0.75rem 1.5rem',
-            backgroundColor: '#4CAF50',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer'
-          }}
+          className="tic-tac-toe-new-game-btn"
         >
           New Game
         </button>

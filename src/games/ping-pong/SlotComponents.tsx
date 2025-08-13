@@ -19,6 +19,7 @@ import {
   calculateGameDimensions,
   createInitialGameData
 } from './gameLogic';
+import './PingPongGame.css';
 
 interface SlotComponentProps {
   playerId: string;

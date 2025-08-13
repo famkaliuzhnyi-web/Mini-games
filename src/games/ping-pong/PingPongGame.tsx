@@ -18,6 +18,7 @@ import {
   calculateGameDimensions,
   createInitialGameData
 } from './gameLogic';
+import './PingPongGame.css';
 
 interface PingPongGameProps {
   playerId: string;

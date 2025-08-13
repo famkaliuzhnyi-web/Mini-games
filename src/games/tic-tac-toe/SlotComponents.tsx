@@ -16,6 +16,7 @@ import {
 import { multiplayerService } from '../../services/MultiplayerService';
 import type { GameSession } from '../../types/multiplayer';
 import { MultiplayerLobby } from '../../components/multiplayer';
+import './TicTacToeGame.css';
 
 interface SlotComponentProps {
   playerId: string;
@@ -369,25 +370,9 @@ export const TicTacToeGameField: React.FC<SlotComponentProps> = ({ playerId }) =
     <div 
       className="tic-tac-toe-game-field" 
       ref={gameRef}
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        height: '100%',
-        padding: '1rem',
-        backgroundColor: `var(--color-gameBackground)`,
-        color: `var(--color-text)`
-      }}
     >
       {/* Game Status Message */}
-      <div style={{ 
-        fontSize: '1.5rem', 
-        fontWeight: 'bold', 
-        marginBottom: '1.5rem',
-        color: gameState.data.gameStatus === 'playing' ? `var(--color-text)` : `var(--color-success)`,
-        textAlign: 'center'
-      }}>
+      <div className={`tic-tac-toe-status-message ${gameState.data.gameStatus === 'playing' ? 'playing' : 'winner'}`}>
         {gameState.data.gameStatus === 'X-wins' && '🎉 X Wins!'}
         {gameState.data.gameStatus === 'O-wins' && '🎉 O Wins!'}
         {gameState.data.gameStatus === 'tie' && '🤝 It\'s a Tie!'}
@@ -395,58 +380,17 @@ export const TicTacToeGameField: React.FC<SlotComponentProps> = ({ playerId }) =
       </div>
 
       {/* Game Board */}
-      <div style={{ 
-        display: 'inline-block',
-        border: `2px solid var(--color-border)`,
-        borderRadius: '12px',
-        overflow: 'hidden',
-        backgroundColor: `var(--color-border)`
-      }}>
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(3, 1fr)', 
-          gridTemplateRows: 'repeat(3, 1fr)',
-          gap: '2px',
-          width: 'min(60vw, 300px)',
-          height: 'min(60vw, 300px)',
-          maxWidth: '300px',
-          maxHeight: '300px'
-        }}>
+      <div className="tic-tac-toe-board-wrapper">
+        <div className="tic-tac-toe-board-slot">
           {gameState.data.board.map((row, rowIndex) =>
             row.map((cell, colIndex) => (
               <button
                 key={`${rowIndex}-${colIndex}`}
                 onClick={() => handleCellClick(rowIndex, colIndex)}
-                style={{
-                  backgroundColor: isPartOfWinningCombination(rowIndex, colIndex) 
-                    ? `var(--color-warning)` 
-                    : `var(--color-gameSurface)`,
-                  border: isPartOfWinningCombination(rowIndex, colIndex) 
-                    ? `3px solid var(--color-accent)` 
-                    : 'none',
-                  fontSize: 'min(8vw, 3rem)',
-                  fontWeight: 'bold',
-                  cursor: gameState.data.gameStatus === 'playing' && cell === null ? 'pointer' : 'default',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: cell === 'X' ? `var(--color-accent)` : 
-                         cell === 'O' ? `var(--color-error)` : `var(--color-text)`,
-                  transition: 'all 0.3s ease',
-                  aspectRatio: '1',
-                  minHeight: '44px', // Touch-friendly
-                  touchAction: 'manipulation'
-                }}
-                onMouseEnter={(e) => {
-                  if (gameState.data.gameStatus === 'playing' && cell === null && !isPartOfWinningCombination(rowIndex, colIndex)) {
-                    e.currentTarget.style.backgroundColor = `var(--color-surface)`;
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!isPartOfWinningCombination(rowIndex, colIndex)) {
-                    e.currentTarget.style.backgroundColor = `var(--color-gameSurface)`;
-                  }
-                }}
+                className={`tic-tac-toe-cell-slot ${
+                  cell === 'X' ? 'x-mark' : cell === 'O' ? 'o-mark' : ''
+                } ${isPartOfWinningCombination(rowIndex, colIndex) ? 'winning-cell' : ''}`}
+                disabled={gameState.data.gameStatus !== 'playing' || cell !== null}
               >
                 {getCellContent(rowIndex, colIndex)}
               </button>
