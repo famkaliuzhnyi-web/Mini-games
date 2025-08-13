@@ -36,6 +36,11 @@ export const TetrisGameField: React.FC<{ playerId: string }> = ({ playerId }) =>
         event.preventDefault();
         dispatch({ type: 'DROP' });
         break;
+      case 'KeyC':
+      case 'KeyH':
+        event.preventDefault();
+        dispatch({ type: 'HOLD' });
+        break;
       case 'KeyP':
         event.preventDefault();
         dispatch({ type: 'PAUSE' });
@@ -85,7 +90,9 @@ export const TetrisGameField: React.FC<{ playerId: string }> = ({ playerId }) =>
       <TetrisBoard
         grid={gameState.data.grid}
         activePiece={gameState.data.activePiece}
+        ghostPiece={gameState.data.ghostPiece}
         gameOver={gameState.data.gameOver}
+        dangerZoneActive={gameState.data.dangerZoneActive}
       />
       
       {/* Game Status Messages */}
@@ -133,12 +140,16 @@ export const TetrisStats: React.FC<{ playerId: string }> = ({ playerId }) => {
         </div>
       </div>
 
-      {/* Next Piece Preview */}
-      <div className="next-piece">
-        <h4>Next Piece</h4>
-        <div className="next-piece-display">
-          <span className="next-piece-emoji">{nextPieceEmojis[gameState.data.nextPiece]}</span>
-          <span className="next-piece-type">{gameState.data.nextPiece}</span>
+      {/* Next Pieces Preview */}
+      <div className="next-pieces">
+        <h4>Next Pieces</h4>
+        <div className="next-pieces-display">
+          {gameState.data.nextPieces.slice(0, 3).map((piece, index) => (
+            <div key={index} className="next-piece-item">
+              <span className="next-piece-emoji">{nextPieceEmojis[piece]}</span>
+              <span className="next-piece-type">{piece}</span>
+            </div>
+          ))}
         </div>
       </div>
 
