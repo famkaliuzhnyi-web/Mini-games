@@ -32,6 +32,19 @@ export interface WinningCombination {
   type: 'row' | 'column' | 'diagonal';
 }
 
+// Multiplayer mode type
+export type GameMode = 'single-player' | 'multiplayer';
+
+// Multiplayer game state
+export interface MultiplayerState {
+  isMultiplayer: boolean;
+  sessionId?: string;
+  isHost?: boolean;
+  playerId?: string;
+  remotePlayerName?: string;
+  waitingForMove?: boolean;
+}
+
 // Tic-Tac-Toe specific game data that extends base game requirements
 export interface TicTacToeGameData extends Record<string, unknown> {
   board: Board;
@@ -43,4 +56,7 @@ export interface TicTacToeGameData extends Record<string, unknown> {
   oWins: number;
   ties: number;
   winningCombination?: WinningCombination;
+  // Multiplayer support
+  gameMode: GameMode;
+  multiplayer: MultiplayerState;
 }
