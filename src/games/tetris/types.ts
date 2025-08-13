@@ -2,8 +2,8 @@
  * Tetris game type definitions
  */
 
-// Cell value in the game grid
-export type CellValue = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7; // 0 = empty, 1-7 = different piece types
+// Cell value in the game grid (including ghost piece)
+export type CellValue = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | -1; // 0 = empty, 1-7 = different piece types, -1 = ghost
 
 // Game grid (20 rows x 10 columns)
 export type TetrisGrid = CellValue[][];
@@ -34,18 +34,24 @@ export interface GameStats {
   level: number;
   lines: number;
   pieces: number;
+  elapsedTime: number; // seconds since game start
 }
 
 // Tetris-specific game data that extends the platform's game state
 export interface TetrisGameData extends Record<string, unknown> {
   grid: TetrisGrid;
   activePiece: ActivePiece | null;
-  nextPiece: PieceType;
+  ghostPiece: ActivePiece | null; // Preview where piece will land
+  holdPiece: PieceType | null; // Currently held piece
+  nextPieces: PieceType[]; // Queue of upcoming pieces (up to 6)
   stats: GameStats;
   gameOver: boolean;
   paused: boolean;
   lastMoveTime: number;
   dropSpeed: number; // milliseconds between automatic drops
+  canHold: boolean; // Can only hold once per piece
+  gameStartTime: number; // For timer display
+  dangerZoneActive: boolean; // Warning when pieces get too high
 }
 
 // Movement directions
@@ -57,6 +63,7 @@ export type TetrisAction =
   | { type: 'MOVE'; direction: MoveDirection }
   | { type: 'ROTATE'; direction: RotationDirection }
   | { type: 'DROP' }
+  | { type: 'HOLD' } // Hold current piece
   | { type: 'PAUSE' }
   | { type: 'UNPAUSE' }
   | { type: 'RESET' }

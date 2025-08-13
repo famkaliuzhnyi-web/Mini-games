@@ -91,6 +91,41 @@ export function getRandomPieceType(): PieceType {
 }
 
 /**
+ * Generate initial queue of next pieces (7-bag randomization for fairness)
+ */
+export function generateNextPieces(): PieceType[] {
+  const pieces: PieceType[] = ['I', 'O', 'T', 'S', 'Z', 'J', 'L'];
+  const queue: PieceType[] = [];
+  
+  // Generate two full bags to ensure we have enough pieces
+  for (let i = 0; i < 2; i++) {
+    const bag = [...pieces];
+    while (bag.length > 0) {
+      const randomIndex = Math.floor(Math.random() * bag.length);
+      queue.push(bag.splice(randomIndex, 1)[0]);
+    }
+  }
+  
+  return queue.slice(0, 6); // Return first 6 pieces
+}
+
+/**
+ * Create a ghost piece showing where the active piece will land
+ */
+export function createGhostPiece(grid: TetrisGrid, activePiece: ActivePiece): ActivePiece | null {
+  if (!activePiece) return null;
+  
+  let ghostPiece = { ...activePiece };
+  
+  // Drop the piece as far as possible
+  while (isValidPosition(grid, movePiece(ghostPiece, 'down'))) {
+    ghostPiece = movePiece(ghostPiece, 'down');
+  }
+  
+  return ghostPiece;
+}
+
+/**
  * Create a new active piece
  */
 export function createActivePiece(type: PieceType): ActivePiece {
@@ -245,6 +280,19 @@ export function calculateDropSpeed(level: number): number {
 }
 
 /**
+ * Check if the danger zone is active (pieces in top few rows)
+ */
+export function isDangerZoneActive(grid: TetrisGrid): boolean {
+  // Check top 4 rows for any placed pieces
+  for (let row = 0; row < 4; row++) {
+    if (grid[row].some(cell => cell !== 0)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
  * Initialize game statistics
  */
 export function createInitialStats(): GameStats {
@@ -252,22 +300,25 @@ export function createInitialStats(): GameStats {
     score: 0,
     level: 0,
     lines: 0,
-    pieces: 0
+    pieces: 0,
+    elapsedTime: 0
   };
 }
 
 /**
  * Update game statistics after clearing lines
  */
-export function updateStats(stats: GameStats, linesCleared: number): GameStats {
+export function updateStats(stats: GameStats, linesCleared: number, gameStartTime: number): GameStats {
   const newLines = stats.lines + linesCleared;
   const newLevel = calculateLevel(newLines);
   const scoreGain = calculateScore(linesCleared, newLevel);
+  const elapsedTime = Math.floor((Date.now() - gameStartTime) / 1000);
   
   return {
     score: stats.score + scoreGain,
     level: newLevel,
     lines: newLines,
-    pieces: stats.pieces + (linesCleared > 0 ? 0 : 1) // Only count piece if no lines cleared this turn
+    pieces: stats.pieces + (linesCleared > 0 ? 0 : 1), // Only count piece if no lines cleared this turn
+    elapsedTime
   };
 }

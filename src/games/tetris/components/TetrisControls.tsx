@@ -6,9 +6,11 @@ import type { GameStats, PieceType } from '../types';
 
 interface TetrisControlsProps {
   stats: GameStats;
-  nextPiece: PieceType;
+  nextPieces: PieceType[];
+  holdPiece: PieceType | null;
   paused: boolean;
   gameOver: boolean;
+  canHold: boolean;
   onPause: () => void;
   onReset: () => void;
   onMoveLeft?: () => void;
@@ -16,22 +18,26 @@ interface TetrisControlsProps {
   onMoveDown?: () => void;
   onRotate?: () => void;
   onHardDrop?: () => void;
+  onHold?: () => void;
 }
 
 export const TetrisControls: React.FC<TetrisControlsProps> = ({
   stats,
-  nextPiece,
+  nextPieces,
+  holdPiece,
   paused,
   gameOver,
+  canHold,
   onPause,
   onReset,
   onMoveLeft,
   onMoveRight,
   onMoveDown,
   onRotate,
-  onHardDrop
+  onHardDrop,
+  onHold
 }) => {
-  const nextPieceEmojis: Record<PieceType, string> = {
+  const pieceEmojis: Record<PieceType, string> = {
     I: '🟦', // Cyan bar
     O: '🟨', // Yellow square
     T: '🟪', // Purple T
@@ -39,6 +45,13 @@ export const TetrisControls: React.FC<TetrisControlsProps> = ({
     Z: '🟥', // Red Z  
     J: '🔵', // Blue J
     L: '🟠'  // Orange L
+  };
+
+  // Format time in MM:SS
+  const formatTime = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
   return (
@@ -59,24 +72,54 @@ export const TetrisControls: React.FC<TetrisControlsProps> = ({
           <span className="stat-value">{stats.lines}</span>
         </div>
         <div className="stat-row">
+          <span className="stat-label">Time:</span>
+          <span className="stat-value">{formatTime(stats.elapsedTime)}</span>
+        </div>
+        <div className="stat-row">
           <span className="stat-label">Pieces:</span>
           <span className="stat-value">{stats.pieces}</span>
         </div>
       </div>
 
-      {/* Next Piece Preview */}
-      <div className="next-piece">
-        <h3>Next Piece</h3>
-        <div className="next-piece-display">
-          <span className="next-piece-emoji">{nextPieceEmojis[nextPiece]}</span>
-          <span className="next-piece-type">{nextPiece}</span>
+      {/* Hold Piece */}
+      <div className="hold-piece">
+        <h3>Hold</h3>
+        <div className="hold-piece-display">
+          {holdPiece ? (
+            <>
+              <span className="hold-piece-emoji">{pieceEmojis[holdPiece]}</span>
+              <span className="hold-piece-type">{holdPiece}</span>
+            </>
+          ) : (
+            <span className="hold-piece-empty">—</span>
+          )}
+        </div>
+      </div>
+
+      {/* Next Pieces Preview */}
+      <div className="next-pieces">
+        <h3>Next Pieces</h3>
+        <div className="next-pieces-list">
+          {nextPieces.slice(0, 5).map((piece, index) => (
+            <div key={index} className="next-piece-item">
+              <span className="next-piece-emoji">{pieceEmojis[piece]}</span>
+              <span className="next-piece-type">{piece}</span>
+            </div>
+          ))}
         </div>
       </div>
 
 
-
       {/* Action Buttons */}
       <div className="action-buttons">
+        <button
+          onClick={onHold}
+          disabled={gameOver || paused || !canHold}
+          className={`action-btn hold ${!canHold ? 'disabled' : ''}`}
+        >
+          📦 Hold
+        </button>
+        
         <button
           onClick={onPause}
           disabled={gameOver}
@@ -151,6 +194,19 @@ export const TetrisControls: React.FC<TetrisControlsProps> = ({
           <button
             onTouchStart={(e) => {
               e.preventDefault();
+              onHold?.();
+            }}
+            onClick={onHold}
+            disabled={gameOver || paused || !canHold}
+            className="mobile-control-btn hold"
+            type="button"
+          >
+            📦
+          </button>
+          
+          <button
+            onTouchStart={(e) => {
+              e.preventDefault();
               onHardDrop?.();
             }}
             onClick={onHardDrop}
@@ -184,6 +240,8 @@ export const TetrisControls: React.FC<TetrisControlsProps> = ({
         <ul className="tips-list">
           <li>Fill rows to clear lines</li>
           <li>Multiple lines = bonus points</li>
+          <li>Use C or H to hold pieces</li>
+          <li>Hold for strategic advantage</li>
         </ul>
       </div>
     </div>

@@ -10,6 +10,9 @@ import {
   createActivePiece,
   createInitialStats,
   getRandomPieceType,
+  generateNextPieces,
+  createGhostPiece,
+  isDangerZoneActive,
   isValidPosition,
   movePiece,
   rotatePiece,
@@ -37,7 +40,9 @@ class TetrisGameController implements GameController<TetrisGameData> {
 
   getInitialState(): GameState<TetrisGameData> {
     const now = new Date().toISOString();
-    const firstPieceType = getRandomPieceType();
+    const gameStartTime = Date.now();
+    const nextPieces = generateNextPieces();
+    const firstPieceType = nextPieces[0];
     
     return {
       gameId: 'tetris',
@@ -48,12 +53,17 @@ class TetrisGameController implements GameController<TetrisGameData> {
       data: {
         grid: createEmptyGrid(),
         activePiece: createActivePiece(firstPieceType),
-        nextPiece: getRandomPieceType(),
+        ghostPiece: null,
+        holdPiece: null,
+        nextPieces: nextPieces.slice(1),
         stats: createInitialStats(),
         gameOver: false,
         paused: false,
         lastMoveTime: Date.now(),
-        dropSpeed: INITIAL_DROP_SPEED
+        dropSpeed: INITIAL_DROP_SPEED,
+        canHold: true,
+        gameStartTime,
+        dangerZoneActive: false
       },
       isComplete: false,
       score: 0
@@ -61,14 +71,25 @@ class TetrisGameController implements GameController<TetrisGameData> {
   }
 
   validateState(state: GameState<TetrisGameData>): boolean {
-    return !!(
+    const isValid = !!(
       state &&
       state.data &&
       Array.isArray(state.data.grid) &&
       typeof state.data.gameOver === 'boolean' &&
       state.data.stats &&
-      typeof state.data.stats.score === 'number'
+      typeof state.data.stats.score === 'number' &&
+      Array.isArray(state.data.nextPieces) &&
+      typeof state.data.canHold === 'boolean' &&
+      typeof state.data.gameStartTime === 'number' &&
+      typeof state.data.dangerZoneActive === 'boolean'
     );
+    
+    // If validation fails, it might be an old save format - return false to trigger reset
+    if (!isValid) {
+      console.warn('Tetris save validation failed - likely old save format, will reset');
+    }
+    
+    return isValid;
   }
 
   onSaveLoad(state: GameState<TetrisGameData>): void {
@@ -145,10 +166,10 @@ export const useTetrisState = (playerId: string) => {
           data.grid = placePiece(data.grid, data.activePiece);
           const { grid: clearedGrid, linesCleared } = clearCompletedLines(data.grid);
           data.grid = clearedGrid;
-          data.stats = updateStats(data.stats, linesCleared);
+          data.stats = updateStats(data.stats, linesCleared, data.gameStartTime);
           
-          data.activePiece = createActivePiece(data.nextPiece);
-          data.nextPiece = getRandomPieceType();
+          data.activePiece = createActivePiece(data.nextPieces[0]);
+          data.nextPieces = [...data.nextPieces.slice(1), getRandomPieceType()];
           
           if (isGameOver(data.grid, data.activePiece)) {
             data.gameOver = true;
@@ -157,6 +178,13 @@ export const useTetrisState = (playerId: string) => {
           
           data.dropSpeed = calculateDropSpeed(data.stats.level);
           data.stats.pieces++;
+          data.canHold = true;
+          data.dangerZoneActive = isDangerZoneActive(data.grid);
+        }
+        
+        // Update ghost piece
+        if (data.activePiece) {
+          data.ghostPiece = createGhostPiece(data.grid, data.activePiece);
         }
         break;
       }
@@ -167,6 +195,9 @@ export const useTetrisState = (playerId: string) => {
         const rotatedPiece = rotatePiece(data.activePiece, action.direction);
         if (isValidPosition(data.grid, rotatedPiece)) {
           data.activePiece = rotatedPiece;
+          
+          // Update ghost piece
+          data.ghostPiece = createGhostPiece(data.grid, data.activePiece);
         }
         break;
       }
@@ -191,6 +222,33 @@ export const useTetrisState = (playerId: string) => {
           data.activePiece = dropPiece;
           data.stats.score += dropDistance * 2;
           data.lastMoveTime = 0;
+          
+          // Update ghost piece
+          data.ghostPiece = createGhostPiece(data.grid, data.activePiece);
+        }
+        break;
+      }
+
+      case 'HOLD': {
+        if (!data.activePiece || !data.canHold) break;
+        
+        if (data.holdPiece === null) {
+          // First hold - store current piece and spawn next
+          data.holdPiece = data.activePiece.type;
+          data.activePiece = createActivePiece(data.nextPieces[0]);
+          data.nextPieces = [...data.nextPieces.slice(1), getRandomPieceType()];
+        } else {
+          // Swap current piece with held piece
+          const currentType = data.activePiece.type;
+          data.activePiece = createActivePiece(data.holdPiece);
+          data.holdPiece = currentType;
+        }
+        
+        data.canHold = false; // Can only hold once per piece
+        
+        // Update ghost piece
+        if (data.activePiece) {
+          data.ghostPiece = createGhostPiece(data.grid, data.activePiece);
         }
         break;
       }
@@ -229,10 +287,10 @@ export const useTetrisState = (playerId: string) => {
             data.grid = placePiece(data.grid, data.activePiece);
             const { grid: clearedGrid, linesCleared } = clearCompletedLines(data.grid);
             data.grid = clearedGrid;
-            data.stats = updateStats(data.stats, linesCleared);
+            data.stats = updateStats(data.stats, linesCleared, data.gameStartTime);
             
-            data.activePiece = createActivePiece(data.nextPiece);
-            data.nextPiece = getRandomPieceType();
+            data.activePiece = createActivePiece(data.nextPieces[0]);
+            data.nextPieces = [...data.nextPieces.slice(1), getRandomPieceType()];
             
             if (isGameOver(data.grid, data.activePiece)) {
               data.gameOver = true;
@@ -242,6 +300,13 @@ export const useTetrisState = (playerId: string) => {
             data.dropSpeed = calculateDropSpeed(data.stats.level);
             data.stats.pieces++;
             data.lastMoveTime = Date.now();
+            data.canHold = true;
+            data.dangerZoneActive = isDangerZoneActive(data.grid);
+          }
+          
+          // Update ghost piece
+          if (data.activePiece) {
+            data.ghostPiece = createGhostPiece(data.grid, data.activePiece);
           }
         }
         break;
