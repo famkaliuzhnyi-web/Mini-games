@@ -1,4 +1,5 @@
 import React from 'react';
+import { useCoinService } from '../../hooks/useCoinService';
 import './Navigation.css';
 
 interface NavigationProps {
@@ -14,6 +15,8 @@ export const Navigation: React.FC<NavigationProps> = ({
   onHomeClick,
   onProfileClick
 }) => {
+  const { balance } = useCoinService();
+
   return (
     <nav className="navigation">
       <div className="nav-content">
@@ -22,7 +25,10 @@ export const Navigation: React.FC<NavigationProps> = ({
             🏠 Games
           </button>
         )}
-        <div className="nav-user">
+        <div className="nav-right">
+          <div className="nav-coins" title="Your coin balance">
+            🪙 {balance.toLocaleString()}
+          </div>
           <button 
             className="nav-user-name" 
             onClick={onProfileClick}

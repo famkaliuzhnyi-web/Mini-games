@@ -81,8 +81,8 @@ export const useNavigation = () => {
   const setPlayerName = useCallback((name: string) => {
     const trimmedName = name.trim();
     if (!trimmedName) return;
-
-    // Save to localStorage
+    
+    // Save to localStorage - UserService will handle coins initialization
     const profile = userService.saveProfile({
       playerName: trimmedName,
       playerId: navigationState.playerId
