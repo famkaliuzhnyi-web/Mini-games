@@ -1,12 +1,10 @@
 import React from 'react';
-import { CounterGame } from '../../games/counter';
-import { SudokuGame } from '../../games/sudoku';
-import { TetrisGame } from '../../games/tetris';
-import { TicTacToeGame } from '../../games/tic-tac-toe';
-import { PingPongGame } from '../../games/ping-pong';
-import { Game2048 } from '../../games/game2048';
 import { Game2048GameField, Game2048Stats, Game2048Controls } from '../../games/game2048/SlotComponents';
 import { TetrisGameField, TetrisStats, TetrisControls } from '../../games/tetris/SlotComponents';
+import { TicTacToeGameField, TicTacToeStats, TicTacToeControls } from '../../games/tic-tac-toe/SlotComponents';
+import { CounterGameField, CounterStats, CounterControls } from '../../games/counter/SlotComponents';
+import { SudokuGameField, SudokuStats, SudokuControls } from '../../games/sudoku/SlotComponents';
+import { PingPongGameField, PingPongStats, PingPongControls } from '../../games/ping-pong/SlotComponents';
 import { GameLayout } from '../layout/GameLayout';
 import type { GameLayoutSlots } from '../layout/GameLayout';
 import './GameContainer.css';
@@ -96,22 +94,50 @@ export const GameContainer: React.FC<GameContainerProps> = ({
           )
         };
       case 'tic-tac-toe':
-      case 'counter':
-      case 'sudoku':
-      case 'ping-pong':
-        // For other games, use legacy approach until they are updated
+        // Use the proper slots system with dedicated slot components
         return {
-          gameField: (
-            <div className="fullscreen-game-field">
-              {renderLegacyGame()}
-            </div>
-          ),
-          stats: <div className="game-stats-placeholder">Stats coming soon</div>,
-          controls: <div className="game-controls-placeholder">Controls coming soon</div>,
+          gameField: <TicTacToeGameField playerId={playerId} />,
+          stats: <TicTacToeStats playerId={playerId} />,
+          controls: <TicTacToeControls playerId={playerId} />,
           gameInfo: (
             <div>
               <h2>{gameInfo.name}</h2>
-              <p>{gameInfo.description}</p>
+            </div>
+          )
+        };
+      case 'counter':
+        // Use the proper slots system with dedicated slot components
+        return {
+          gameField: <CounterGameField playerId={playerId} />,
+          stats: <CounterStats playerId={playerId} />,
+          controls: <CounterControls playerId={playerId} />,
+          gameInfo: (
+            <div>
+              <h2>{gameInfo.name}</h2>
+            </div>
+          )
+        };
+      case 'sudoku':
+        // Use the proper slots system with dedicated slot components
+        return {
+          gameField: <SudokuGameField playerId={playerId} />,
+          stats: <SudokuStats playerId={playerId} />,
+          controls: <SudokuControls playerId={playerId} />,
+          gameInfo: (
+            <div>
+              <h2>{gameInfo.name}</h2>
+            </div>
+          )
+        };
+      case 'ping-pong':
+        // Use the proper slots system with dedicated slot components
+        return {
+          gameField: <PingPongGameField playerId={playerId} />,
+          stats: <PingPongStats playerId={playerId} />,
+          controls: <PingPongControls playerId={playerId} />,
+          gameInfo: (
+            <div>
+              <h2>{gameInfo.name}</h2>
             </div>
           )
         };
@@ -137,7 +163,12 @@ export const GameContainer: React.FC<GameContainerProps> = ({
             </div>
           ),
           stats: <div>WebSocket Status: Disconnected</div>,
-          controls: <div>Demo controls</div>
+          controls: <div>Demo controls</div>,
+          gameInfo: (
+            <div>
+              <h2>WebSocket Demo</h2>
+            </div>
+          )
         };
       default:
         return {
@@ -153,25 +184,7 @@ export const GameContainer: React.FC<GameContainerProps> = ({
     }
   };
 
-  const renderLegacyGame = () => {
-    switch (gameId) {
-      case 'game2048':
-        return <Game2048 playerId={playerId} />;
-      case 'tetris':
-        return <TetrisGame playerId={playerId} />;
-      case 'tic-tac-toe':
-        return <TicTacToeGame playerId={playerId} />;
-      case 'counter':
-        return <CounterGame playerId={playerId} />;
-      case 'sudoku':
-        return <SudokuGame playerId={playerId} />;
-      case 'ping-pong':
-        return <PingPongGame playerId={playerId} />;
-      default:
-        return null;
-    }
-  };
-
+  // Remove unused renderLegacyGame function as all games are now platformized
   const gameSlots = renderGameInSlots();
 
   return <GameLayout slots={gameSlots} className={`game-container--${gameId}`} />;
