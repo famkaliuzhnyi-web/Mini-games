@@ -126,6 +126,7 @@ export interface MultiplayerService {
   // Game state management
   sendGameMove(move: Record<string, unknown>): Promise<void>;
   sendGameState(state: Record<string, unknown>): Promise<void>;
+  startGame(gameId: string): Promise<void>;
   
   // Player management
   setPlayerReady(isReady: boolean): Promise<void>;

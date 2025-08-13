@@ -1,0 +1,265 @@
+/* Multiplayer Modal Styles */
+
+.multiplayer-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000; /* Above navigation which is z-index: 1000 */
+  padding: 1rem;
+}
+
+.multiplayer-modal {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  max-width: 90vw;
+  max-height: 90vh;
+  width: 600px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.multiplayer-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem;
+  background: var(--color-accent, #2196F3);
+  color: white;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.multiplayer-modal-header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.multiplayer-modal-close {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.multiplayer-modal-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.multiplayer-modal-content {
+  padding: 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Session Setup Styles */
+.multiplayer-session-setup {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.multiplayer-section {
+  text-align: center;
+}
+
+.multiplayer-section h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  color: var(--color-text, #333);
+}
+
+.multiplayer-section p {
+  margin: 0 0 1.5rem 0;
+  color: var(--color-text-secondary, #666);
+  font-size: 0.9rem;
+}
+
+.game-selection {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.game-select-btn {
+  padding: 1rem 1.5rem;
+  background: var(--color-accent, #2196F3);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.game-select-btn:hover:not(:disabled) {
+  background: var(--color-accent-hover, #1976D2);
+  transform: translateY(-1px);
+}
+
+.game-select-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.game-select-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.multiplayer-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: var(--color-text-secondary, #666);
+  margin: 1rem 0;
+}
+
+.multiplayer-divider::before,
+.multiplayer-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-border, #e0e0e0);
+}
+
+.multiplayer-divider span {
+  padding: 0 1rem;
+  background: white;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.join-session-form {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.session-id-input {
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--color-border, #e0e0e0);
+  border-radius: 6px;
+  font-size: 1rem;
+  min-width: 200px;
+  flex: 1;
+  max-width: 300px;
+  transition: border-color 0.2s ease;
+}
+
+.session-id-input:focus {
+  outline: none;
+  border-color: var(--color-accent, #2196F3);
+}
+
+.join-btn {
+  padding: 0.75rem 1.5rem;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  white-space: nowrap;
+}
+
+.join-btn:hover:not(:disabled) {
+  background: #45a049;
+}
+
+.join-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .multiplayer-modal-overlay {
+    padding: 0.5rem;
+  }
+
+  .multiplayer-modal {
+    width: 100%;
+    max-width: none;
+  }
+
+  .multiplayer-modal-header {
+    padding: 1rem;
+  }
+
+  .multiplayer-modal-header h2 {
+    font-size: 1.1rem;
+  }
+
+  .multiplayer-modal-content {
+    padding: 1rem;
+  }
+
+  .multiplayer-session-setup {
+    gap: 1.5rem;
+  }
+
+  .game-selection {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .game-select-btn {
+    width: 100%;
+    max-width: 250px;
+  }
+
+  .join-session-form {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .session-id-input {
+    width: 100%;
+    max-width: none;
+  }
+
+  .join-btn {
+    width: 100%;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .multiplayer-modal {
+    background: var(--color-card, #2d2d30);
+    color: var(--color-text, #ffffff);
+  }
+
+  .multiplayer-divider span {
+    background: var(--color-card, #2d2d30);
+  }
+
+  .session-id-input {
+    background: var(--color-surface, #3c3c3c);
+    color: var(--color-text, #ffffff);
+    border-color: var(--color-border, #555);
+  }
+}

@@ -231,7 +231,7 @@ const useTicTacToeState = (playerId: string) => {
             isMultiplayer: true,
             sessionId: session.id,
             isHost: true,
-            playerId: playerId,
+            playerId,
             waitingForMove: false
           }
         },
@@ -262,7 +262,7 @@ const useTicTacToeState = (playerId: string) => {
             isMultiplayer: true,
             sessionId: session.id,
             isHost: false,
-            playerId: playerId,
+            playerId,
             waitingForMove: true // Guest waits for host's first move
           }
         },
