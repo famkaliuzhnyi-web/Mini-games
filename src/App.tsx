@@ -87,7 +87,7 @@ function MultiplayerJoinPage() {
 
       try {
         await multiplayerService.joinSession({
-          sessionId: sessionId,
+          sessionId,
           playerName: navigation.playerName
         })
         setIsJoining(false)
