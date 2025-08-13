@@ -130,6 +130,10 @@ export const TicTacToeGame: React.FC<TicTacToeGameProps> = ({ playerId }) => {
           gameStatus: 'playing',
           moveHistory: [],
           winningCombination: undefined,
+          gameMode: 'single-player',
+          multiplayer: {
+            isMultiplayer: false
+          },
           ...newStats
         },
         score: 0,
@@ -149,6 +153,10 @@ export const TicTacToeGame: React.FC<TicTacToeGameProps> = ({ playerId }) => {
           gameStatus: 'playing',
           moveHistory: [],
           winningCombination: undefined,
+          gameMode: 'single-player',
+          multiplayer: {
+            isMultiplayer: false
+          },
           gamesPlayed: currentStats.gamesPlayed,
           xWins: currentStats.xWins,
           oWins: currentStats.oWins,

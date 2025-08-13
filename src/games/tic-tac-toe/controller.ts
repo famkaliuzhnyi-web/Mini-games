@@ -42,7 +42,11 @@ export class TicTacToeGameController implements GameController<TicTacToeGameData
         gamesPlayed: 0,
         xWins: 0,
         oWins: 0,
-        ties: 0
+        ties: 0,
+        gameMode: 'single-player',
+        multiplayer: {
+          isMultiplayer: false
+        }
       },
       isComplete: false,
       score: 0
@@ -95,6 +99,19 @@ export class TicTacToeGameController implements GameController<TicTacToeGameData
           typeof data.xWins !== 'number' ||
           typeof data.oWins !== 'number' ||
           typeof data.ties !== 'number') {
+        return false;
+      }
+
+      // Validate multiplayer fields (optional for backward compatibility)
+      if (data.gameMode && !['single-player', 'multiplayer'].includes(data.gameMode)) {
+        return false;
+      }
+
+      if (data.multiplayer && typeof data.multiplayer !== 'object') {
+        return false;
+      }
+
+      if (data.multiplayer && typeof data.multiplayer.isMultiplayer !== 'boolean') {
         return false;
       }
 
