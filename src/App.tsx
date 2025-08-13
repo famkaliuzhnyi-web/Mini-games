@@ -7,6 +7,7 @@ import { GamesList } from './components/GamesList'
 import { GameContainer } from './components/GameContainer'
 import { Navigation } from './components/Navigation'
 import { Profile } from './components/Profile'
+import { InstallPrompt } from './components/InstallPrompt'
 import { useEffect } from 'react'
 
 // Component for the main games list/name entry page
@@ -125,6 +126,7 @@ function App() {
         <Route path="/game/:gameId" element={<GamePage />} />
         <Route path="/profile" element={<ProfilePage />} />
       </Routes>
+      <InstallPrompt />
     </HashRouter>
   )
 }
