@@ -137,24 +137,19 @@ export const Game2048Stats: React.FC<{ playerId: string }> = ({ playerId }) => {
         </div>
       </div>
       <div className="game2048-stats-info">
-        <small>Moves: {gameState.data.moves} | Auto-save: {autoSaveEnabled ? 'On' : 'Off'}</small>
+        <small>Moves: {gameState.data.moves}</small>
       </div>
-      {lastSaveEvent && (
+      {lastSaveEvent && lastSaveEvent.success && (
         <div className="game2048-save-status" style={{ 
-          marginTop: '0.5rem',
-          padding: '0.25rem',
-          backgroundColor: lastSaveEvent.success ? '#e8f5e8' : '#fde8e8',
-          border: `1px solid ${lastSaveEvent.success ? '#4CAF50' : '#f44336'}`,
+          marginTop: '0.25rem',
+          padding: '0.2rem',
+          backgroundColor: '#e8f5e8',
+          border: '1px solid #4CAF50',
           borderRadius: '4px',
-          fontSize: '0.7rem',
+          fontSize: '0.65rem',
           textAlign: 'center'
         }}>
-          {lastSaveEvent.success ? '✅' : '❌'} 
-          {lastSaveEvent.action === 'auto-save' ? 'Auto-saved' : 
-           lastSaveEvent.action === 'save' ? 'Saved' : 
-           lastSaveEvent.action === 'load' ? 'Loaded' : 
-           lastSaveEvent.action === 'drop' ? 'Save deleted' : lastSaveEvent.action}
-          {lastSaveEvent.error && ` (${lastSaveEvent.error})`}
+          ✅ Saved
         </div>
       )}
     </div>
@@ -193,27 +188,6 @@ export const Game2048Controls: React.FC<{ playerId: string }> = ({ playerId }) =
         >
           Undo
         </button>
-        <button 
-          className="game2048-btn game2048-btn-secondary"
-          onClick={handleManualSave}
-        >
-          Save
-        </button>
-        <button 
-          className="game2048-btn game2048-btn-secondary"
-          onClick={handleManualLoad}
-          disabled={!hasSave}
-        >
-          Load
-        </button>
-      </div>
-      <div className="game2048-instructions">
-        <p>
-          <strong>Controls:</strong> Arrow keys, WASD, or swipe to move tiles.
-        </p>
-        <p>
-          📱 <strong>Mobile:</strong> Swipe in any direction on the game board.
-        </p>
       </div>
     </div>
   );

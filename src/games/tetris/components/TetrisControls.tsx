@@ -73,36 +73,7 @@ export const TetrisControls: React.FC<TetrisControlsProps> = ({
         </div>
       </div>
 
-      {/* Game Controls */}
-      <div className="game-controls">
-        <h3>Controls</h3>
-        <div className="controls-info">
-          <div className="control-row">
-            <span className="control-key">←→</span>
-            <span className="control-action">Move</span>
-          </div>
-          <div className="control-row">
-            <span className="control-key">↓</span>
-            <span className="control-action">Soft Drop</span>
-          </div>
-          <div className="control-row">
-            <span className="control-key">↑</span>
-            <span className="control-action">Rotate</span>
-          </div>
-          <div className="control-row">
-            <span className="control-key">Space</span>
-            <span className="control-action">Hard Drop</span>
-          </div>
-          <div className="control-row">
-            <span className="control-key">P</span>
-            <span className="control-action">Pause</span>
-          </div>
-        </div>
-        <div className="swipe-info">
-          <h4>📱 Touch Controls</h4>
-          <p>Swipe left/right to move, down for soft drop, up to rotate pieces</p>
-        </div>
-      </div>
+
 
       {/* Action Buttons */}
       <div className="action-buttons">
@@ -124,7 +95,6 @@ export const TetrisControls: React.FC<TetrisControlsProps> = ({
 
       {/* Mobile Touch Controls */}
       <div className="mobile-controls">
-        <h3>Touch Controls</h3>
         <div className="mobile-control-grid">
           <button
             onTouchStart={(e) => {
@@ -211,13 +181,9 @@ export const TetrisControls: React.FC<TetrisControlsProps> = ({
 
       {/* Tips */}
       <div className="tips">
-        <h3>Tips</h3>
         <ul className="tips-list">
-          <li>Clear lines by filling complete rows</li>
-          <li>Clearing multiple lines gives bonus points</li>
-          <li>Game speeds up every 10 lines</li>
-          <li>Use soft drop for better control</li>
-          <li>Hard drop for maximum speed</li>
+          <li>Fill rows to clear lines</li>
+          <li>Multiple lines = bonus points</li>
         </ul>
       </div>
     </div>

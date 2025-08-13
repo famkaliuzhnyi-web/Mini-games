@@ -370,7 +370,6 @@ export const Game2048: React.FC<Game2048Props> = ({ playerId }) => {
     <div className="game2048-container" ref={gameContainerRef}>
       <div className="game2048-header">
         <h1 className="game2048-title">2048</h1>
-        <p className="game2048-subtitle">Join numbers and get to the 2048 tile!</p>
       </div>
 
       <div className="game2048-score-container">
@@ -399,19 +398,6 @@ export const Game2048: React.FC<Game2048Props> = ({ playerId }) => {
           disabled={!gameState.data.canUndo}
         >
           Undo
-        </button>
-        <button 
-          className="game2048-btn game2048-btn-secondary"
-          onClick={handleManualSave}
-        >
-          Save
-        </button>
-        <button 
-          className="game2048-btn game2048-btn-secondary"
-          onClick={handleManualLoad}
-          disabled={!hasSave}
-        >
-          Load
         </button>
       </div>
 
@@ -445,34 +431,22 @@ export const Game2048: React.FC<Game2048Props> = ({ playerId }) => {
 
       <div className="game2048-instructions">
         <p>
-          <strong>HOW TO PLAY:</strong> Use arrow keys (↑↓←→), WASD, or swipe gestures to move tiles. 
-          When two tiles with the same number touch, they merge into one!
-        </p>
-        <p>
-          <small>Moves: {gameState.data.moves} | Auto-save: {autoSaveEnabled ? 'On' : 'Off'}</small>
-        </p>
-        <p className="game2048-swipe-hint">
-          📱 <strong>Touch Controls:</strong> Swipe up, down, left, or right on the game board to move tiles.
+          <small>Moves: {gameState.data.moves}</small>
         </p>
       </div>
 
       {/* Save Status */}
-      {lastSaveEvent && (
+      {lastSaveEvent && lastSaveEvent.success && (
         <div style={{ 
-          marginTop: '1rem',
-          padding: '0.5rem',
-          backgroundColor: lastSaveEvent.success ? '#e8f5e8' : '#fde8e8',
-          border: `1px solid ${lastSaveEvent.success ? '#4CAF50' : '#f44336'}`,
+          marginTop: '0.5rem',
+          padding: '0.25rem',
+          backgroundColor: '#e8f5e8',
+          border: '1px solid #4CAF50',
           borderRadius: '4px',
-          fontSize: '0.8rem',
+          fontSize: '0.7rem',
           textAlign: 'center'
         }}>
-          {lastSaveEvent.success ? '✅' : '❌'} 
-          {lastSaveEvent.action === 'auto-save' ? 'Auto-saved' : 
-           lastSaveEvent.action === 'save' ? 'Saved' : 
-           lastSaveEvent.action === 'load' ? 'Loaded' : 
-           lastSaveEvent.action === 'drop' ? 'Save deleted' : lastSaveEvent.action}
-          {lastSaveEvent.error && ` (${lastSaveEvent.error})`}
+          ✅ Saved
         </div>
       )}
     </div>

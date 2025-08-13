@@ -80,7 +80,6 @@ export const GameContainer: React.FC<GameContainerProps> = ({
           gameInfo: (
             <div>
               <h2>{gameInfo.name}</h2>
-              <p>{gameInfo.description}</p>
             </div>
           )
         };
@@ -93,7 +92,6 @@ export const GameContainer: React.FC<GameContainerProps> = ({
           gameInfo: (
             <div>
               <h2>{gameInfo.name}</h2>
-              <p>{gameInfo.description}</p>
             </div>
           )
         };
