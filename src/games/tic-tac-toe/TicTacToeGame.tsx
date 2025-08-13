@@ -3,6 +3,7 @@
  */
 import React from 'react';
 import { useGameSave } from '../../hooks/useGameSave';
+import { useCoinService } from '../../hooks/useCoinService';
 import { TicTacToeGameController } from './controller';
 import type { TicTacToeGameData } from './types';
 import { 
@@ -19,6 +20,7 @@ interface TicTacToeGameProps {
 
 export const TicTacToeGame: React.FC<TicTacToeGameProps> = ({ playerId }) => {
   const controller = new TicTacToeGameController();
+  const { awardGameCompletion, awardGamePlay } = useCoinService();
   
   const {
     gameState,
@@ -86,6 +88,20 @@ export const TicTacToeGame: React.FC<TicTacToeGameProps> = ({ playerId }) => {
         isComplete: newGameStatus !== 'playing',
         lastModified: new Date().toISOString()
       });
+
+      // Award coins when game completes
+      if (newGameStatus !== 'playing' && gameState.data.gameStatus === 'playing') {
+        // Award base completion reward
+        let reward = 5; // Base reward for completing a game
+        
+        if (newGameStatus === 'X-wins' || newGameStatus === 'O-wins') {
+          reward += 10; // Bonus for winning
+        } else if (newGameStatus === 'tie') {
+          reward += 3; // Smaller bonus for tie
+        }
+        
+        awardGameCompletion('tic-tac-toe', reward);
+      }
     } catch (error) {
       console.error('Error making move:', error);
     }
@@ -120,6 +136,9 @@ export const TicTacToeGame: React.FC<TicTacToeGameProps> = ({ playerId }) => {
         isComplete: false,
         lastModified: new Date().toISOString()
       });
+      
+      // Award small play reward for starting a new game
+      awardGamePlay('tic-tac-toe', 1);
     } else {
       // No game to complete, just reset
       setGameState({
@@ -139,6 +158,9 @@ export const TicTacToeGame: React.FC<TicTacToeGameProps> = ({ playerId }) => {
         isComplete: false,
         lastModified: new Date().toISOString()
       });
+      
+      // Award small play reward for starting a game
+      awardGamePlay('tic-tac-toe', 1);
     }
   };
 
