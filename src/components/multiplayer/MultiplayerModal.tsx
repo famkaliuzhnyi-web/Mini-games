@@ -31,22 +31,48 @@ export const MultiplayerModal: React.FC<MultiplayerModalProps> = ({
   // Generate a unique player ID
   const [playerId] = useState(() => Math.random().toString(36).substring(2, 15));
 
+  // Create session immediately when modal opens
   useEffect(() => {
     if (!isOpen) return;
 
-    // Set up event listeners first
-    const handleSessionCreated = (newSession: GameSession) => {
-      setSession(newSession);
-      setIsHost(true);
-      setSessionUrl(multiplayerService.getSessionUrl());
-      setIsCreatingSession(false);
+    const initializeSession = async () => {
+      // Check if already in a session
+      const currentSession = multiplayerService.getCurrentSession();
+      console.log('Current session check:', currentSession);
+      
+      if (currentSession) {
+        console.log('Found existing session, setting state');
+        setSession(currentSession);
+        setIsHost(multiplayerService.isHost());
+        setSessionUrl(multiplayerService.getSessionUrl());
+      } else {
+        console.log('No existing session, creating new one');
+        try {
+          setIsCreatingSession(true);
+          const newSession = await multiplayerService.createSession({
+            maxPlayers: 4,
+            hostName: playerName
+          });
+          console.log('Session created successfully:', newSession);
+          
+          // Directly update the state
+          setSession(newSession);
+          setIsHost(true);
+          setSessionUrl(multiplayerService.getSessionUrl());
+          setIsCreatingSession(false);
+        } catch (error) {
+          console.error('Failed to create multiplayer session:', error);
+          setIsCreatingSession(false);
+        }
+      }
     };
 
-    const handleSessionJoined = (newSession: GameSession) => {
-      setSession(newSession);
-      setIsHost(false);
-      setSessionUrl(null);
-    };
+    initializeSession();
+  }, [isOpen, playerName]);
+
+  // Set up event listeners for multiplayer events
+  useEffect(() => {
+    if (!isOpen) return;
 
     const handleGameSelected = (data: { gameId: string }) => {
       // Update session in state when host selects a game
@@ -68,56 +94,26 @@ export const MultiplayerModal: React.FC<MultiplayerModalProps> = ({
       }
     };
 
-    multiplayerService.on('session-created', handleSessionCreated);
-    multiplayerService.on('session-joined', handleSessionJoined);
     multiplayerService.on('game-selected', handleGameSelected);
     multiplayerService.on('game-started', handleGameStarted);
 
-    // Now check if already in a session or create one
-    const currentSession = multiplayerService.getCurrentSession();
-    if (currentSession) {
-      setSession(currentSession);
-      setIsHost(multiplayerService.isHost());
-      setSessionUrl(multiplayerService.getSessionUrl());
-    } else {
-      // Create a session immediately when modal opens
-      handleCreateSession();
-    }
-
     return () => {
-      multiplayerService.off('session-created', handleSessionCreated);
-      multiplayerService.off('session-joined', handleSessionJoined);
       multiplayerService.off('game-selected', handleGameSelected);
       multiplayerService.off('game-started', handleGameStarted);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, onNavigateToGame, onClose]);
-
-  const handleCreateSession = async () => {
-    try {
-      console.log('Starting to create session...');
-      setIsCreatingSession(true);
-      console.log('About to call multiplayerService.createSession');
-      const session = await multiplayerService.createSession({
-        maxPlayers: 4, // Default max players
-        hostName: playerName
-        // No gameId - will be selected later
-      });
-      console.log('Session created successfully:', session);
-    } catch (error) {
-      console.error('Failed to create multiplayer session:', error);
-      setIsCreatingSession(false);
-    }
-  };
 
   const handleJoinSession = async () => {
     if (!joinSessionId.trim()) return;
 
     try {
-      await multiplayerService.joinSession({
+      const newSession = await multiplayerService.joinSession({
         sessionId: joinSessionId.trim(),
         playerName
       });
+      setSession(newSession);
+      setIsHost(false);
+      setSessionUrl(null);
       setJoinSessionId('');
     } catch (error) {
       console.error('Failed to join multiplayer session:', error);

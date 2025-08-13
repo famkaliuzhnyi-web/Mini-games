@@ -50,9 +50,7 @@ export class WebRTCMultiplayerService implements MultiplayerService {
   }
 
   private emit<T>(event: MultiplayerEvent, data: T): void {
-    console.log(`Emitting event: ${event}`, data);
     const callbacks = this.eventListeners.get(event) || [];
-    console.log(`Found ${callbacks.length} callbacks for event: ${event}`);
     callbacks.forEach(callback => {
       try {
         callback(data);
