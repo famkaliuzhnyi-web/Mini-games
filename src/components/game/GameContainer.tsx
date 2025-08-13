@@ -1,10 +1,10 @@
 import React from 'react';
-import { CounterGame } from '../games/counter';
-import { SudokuGame } from '../games/sudoku';
-import { TetrisGame } from '../games/tetris';
-import { TicTacToeGame } from '../games/tic-tac-toe';
-import { PingPongGame } from '../games/ping-pong';
-import { Game2048 } from '../games/game2048';
+import { CounterGame } from '../../games/counter';
+import { SudokuGame } from '../../games/sudoku';
+import { TetrisGame } from '../../games/tetris';
+import { TicTacToeGame } from '../../games/tic-tac-toe';
+import { PingPongGame } from '../../games/ping-pong';
+import { Game2048 } from '../../games/game2048';
 import './GameContainer.css';
 
 interface GameContainerProps {
