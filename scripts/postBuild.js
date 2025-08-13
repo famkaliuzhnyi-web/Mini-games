@@ -68,10 +68,42 @@ swContent = swContent.replace(
   `const STATIC_ASSETS = ${staticAssetsString};`
 )
 
-// Update the fallback path in the fetch handler
+// Update the fallback paths in the fetch handler
 swContent = swContent.replace(
-  /return caches\.match\('\/index\.html'\);/g,
-  `return caches.match('${basePath}/index.html');`
+  /return caches\.match\('\/index\.html'\)/g,
+  `return caches.match('${basePath}/index.html')`
+)
+
+swContent = swContent.replace(
+  /return fetch\('\/index\.html'\)/g,
+  `return fetch('${basePath}/index.html')`
+)
+
+// Fix navigation mode fallback
+swContent = swContent.replace(
+  /caches\.match\('\/index\.html'\)/g,
+  `caches.match('${basePath}/index.html')`
+)
+
+swContent = swContent.replace(
+  /fetch\('\/index\.html'\)/g,
+  `fetch('${basePath}/index.html')`
+)
+
+// Fix notification icon paths to use the correct base path
+swContent = swContent.replace(
+  /icon: self\.location\.origin \+ '\/icon-192x192\.png'/g,
+  `icon: self.location.origin + '${basePath}/icon-192x192.png'`
+)
+swContent = swContent.replace(
+  /badge: self\.location\.origin \+ '\/icon-96x96\.png'/g,
+  `badge: self.location.origin + '${basePath}/icon-96x96.png'`
+)
+
+// Fix notification click handler to open the correct base URL
+swContent = swContent.replace(
+  /clients\.openWindow\(self\.location\.origin\)/g,
+  `clients.openWindow(self.location.origin + '${basePath}/')`
 )
 
 // Write the updated service worker back

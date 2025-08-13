@@ -63,6 +63,26 @@ self.addEventListener('fetch', event => {
     return;
   }
 
+  // Special handling for navigation requests (HTML documents)
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      caches.match('/index.html')
+        .then(response => {
+          if (response) {
+            return response;
+          }
+          return fetch('/index.html').catch(() => {
+            // Fallback for offline navigation
+            return new Response(
+              '<!DOCTYPE html><html><head><title>Mini Games - Offline</title></head><body><h1>Mini Games</h1><p>Please check your internet connection and try again.</p></body></html>',
+              { headers: { 'Content-Type': 'text/html' } }
+            );
+          });
+        })
+    );
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request)
       .then(response => {
@@ -93,7 +113,18 @@ self.addEventListener('fetch', event => {
         }).catch(() => {
           // Fallback for offline mode
           if (event.request.destination === 'document') {
-            return caches.match('/index.html');
+            // For HTML requests, always return the index.html so React Router can handle it
+            return caches.match('/index.html').then(response => {
+              if (response) return response;
+              // If index.html is not cached, try to get it from the network
+              return fetch('/index.html').catch(() => {
+                // Last resort - return a basic offline page
+                return new Response(
+                  '<!DOCTYPE html><html><head><title>Mini Games - Offline</title></head><body><h1>Mini Games</h1><p>Please check your internet connection and try again.</p></body></html>',
+                  { headers: { 'Content-Type': 'text/html' } }
+                );
+              });
+            });
           }
         });
       })
@@ -119,8 +150,8 @@ self.addEventListener('push', event => {
     
     const options = {
       body: data.body || 'You have a new game update!',
-      icon: '/icon-192x192.png',
-      badge: '/icon-96x96.png',
+      icon: self.location.origin + '/icon-192x192.png',
+      badge: self.location.origin + '/icon-96x96.png',
       tag: 'mini-games-notification',
       renotify: true,
       actions: [
@@ -147,7 +178,7 @@ self.addEventListener('notificationclick', event => {
 
   if (event.action === 'open') {
     event.waitUntil(
-      clients.openWindow('/')
+      clients.openWindow(self.location.origin)
     );
   }
 });
