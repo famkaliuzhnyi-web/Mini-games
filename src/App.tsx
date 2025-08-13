@@ -2,6 +2,8 @@ import './App.css'
 import { HashRouter, Routes, Route } from 'react-router-dom'
 import { useGameSession } from './hooks/useGameSession'
 import { NameEntry, Profile, GameContainer, GamesList, Navigation, InstallPrompt, ErrorBoundary } from './components'
+import { useEffect } from 'react'
+import { ThemeService } from './services/ThemeService'
 
 // Component for the main games list/name entry page
 function MainPage() {
@@ -70,6 +72,11 @@ function ProfilePage() {
 }
 
 function App() {
+  // Initialize theme service
+  useEffect(() => {
+    ThemeService.getInstance();
+  }, []);
+
   return (
     <ErrorBoundary>
       <HashRouter>
