@@ -4,7 +4,7 @@
 import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { useGameSave } from '../../hooks/useGameSave';
 import { PingPongGameController } from './controller';
-import type { PingPongGameData, KeyState } from './types';
+import type { PingPongGameData, KeyState, TouchState, Paddle, Size } from './types';
 import type { GameState } from '../../types/game';
 import {
   updatePlayerPaddle,
@@ -13,7 +13,9 @@ import {
   resetBall,
   isGameOver,
   getWinner,
-  GAME_CONFIG
+  LEGACY_GAME_CONFIG,
+  calculateGameDimensions,
+  createInitialGameData
 } from './gameLogic';
 
 interface PingPongGameProps {
@@ -32,9 +34,33 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
     s: false,
     space: false
   });
+  const touchStateRef = useRef<TouchState>({
+    isActive: false,
+    startY: 0,
+    currentY: 0,
+    paddleStartY: 0
+  });
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [gameDimensions, setGameDimensions] = useState(() => 
+    calculateGameDimensions(LEGACY_GAME_CONFIG.GAME_WIDTH, LEGACY_GAME_CONFIG.GAME_HEIGHT)
+  );
   
+  // Mobile detection state
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 768);
+
+  // Update mobile state on resize
+  useEffect(() => {
+    const updateMobileState = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener('resize', updateMobileState);
+    return () => window.removeEventListener('resize', updateMobileState);
+  }, []);
+
   // Key state for paddle control
   const [keyState, setKeyState] = useState<KeyState>(keyStateRef.current);
+  const [touchState, setTouchState] = useState<TouchState>(touchStateRef.current);
 
   const {
     gameState,
@@ -56,6 +82,39 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
     onSaveDropped: controller.onSaveDropped
   });
 
+  // Handle responsive dimensions
+  useEffect(() => {
+    const updateDimensions = () => {
+      if (containerRef.current) {
+        const containerWidth = containerRef.current.clientWidth - 40; // Account for padding
+        const maxHeight = window.innerHeight * 0.4; // Max 40% of viewport height
+        const newDimensions = calculateGameDimensions(containerWidth, maxHeight);
+        setGameDimensions(newDimensions);
+      }
+    };
+
+    updateDimensions();
+    window.addEventListener('resize', updateDimensions);
+    return () => window.removeEventListener('resize', updateDimensions);
+  }, []);
+
+  // Update game state when dimensions change (for new games only)
+  useEffect(() => {
+    if (gameState && gameState.data.gameStatus === 'playing') {
+      // Only update dimensions if game area doesn't match new dimensions
+      if (gameState.data.gameArea.width !== gameDimensions.width || 
+          gameState.data.gameArea.height !== gameDimensions.height) {
+        // Only auto-update for new games or when dimensions are significantly different
+        const widthDiff = Math.abs(gameState.data.gameArea.width - gameDimensions.width);
+        const heightDiff = Math.abs(gameState.data.gameArea.height - gameDimensions.height);
+        
+        if (widthDiff > 50 || heightDiff > 25) {
+          startNewGame(); // This will use the new dimensions
+        }
+      }
+    }
+  }, [gameDimensions]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Update refs when state changes
   useEffect(() => {
     gameStateRef.current = gameState;
@@ -64,6 +123,93 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
   useEffect(() => {
     keyStateRef.current = keyState;
   }, [keyState]);
+
+  useEffect(() => {
+    touchStateRef.current = touchState;
+  }, [touchState]);
+
+  /**
+   * Handle touch start for paddle control
+   */
+  const handleTouchStart = useCallback((event: React.TouchEvent) => {
+    event.preventDefault();
+    const touch = event.touches[0];
+    const currentGameState = gameStateRef.current;
+    
+    if (!currentGameState) return;
+    
+    setTouchState({
+      isActive: true,
+      startY: touch.clientY,
+      currentY: touch.clientY,
+      paddleStartY: currentGameState.data.playerPaddle.y
+    });
+  }, []);
+
+  /**
+   * Handle touch move for paddle control
+   */
+  const handleTouchMove = useCallback((event: React.TouchEvent) => {
+    event.preventDefault();
+    if (!touchStateRef.current.isActive) return;
+    
+    const touch = event.touches[0];
+    setTouchState(prev => ({
+      ...prev,
+      currentY: touch.clientY
+    }));
+  }, []);
+
+  /**
+   * Handle touch end
+   */
+  const handleTouchEnd = useCallback((event: React.TouchEvent) => {
+    event.preventDefault();
+    setTouchState({
+      isActive: false,
+      startY: 0,
+      currentY: 0,
+      paddleStartY: 0
+    });
+  }, []);
+
+  /**
+   * Handle touch tap for pause/resume
+   */
+  const handleTouchTap = useCallback((event: React.TouchEvent) => {
+    // Only handle tap if it was a short touch (not a drag)
+    const touch = event.changedTouches[0];
+    const touchDuration = Date.now() - (event.timeStamp || 0);
+    const touchDistance = Math.abs(touch.clientY - touchStateRef.current.startY);
+    
+    if (touchDuration < 200 && touchDistance < 10) {
+      if (gameState.data.gameStatus === 'paused') {
+        resumeGame();
+      } else if (gameState.data.gameStatus === 'playing') {
+        pauseGame();
+      }
+    }
+  }, [gameState.data.gameStatus]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  /**
+   * Update player paddle position based on touch input
+   */
+  const updatePlayerPaddleWithTouch = useCallback((paddle: Paddle, gameArea: Size) => {
+    const currentTouchState = touchStateRef.current;
+    
+    if (!currentTouchState.isActive) return paddle;
+    
+    const touchDelta = currentTouchState.currentY - currentTouchState.startY;
+    const newY = Math.max(0, Math.min(
+      gameArea.height - paddle.height,
+      currentTouchState.paddleStartY + touchDelta
+    ));
+    
+    return {
+      ...paddle,
+      y: newY
+    };
+  }, []);
 
   /**
    * Pause game
@@ -164,11 +310,13 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
 
     const currentData = currentGameState.data;
       
-    // Update player paddle
-    const newPlayerPaddle = updatePlayerPaddle(currentData.playerPaddle, currentKeyState, currentData.gameArea);
+    // Update player paddle (with both keyboard and touch input)
+    let newPlayerPaddle = updatePlayerPaddle(currentData.playerPaddle, currentKeyState, currentData.gameArea);
+    newPlayerPaddle = updatePlayerPaddleWithTouch(newPlayerPaddle, currentData.gameArea);
     
-    // Update AI paddle
-    const newAIPaddle = updateAIPaddle(currentData.aiPaddle, currentData.ball, currentData.gameArea);
+    // Update AI paddle with dynamic reaction speed
+    const aiReactionSpeed = currentData.gameArea.width * 0.004375; // AI_REACTION_SPEED_RATIO
+    const newAIPaddle = updateAIPaddle(currentData.aiPaddle, currentData.ball, currentData.gameArea, aiReactionSpeed);
     
     // Update ball and check for scoring
     const { ball: newBall, scored } = updateBall(
@@ -196,7 +344,11 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
       }
       
       // Reset ball after scoring
-      ballToUse = resetBall(currentData.gameArea);
+      ballToUse = resetBall(
+        currentData.gameArea, 
+        currentData.ball.width,
+        Math.max(1, currentData.gameArea.width * 0.005) // BALL_INITIAL_SPEED_RATIO
+      );
       
       // Check for game over
       if (isGameOver(newScore)) {
@@ -229,7 +381,7 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
 
     setGameState(newState);
     gameLoopRef.current = requestAnimationFrame(gameLoop);
-  }, [setGameState]);
+  }, [setGameState, updatePlayerPaddleWithTouch]);
 
   /**
    * Start new game
@@ -237,10 +389,22 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
   const startNewGame = useCallback(() => {
     const currentStats = gameState.data;
     
+    // Create new game data with current dimensions
+    const newGameData = createInitialGameData({
+      width: gameDimensions.width,
+      height: gameDimensions.height,
+      paddleWidth: gameDimensions.paddleWidth,
+      paddleHeight: gameDimensions.paddleHeight,
+      paddleSpeed: gameDimensions.paddleSpeed,
+      ballSize: gameDimensions.ballSize,
+      ballInitialSpeed: gameDimensions.ballInitialSpeed,
+      paddleMargin: gameDimensions.paddleMargin
+    });
+    
     setGameState({
       ...gameState,
       data: {
-        ...controller.getInitialState().data,
+        ...newGameData,
         gamesPlayed: currentStats.gamesPlayed,
         gamesWon: currentStats.gamesWon,
         gamesLost: currentStats.gamesLost,
@@ -250,7 +414,7 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
       isComplete: false,
       lastModified: new Date().toISOString()
     });
-  }, [controller, gameState, setGameState]);
+  }, [gameState, setGameState, gameDimensions]);
 
   /**
    * Set up keyboard event listeners
@@ -379,15 +543,18 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
   }
 
   return (
-    <div style={{ 
-      padding: '2rem', 
-      textAlign: 'center', 
-      maxWidth: '1000px', 
-      margin: '0 auto',
-      border: '1px solid #ddd',
-      borderRadius: '8px',
-      backgroundColor: '#f9f9f9'
-    }}>
+    <div 
+      ref={containerRef}
+      style={{ 
+        padding: '1rem', 
+        textAlign: 'center', 
+        maxWidth: '1000px', 
+        margin: '0 auto',
+        border: '1px solid #ddd',
+        borderRadius: '8px',
+        backgroundColor: '#f9f9f9'
+      }}
+    >
       <h2>{controller.config.name}</h2>
       <p>{controller.config.description}</p>
       
@@ -433,32 +600,60 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
         display: 'inline-block',
         border: '2px solid #333',
         borderRadius: '8px',
-        backgroundColor: '#000'
+        backgroundColor: '#000',
+        position: 'relative',
+        maxWidth: '100%'
       }}>
         <svg
-          width={GAME_CONFIG.GAME_WIDTH}
-          height={GAME_CONFIG.GAME_HEIGHT}
-          style={{ display: 'block' }}
+          width={gameDimensions.width}
+          height={gameDimensions.height}
+          style={{ 
+            display: 'block',
+            maxWidth: '100%',
+            height: 'auto',
+            touchAction: 'none' // Prevent default touch behaviors
+          }}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={(e) => {
+            handleTouchEnd(e);
+            handleTouchTap(e);
+          }}
+          onTouchCancel={handleTouchEnd}
         >
           {/* Game field background */}
           <rect
             x={0}
             y={0}
-            width={GAME_CONFIG.GAME_WIDTH}
-            height={GAME_CONFIG.GAME_HEIGHT}
+            width={gameDimensions.width}
+            height={gameDimensions.height}
             fill="#000"
           />
           
           {/* Center line */}
           <line
-            x1={GAME_CONFIG.GAME_WIDTH / 2}
+            x1={gameDimensions.width / 2}
             y1={0}
-            x2={GAME_CONFIG.GAME_WIDTH / 2}
-            y2={GAME_CONFIG.GAME_HEIGHT}
+            x2={gameDimensions.width / 2}
+            y2={gameDimensions.height}
             stroke="#fff"
             strokeWidth="2"
             strokeDasharray="10,10"
           />
+          
+          {/* Touch area indicator for mobile */}
+          {touchState.isActive && (
+            <rect
+              x={0}
+              y={0}
+              width={gameDimensions.width / 2}
+              height={gameDimensions.height}
+              fill="rgba(76, 175, 80, 0.1)"
+              stroke="rgba(76, 175, 80, 0.3)"
+              strokeWidth="2"
+              strokeDasharray="5,5"
+            />
+          )}
           
           {/* Player paddle */}
           <rect
@@ -467,7 +662,7 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
             width={gameState.data.playerPaddle.width}
             height={gameState.data.playerPaddle.height}
             fill="#4CAF50"
-            rx={4}
+            rx={2}
           />
           
           {/* AI paddle */}
@@ -477,7 +672,7 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
             width={gameState.data.aiPaddle.width}
             height={gameState.data.aiPaddle.height}
             fill="#f44336"
-            rx={4}
+            rx={2}
           />
           
           {/* Ball */}
@@ -488,6 +683,22 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
             fill="#fff"
           />
         </svg>
+        
+        {/* Mobile instructions overlay */}
+        <div style={{
+          position: 'absolute',
+          bottom: '8px',
+          left: '8px',
+          right: '8px',
+          fontSize: '0.8rem',
+          color: '#fff',
+          textAlign: 'center',
+          opacity: 0.7,
+          pointerEvents: 'none',
+          display: isMobile ? 'block' : 'none'
+        }}>
+          Touch & drag to move paddle • Tap to pause
+        </div>
       </div>
 
       {/* Game Controls */}
@@ -495,14 +706,17 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
         <button 
           onClick={startNewGame}
           style={{ 
-            fontSize: '1.1rem', 
+            fontSize: '1rem', 
             padding: '0.75rem 1.5rem',
             backgroundColor: '#4CAF50',
             color: 'white',
             border: 'none',
-            borderRadius: '4px',
+            borderRadius: '8px',
             cursor: 'pointer',
-            marginRight: '1rem'
+            marginRight: '0.5rem',
+            marginBottom: '0.5rem',
+            minHeight: '44px', // Touch-friendly
+            minWidth: '120px'
           }}
         >
           New Game
@@ -512,13 +726,16 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
           <button 
             onClick={pauseGame}
             style={{ 
-              fontSize: '1.1rem', 
+              fontSize: '1rem', 
               padding: '0.75rem 1.5rem',
               backgroundColor: '#ff9800',
               color: 'white',
               border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer'
+              borderRadius: '8px',
+              cursor: 'pointer',
+              marginBottom: '0.5rem',
+              minHeight: '44px', // Touch-friendly
+              minWidth: '120px'
             }}
           >
             Pause
@@ -529,13 +746,16 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
           <button 
             onClick={resumeGame}
             style={{ 
-              fontSize: '1.1rem', 
+              fontSize: '1rem', 
               padding: '0.75rem 1.5rem',
               backgroundColor: '#4CAF50',
               color: 'white',
               border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer'
+              borderRadius: '8px',
+              cursor: 'pointer',
+              marginBottom: '0.5rem',
+              minHeight: '44px', // Touch-friendly
+              minWidth: '120px'
             }}
           >
             Resume
@@ -548,14 +768,39 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
         marginBottom: '1.5rem',
         padding: '1rem',
         backgroundColor: '#fff',
-        borderRadius: '4px',
+        borderRadius: '8px',
         border: '1px solid #eee'
       }}>
-        <h3 style={{ margin: '0 0 0.5rem 0' }}>Controls</h3>
-        <p style={{ margin: '0', fontSize: '0.9rem' }}>
-          <strong>W/S</strong> or <strong>↑/↓ Arrow Keys</strong> to move paddle | 
-          <strong>Space</strong> to pause/resume
-        </p>
+        <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.1rem' }}>Controls</h3>
+        <div style={{ 
+          display: 'flex', 
+          flexDirection: 'column', 
+          gap: '0.5rem',
+          fontSize: '0.9rem'
+        }}>
+          {/* Desktop controls */}
+          <div style={{ 
+            display: !isMobile ? 'block' : 'none'
+          }}>
+            <strong>Desktop:</strong> W/S or ↑/↓ Arrow Keys to move paddle • Space to pause/resume
+          </div>
+          
+          {/* Mobile controls */}
+          <div style={{ 
+            display: isMobile ? 'block' : 'none'
+          }}>
+            <strong>Mobile:</strong> Touch & drag on your paddle area to move • Tap anywhere to pause/resume
+          </div>
+          
+          {/* Always visible controls */}
+          <div style={{ 
+            display: isMobile ? 'block' : 'none',
+            color: '#666',
+            fontSize: '0.8rem'
+          }}>
+            Desktop keyboard controls also work if you have a keyboard
+          </div>
+        </div>
       </div>
 
       {/* Save/Load Controls */}
@@ -587,8 +832,10 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
               backgroundColor: '#2196F3',
               color: 'white',
               border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer'
+              borderRadius: '8px',
+              cursor: 'pointer',
+              minHeight: '44px', // Touch-friendly
+              fontSize: '0.9rem'
             }}
           >
             Manual Save
@@ -602,8 +849,10 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
               backgroundColor: hasSave ? '#4CAF50' : '#ccc',
               color: 'white',
               border: 'none',
-              borderRadius: '4px',
-              cursor: hasSave ? 'pointer' : 'not-allowed'
+              borderRadius: '8px',
+              cursor: hasSave ? 'pointer' : 'not-allowed',
+              minHeight: '44px', // Touch-friendly
+              fontSize: '0.9rem'
             }}
           >
             Load Game
@@ -617,8 +866,10 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
               backgroundColor: hasSave ? '#f44336' : '#ccc',
               color: 'white',
               border: 'none',
-              borderRadius: '4px',
-              cursor: hasSave ? 'pointer' : 'not-allowed'
+              borderRadius: '8px',
+              cursor: hasSave ? 'pointer' : 'not-allowed',
+              minHeight: '44px', // Touch-friendly
+              fontSize: '0.9rem'
             }}
           >
             Delete Save
