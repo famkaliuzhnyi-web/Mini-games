@@ -2,8 +2,8 @@
   position: sticky;
   top: 0;
   z-index: 1000;
-  background: #ffffff;
-  border-bottom: 1px solid #e0e0e0;
+  background: var(--color-card, #ffffff);
+  border-bottom: 1px solid var(--color-border, #e0e0e0);
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   width: 100%;
 }
@@ -19,7 +19,7 @@
 }
 
 .nav-home-btn {
-  background: #2196F3;
+  background: var(--color-accent, #2196F3);
   color: white;
   border: none;
   border-radius: 8px;
@@ -34,7 +34,7 @@
 }
 
 .nav-home-btn:hover {
-  background: #1976D2;
+  background: var(--color-accent-hover, #1976D2);
 }
 
 .nav-home-btn:active {
@@ -48,7 +48,7 @@
 
 .nav-user-name {
   font-weight: 600;
-  color: #333;
+  color: var(--color-text, #333);
   font-size: 0.9rem;
   background: none;
   border: none;
@@ -59,11 +59,11 @@
 }
 
 .nav-user-name:hover {
-  background: #f0f0f0;
+  background: var(--color-surface, #f0f0f0);
 }
 
 .nav-user-name:active {
-  background: #e0e0e0;
+  background: var(--color-border, #e0e0e0);
   transform: translateY(1px);
 }
 

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { UserService } from '../../services/UserService';
+import { useTheme } from '../../hooks/useTheme';
 import './Profile.css';
 
 interface ProfileProps {
@@ -17,6 +18,7 @@ export const Profile: React.FC<ProfileProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const userService = UserService.getInstance();
+  const { currentTheme, availableThemes, setTheme } = useTheme();
 
   const handleSave = async () => {
     const trimmedName = editName.trim();
@@ -138,6 +140,29 @@ export const Profile: React.FC<ProfileProps> = ({
                 </div>
               </div>
             )}
+          </div>
+
+          <div className="profile-field">
+            <label>Theme</label>
+            <div className="theme-selector">
+              {availableThemes.map((theme) => (
+                <button
+                  key={theme.name}
+                  onClick={() => setTheme(theme.name)}
+                  className={`theme-option ${currentTheme === theme.name ? 'active' : ''}`}
+                  disabled={isSaving}
+                >
+                  <div className="theme-preview" data-theme={theme.name}>
+                    <div className="theme-preview-bg"></div>
+                    <div className="theme-preview-text"></div>
+                  </div>
+                  <div className="theme-info">
+                    <span className="theme-name">{theme.displayName}</span>
+                    <span className="theme-description">{theme.description}</span>
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 

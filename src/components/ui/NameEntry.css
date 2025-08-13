@@ -3,12 +3,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--color-accent, #667eea) 0%, var(--color-accent-hover, #764ba2) 100%);
   padding: 1rem;
 }
 
 .name-entry-content {
-  background: white;
+  background: var(--color-card, white);
   border-radius: 20px;
   padding: 3rem 2.5rem;
   max-width: 500px;
@@ -35,8 +35,8 @@
   font-size: 2.5rem;
   font-weight: 700;
   margin-bottom: 0.75rem;
-  color: #333;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: var(--color-text, #333);
+  background: linear-gradient(135deg, var(--color-accent, #667eea), var(--color-accent-hover, #764ba2));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -44,7 +44,7 @@
 
 .name-entry-header p {
   font-size: 1.1rem;
-  color: #666;
+  color: var(--color-text-secondary, #666);
   margin: 0;
 }
 
@@ -62,20 +62,22 @@
 .name-input {
   flex: 1;
   padding: 1rem;
-  border: 2px solid #e0e0e0;
+  border: 2px solid var(--color-border, #e0e0e0);
   border-radius: 12px;
   font-size: 1rem;
   transition: border-color 0.3s ease;
   outline: none;
+  background: var(--color-surface, white);
+  color: var(--color-text, #333);
 }
 
 .name-input:focus {
-  border-color: #667eea;
+  border-color: var(--color-accent, #667eea);
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .start-btn {
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(135deg, var(--color-accent, #667eea), var(--color-accent-hover, #764ba2));
   color: white;
   border: none;
   border-radius: 12px;
@@ -93,7 +95,7 @@
 }
 
 .start-btn:disabled {
-  background: #ccc;
+  background: var(--color-text-muted, #ccc);
   cursor: not-allowed;
   transform: none;
 }
@@ -103,14 +105,14 @@
 }
 
 .features-preview {
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid var(--color-border, #f0f0f0);
   padding-top: 2rem;
 }
 
 .features-preview h3 {
   font-size: 1.3rem;
   margin-bottom: 1.5rem;
-  color: #333;
+  color: var(--color-text, #333);
 }
 
 .features-grid {
@@ -125,7 +127,7 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem;
-  background: #f8f9fa;
+  background: var(--color-surface, #f8f9fa);
   border-radius: 12px;
   transition: transform 0.2s ease;
 }
@@ -141,7 +143,7 @@
 .feature-item span:last-child {
   font-size: 0.9rem;
   font-weight: 500;
-  color: #666;
+  color: var(--color-text-secondary, #666);
 }
 
 /* Mobile responsiveness */
