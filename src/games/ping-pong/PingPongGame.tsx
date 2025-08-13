@@ -3,6 +3,7 @@
  */
 import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { useGameSave } from '../../hooks/useGameSave';
+import { useSwipeGestures } from '../../hooks/useSwipeGestures';
 import { PingPongGameController } from './controller';
 import type { PingPongGameData, KeyState, TouchState, Paddle, Size } from './types';
 import type { GameState } from '../../types/game';
@@ -190,6 +191,31 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
       }
     }
   }, [gameState.data.gameStatus]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Swipe gesture support - Add swipe gestures for game actions  
+  useSwipeGestures(containerRef, {
+    onSwipeRight: () => {
+      // Swipe right to start new game when game is over
+      if (gameState.data.gameStatus === 'game-over') {
+        startNewGame();
+      }
+    },
+    onSwipeUp: () => {
+      // Swipe up to resume game when paused
+      if (gameState.data.gameStatus === 'paused') {
+        resumeGame();
+      }
+    },
+    onSwipeDown: () => {
+      // Swipe down to pause game when playing
+      if (gameState.data.gameStatus === 'playing') {
+        pauseGame();
+      }
+    },
+    minSwipeDistance: 40,
+    maxSwipeTime: 400,
+    preventDefault: false // Don't interfere with existing paddle touch controls
+  });
 
   /**
    * Update player paddle position based on touch input
@@ -697,7 +723,7 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
           pointerEvents: 'none',
           display: isMobile ? 'block' : 'none'
         }}>
-          Touch & drag to move paddle • Tap to pause
+          Touch & drag to move paddle • Swipe for quick actions
         </div>
       </div>
 
@@ -790,6 +816,16 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
             display: isMobile ? 'block' : 'none'
           }}>
             <strong>Mobile:</strong> Touch & drag on your paddle area to move • Tap anywhere to pause/resume
+          </div>
+          
+          {/* Swipe gestures */}
+          <div style={{ 
+            display: isMobile ? 'block' : 'none',
+            color: '#4CAF50',
+            fontSize: '0.85rem',
+            fontWeight: 'bold'
+          }}>
+            📱 <strong>Swipe Gestures:</strong> Swipe ↓ to pause • Swipe ↑ to resume • Swipe → to start new game
           </div>
           
           {/* Always visible controls */}

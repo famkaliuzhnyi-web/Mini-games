@@ -3,6 +3,7 @@
  */
 import React, { useCallback, useEffect, useRef, useMemo } from 'react';
 import { useGameSave } from '../../hooks/useGameSave';
+import { useSwipeGestures } from '../../hooks/useSwipeGestures';
 import type { GameController, GameState, GameConfig } from '../../types/game';
 import type { TetrisGameData, TetrisAction } from './types';
 import { TetrisBoard } from './components/TetrisBoard';
@@ -94,6 +95,7 @@ interface TetrisGameProps {
 export const TetrisGame: React.FC<TetrisGameProps> = ({ playerId }) => {
   const controller = useMemo(() => new TetrisGameController(), []);
   const gameLoopRef = useRef<number | null>(null);
+  const gameContainerRef = useRef<HTMLDivElement>(null);
   
   const {
     gameState,
@@ -347,6 +349,33 @@ export const TetrisGame: React.FC<TetrisGameProps> = ({ playerId }) => {
     dispatch({ type: 'DROP' });
   }, [dispatch, isLoading]);
 
+  // Swipe gesture support
+  useSwipeGestures(gameContainerRef, {
+    onSwipeLeft: () => {
+      if (!isLoading && !gameState.data.gameOver && !gameState.data.paused) {
+        dispatch({ type: 'MOVE', direction: 'left' });
+      }
+    },
+    onSwipeRight: () => {
+      if (!isLoading && !gameState.data.gameOver && !gameState.data.paused) {
+        dispatch({ type: 'MOVE', direction: 'right' });
+      }
+    },
+    onSwipeDown: () => {
+      if (!isLoading && !gameState.data.gameOver && !gameState.data.paused) {
+        dispatch({ type: 'MOVE', direction: 'down' });
+      }
+    },
+    onSwipeUp: () => {
+      if (!isLoading && !gameState.data.gameOver && !gameState.data.paused) {
+        dispatch({ type: 'ROTATE', direction: 'clockwise' });
+      }
+    },
+    minSwipeDistance: 30,
+    maxSwipeTime: 300,
+    preventDefault: true
+  });
+
   if (isLoading) {
     return (
       <div style={{ padding: '2rem', textAlign: 'center' }}>
@@ -356,7 +385,7 @@ export const TetrisGame: React.FC<TetrisGameProps> = ({ playerId }) => {
   }
 
   return (
-    <div className="tetris-game">
+    <div className="tetris-game" ref={gameContainerRef}>
       <div className="tetris-header">
         <h2>{TETRIS_CONFIG.name}</h2>
         <p>{TETRIS_CONFIG.description}</p>

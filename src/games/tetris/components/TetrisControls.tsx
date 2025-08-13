@@ -98,6 +98,10 @@ export const TetrisControls: React.FC<TetrisControlsProps> = ({
             <span className="control-action">Pause</span>
           </div>
         </div>
+        <div className="swipe-info">
+          <h4>📱 Touch Controls</h4>
+          <p>Swipe left/right to move, down for soft drop, up to rotate pieces</p>
+        </div>
       </div>
 
       {/* Action Buttons */}
