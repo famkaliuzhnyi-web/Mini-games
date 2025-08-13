@@ -62,3 +62,10 @@ export interface KeyState {
   s: boolean;
   space: boolean;
 }
+
+export interface TouchState {
+  isActive: boolean;
+  startY: number;
+  currentY: number;
+  paddleStartY: number;
+}
