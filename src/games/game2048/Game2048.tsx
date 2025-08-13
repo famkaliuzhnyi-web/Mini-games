@@ -312,11 +312,7 @@ export const Game2048: React.FC<Game2048Props> = ({ playerId }) => {
     preventDefault: true
   });
 
-  // Mobile control handlers
-  const handleMobileMove = useCallback(async (direction: Direction) => {
-    if (isLoading) return;
-    await handleMove(direction);
-  }, [handleMove, isLoading]);
+
 
   // Get CSS class for tile value with animation states
   const getTileClass = useCallback((value: number, row: number, col: number) => {
@@ -455,60 +451,12 @@ export const Game2048: React.FC<Game2048Props> = ({ playerId }) => {
         <p>
           <small>Moves: {gameState.data.moves} | Auto-save: {autoSaveEnabled ? 'On' : 'Off'}</small>
         </p>
-      </div>
-
-      {/* Mobile Touch Controls */}
-      <div className="game2048-mobile-controls">
-        <h3>Touch Controls</h3>
-        <div className="game2048-control-grid">
-          <button
-            className="game2048-control-btn"
-            onClick={() => handleMobileMove('up')}
-            disabled={gameState.data.gameOver || isLoading}
-            type="button"
-          >
-            ⬆️
-          </button>
-          
-          <button
-            className="game2048-control-btn"
-            onClick={() => handleMobileMove('left')}
-            disabled={gameState.data.gameOver || isLoading}
-            type="button"
-          >
-            ⬅️
-          </button>
-          
-          <button
-            className="game2048-control-btn game2048-control-center"
-            disabled={true}
-            type="button"
-          >
-            📱
-          </button>
-          
-          <button
-            className="game2048-control-btn"
-            onClick={() => handleMobileMove('right')}
-            disabled={gameState.data.gameOver || isLoading}
-            type="button"
-          >
-            ➡️
-          </button>
-          
-          <button
-            className="game2048-control-btn"
-            onClick={() => handleMobileMove('down')}
-            disabled={gameState.data.gameOver || isLoading}
-            type="button"
-          >
-            ⬇️
-          </button>
-        </div>
-        <p className="game2048-mobile-hint">
-          💡 <em>Swipe on the game board or use these buttons!</em>
+        <p className="game2048-swipe-hint">
+          📱 <strong>Touch Controls:</strong> Swipe up, down, left, or right on the game board to move tiles.
         </p>
       </div>
+
+
 
       {/* Save Status */}
       {lastSaveEvent && (
