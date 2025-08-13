@@ -1,0 +1,424 @@
+/**
+ * Sudoku Game CSS Styles
+ */
+
+.sudoku-game {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+  max-width: 800px;
+  margin: 0 auto;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--color-gameBackground, #f8f9fa);
+  color: var(--color-text, #333);
+}
+
+/* Game Field Component (used in slots) */
+.sudoku-game-field {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  padding: 1rem;
+  background-color: var(--color-gameBackground, #f8f9fa);
+  color: var(--color-text, #333);
+}
+
+/* Sudoku Board */
+.sudoku-board {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  grid-template-rows: repeat(9, 1fr);
+  gap: 1px;
+  border: 3px solid var(--color-border, #333);
+  border-radius: 4px;
+  background-color: var(--color-border, #333);
+  margin-bottom: 1rem;
+  max-width: min(80vw, 450px);
+  aspect-ratio: 1;
+}
+
+.sudoku-cell {
+  background-color: var(--color-surface, #fff);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(1rem, 3vw, 1.5rem);
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--color-text, #333);
+  position: relative;
+}
+
+.sudoku-cell:hover {
+  background-color: var(--color-surface-hover, #f0f0f0);
+}
+
+.sudoku-cell.selected {
+  background-color: var(--color-accent-light, #e3f2fd);
+  border: 2px solid var(--color-accent, #2196F3);
+}
+
+.sudoku-cell.highlighted {
+  background-color: var(--color-warning-light, #fff3e0);
+}
+
+.sudoku-cell.error {
+  background-color: var(--color-error-light, #ffebee);
+  color: var(--color-error, #f44336);
+}
+
+.sudoku-cell.given {
+  background-color: var(--color-surface-darker, #f5f5f5);
+  color: var(--color-text-primary, #333);
+  font-weight: 900;
+  cursor: default;
+}
+
+.sudoku-cell.user-input {
+  color: var(--color-accent, #2196F3);
+  font-weight: bold;
+}
+
+/* 3x3 box borders */
+.sudoku-cell:nth-child(3n) {
+  border-right: 2px solid var(--color-border, #333);
+}
+
+.sudoku-cell:nth-child(n+19):nth-child(-n+27),
+.sudoku-cell:nth-child(n+46):nth-child(-n+54) {
+  border-bottom: 2px solid var(--color-border, #333);
+}
+
+/* Game Controls */
+.sudoku-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-bottom: 1rem;
+  max-width: 500px;
+}
+
+.sudoku-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: var(--color-accent, #2196F3);
+  color: white;
+}
+
+.sudoku-btn:hover {
+  background-color: var(--color-accent-hover, #1976D2);
+  transform: translateY(-1px);
+}
+
+.sudoku-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.sudoku-btn.new-game {
+  background-color: var(--color-success, #4CAF50);
+}
+
+.sudoku-btn.new-game:hover {
+  background-color: #45a049;
+}
+
+.sudoku-btn.hint {
+  background-color: var(--color-warning, #FF9800);
+}
+
+.sudoku-btn.hint:hover {
+  background-color: #F57C00;
+}
+
+.sudoku-btn.check {
+  background-color: var(--color-info, #00BCD4);
+}
+
+.sudoku-btn.check:hover {
+  background-color: #0097A7;
+}
+
+/* Number Input Pad */
+.sudoku-number-pad {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  max-width: 300px;
+}
+
+.sudoku-number-btn {
+  padding: 0.75rem;
+  border: 2px solid var(--color-border-light, #ddd);
+  border-radius: 6px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: var(--color-surface, #fff);
+  color: var(--color-text, #333);
+}
+
+.sudoku-number-btn:hover {
+  background-color: var(--color-accent-light, #e3f2fd);
+  border-color: var(--color-accent, #2196F3);
+}
+
+.sudoku-number-btn.clear {
+  background-color: var(--color-error-light, #ffebee);
+  color: var(--color-error, #f44336);
+  border-color: var(--color-error, #f44336);
+  grid-column: span 2;
+}
+
+.sudoku-number-btn.clear:hover {
+  background-color: var(--color-error, #f44336);
+  color: white;
+}
+
+/* Game Status */
+.sudoku-status {
+  text-align: center;
+  margin-bottom: 1rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: bold;
+}
+
+.sudoku-status.playing {
+  background-color: var(--color-info-light, #e1f5fe);
+  color: var(--color-info, #00BCD4);
+}
+
+.sudoku-status.completed {
+  background-color: var(--color-success-light, #e8f5e8);
+  color: var(--color-success, #4CAF50);
+}
+
+.sudoku-status.error {
+  background-color: var(--color-error-light, #ffebee);
+  color: var(--color-error, #f44336);
+}
+
+/* Difficulty Selection */
+.sudoku-difficulty {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.sudoku-difficulty-btn {
+  padding: 0.5rem 1rem;
+  border: 2px solid var(--color-border-light, #ddd);
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: var(--color-surface, #fff);
+  color: var(--color-text, #333);
+}
+
+.sudoku-difficulty-btn:hover {
+  border-color: var(--color-accent, #2196F3);
+  background-color: var(--color-accent-light, #e3f2fd);
+}
+
+.sudoku-difficulty-btn.active {
+  background-color: var(--color-accent, #2196F3);
+  color: white;
+  border-color: var(--color-accent, #2196F3);
+}
+
+/* Statistics */
+.sudoku-stats {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 1rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary, #666);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.sudoku-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.sudoku-stat-label {
+  font-size: 0.8rem;
+  opacity: 0.8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sudoku-stat-value {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: var(--color-text, #333);
+}
+
+/* Loading State */
+.sudoku-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--color-text, #333);
+}
+
+.sudoku-loading h2 {
+  margin: 0 0 1rem 0;
+  font-size: 1.5rem;
+}
+
+/* Game Complete Animation */
+.sudoku-complete-celebration {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(76, 175, 80, 0.95);
+  color: white;
+  padding: 2rem;
+  border-radius: 12px;
+  text-align: center;
+  z-index: 1000;
+  animation: celebrationPulse 2s ease-in-out;
+}
+
+@keyframes celebrationPulse {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  50% { transform: translate(-50%, -50%) scale(1.1); }
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .sudoku-game {
+    padding: 0.5rem;
+  }
+
+  .sudoku-game-field {
+    padding: 0.5rem;
+  }
+
+  .sudoku-board {
+    max-width: min(95vw, 400px);
+    gap: 0.5px;
+  }
+
+  .sudoku-cell {
+    font-size: clamp(0.8rem, 2.5vw, 1.2rem);
+  }
+
+  .sudoku-controls {
+    gap: 0.25rem;
+  }
+
+  .sudoku-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
+
+  .sudoku-number-pad {
+    max-width: 280px;
+    gap: 0.25rem;
+  }
+
+  .sudoku-number-btn {
+    padding: 0.6rem;
+    font-size: 1rem;
+  }
+
+  .sudoku-stats {
+    gap: 1rem;
+    font-size: 0.8rem;
+  }
+
+  .sudoku-difficulty {
+    gap: 0.25rem;
+  }
+
+  .sudoku-difficulty-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .sudoku-game-field {
+    padding: 0.25rem;
+  }
+
+  .sudoku-board {
+    max-width: min(98vw, 350px);
+  }
+
+  .sudoku-cell {
+    font-size: clamp(0.7rem, 2vw, 1rem);
+  }
+
+  .sudoku-number-pad {
+    max-width: 250px;
+  }
+
+  .sudoku-number-btn {
+    padding: 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  .sudoku-stats {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .sudoku-complete-celebration {
+    padding: 1.5rem;
+    margin: 1rem;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .sudoku-cell {
+    border: 1px solid currentColor;
+  }
+
+  .sudoku-btn,
+  .sudoku-number-btn {
+    border: 2px solid currentColor;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .sudoku-btn,
+  .sudoku-number-btn,
+  .sudoku-difficulty-btn {
+    transition: none;
+  }
+
+  .sudoku-complete-celebration {
+    animation: none;
+  }
+}

@@ -19,6 +19,7 @@ import {
 import { SudokuBoard } from './components/SudokuBoard';
 import { SudokuControls } from './components/SudokuControls';
 import { GameStats } from './components/GameStats';
+import './SudokuGame.css';
 
 // Sudoku game configuration
 const SUDOKU_CONFIG: GameConfig = {

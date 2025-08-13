@@ -1,0 +1,389 @@
+/**
+ * Tic-Tac-Toe Game CSS Styles
+ */
+
+.tic-tac-toe-game {
+  padding: 2rem;
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Game Field Component (used in slots) */
+.tic-tac-toe-game-field {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 1rem;
+  background-color: var(--color-gameBackground, #f8f9fa);
+  color: var(--color-text, #333);
+}
+
+.tic-tac-toe-status-message {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  color: var(--color-text, #333);
+}
+
+.tic-tac-toe-status-message.winner {
+  color: var(--color-success, #4CAF50);
+}
+
+.tic-tac-toe-status-message.playing {
+  color: var(--color-text, #333);
+}
+
+.tic-tac-toe-board-wrapper {
+  display: inline-block;
+  border: 2px solid var(--color-border, #333);
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: var(--color-border, #333);
+}
+
+.tic-tac-toe-board-slot {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 2px;
+  width: min(60vw, 300px);
+  height: min(60vw, 300px);
+  max-width: 300px;
+  max-height: 300px;
+}
+
+.tic-tac-toe-cell-slot {
+  background-color: var(--color-gameSurface, #fff);
+  border: none;
+  font-size: min(8vw, 3rem);
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text, #333);
+  transition: all 0.3s ease;
+  aspect-ratio: 1;
+  min-height: 44px; /* Touch-friendly */
+  touch-action: manipulation;
+}
+
+.tic-tac-toe-cell-slot:hover {
+  background-color: var(--color-surface, #f0f0f0);
+}
+
+.tic-tac-toe-cell-slot.x-mark {
+  color: var(--color-accent, #2196F3);
+}
+
+.tic-tac-toe-cell-slot.o-mark {
+  color: var(--color-error, #f44336);
+}
+
+.tic-tac-toe-cell-slot.winning-cell {
+  background-color: var(--color-warning, #ffeb3b) !important;
+  border: 3px solid var(--color-accent, #ff9800);
+}
+
+.tic-tac-toe-cell-slot:disabled {
+  cursor: default;
+}
+
+/* Legacy game component styles */
+.tic-tac-toe-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.tic-tac-toe-header h2 {
+  margin: 0 0 0.5rem 0;
+  color: #333;
+  font-size: 2rem;
+}
+
+.tic-tac-toe-header p {
+  margin: 0;
+  color: #666;
+  font-size: 1rem;
+}
+
+.tic-tac-toe-loading {
+  padding: 2rem;
+  text-align: center;
+}
+
+.tic-tac-toe-loading h2 {
+  color: #333;
+  margin: 0;
+}
+
+/* Game Status */
+.tic-tac-toe-status {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background-color: #fff;
+  border-radius: 4px;
+  border: 1px solid #eee;
+}
+
+.tic-tac-toe-stats {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+/* Game Board */
+.tic-tac-toe-board-container {
+  margin-bottom: 1.5rem;
+  display: inline-block;
+  border: 2px solid #333;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.tic-tac-toe-board {
+  display: grid;
+  grid-template-columns: repeat(3, 80px);
+  grid-template-rows: repeat(3, 80px);
+  gap: 1px;
+  background-color: #333;
+}
+
+.tic-tac-toe-cell {
+  background-color: #fff;
+  border: none;
+  font-size: 2rem;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  color: #333;
+}
+
+.tic-tac-toe-cell:hover {
+  background-color: #f0f0f0;
+}
+
+.tic-tac-toe-cell.empty.playable:hover {
+  background-color: #e8f5e8;
+}
+
+.tic-tac-toe-cell.filled {
+  cursor: default;
+}
+
+.tic-tac-toe-cell.x-mark {
+  color: #2196F3;
+}
+
+.tic-tac-toe-cell.o-mark {
+  color: #f44336;
+}
+
+.tic-tac-toe-cell.winning-cell {
+  background-color: #ffeb3b !important;
+  border: 3px solid #ff9800;
+  box-shadow: 0 0 10px rgba(255, 152, 0, 0.5);
+}
+
+/* Game Controls */
+.tic-tac-toe-controls {
+  margin-bottom: 1.5rem;
+}
+
+.tic-tac-toe-new-game-btn {
+  font-size: 1.1rem;
+  padding: 0.75rem 1.5rem;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.tic-tac-toe-new-game-btn:hover {
+  background-color: #45a049;
+}
+
+/* Save Management */
+.tic-tac-toe-save-section {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background-color: #fff;
+  border-radius: 4px;
+  border: 1px solid #eee;
+}
+
+.tic-tac-toe-save-section h3 {
+  margin: 0 0 1rem 0;
+  color: #333;
+  font-size: 1.2rem;
+}
+
+.tic-tac-toe-autosave-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.tic-tac-toe-save-buttons {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.tic-tac-toe-save-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.tic-tac-toe-save-btn.save {
+  background-color: #2196F3;
+  color: white;
+}
+
+.tic-tac-toe-save-btn.save:hover {
+  background-color: #1976D2;
+}
+
+.tic-tac-toe-save-btn.load {
+  background-color: #FF9800;
+  color: white;
+}
+
+.tic-tac-toe-save-btn.load:hover {
+  background-color: #F57C00;
+}
+
+.tic-tac-toe-save-btn.delete {
+  background-color: #f44336;
+  color: white;
+}
+
+.tic-tac-toe-save-btn.delete:hover {
+  background-color: #da190b;
+}
+
+.tic-tac-toe-save-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Save Status */
+.tic-tac-toe-save-status {
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.tic-tac-toe-save-status.has-save {
+  background-color: #e8f5e8;
+  color: #4CAF50;
+  border: 1px solid #4CAF50;
+}
+
+.tic-tac-toe-save-status.no-save {
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeaa7;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .tic-tac-toe-game {
+    padding: 1rem;
+    margin: 0 0.5rem;
+  }
+
+  .tic-tac-toe-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .tic-tac-toe-board {
+    grid-template-columns: repeat(3, 70px);
+    grid-template-rows: repeat(3, 70px);
+  }
+
+  .tic-tac-toe-cell {
+    font-size: 1.8rem;
+  }
+
+  .tic-tac-toe-status-message {
+    font-size: 1.3rem;
+  }
+
+  .tic-tac-toe-save-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .tic-tac-toe-save-btn {
+    width: 100%;
+    max-width: 200px;
+  }
+
+  /* Slot component mobile styles */
+  .tic-tac-toe-board-slot {
+    width: min(80vw, 280px);
+    height: min(80vw, 280px);
+    max-width: 280px;
+    max-height: 280px;
+  }
+
+  .tic-tac-toe-cell-slot {
+    font-size: min(10vw, 2.5rem);
+  }
+}
+
+@media (max-width: 480px) {
+  .tic-tac-toe-game {
+    padding: 0.5rem;
+  }
+
+  .tic-tac-toe-board {
+    grid-template-columns: repeat(3, 60px);
+    grid-template-rows: repeat(3, 60px);
+  }
+
+  .tic-tac-toe-cell {
+    font-size: 1.5rem;
+  }
+
+  .tic-tac-toe-header h2 {
+    font-size: 1.3rem;
+  }
+
+  .tic-tac-toe-status-message {
+    font-size: 1.2rem;
+  }
+
+  /* Slot component small mobile styles */
+  .tic-tac-toe-board-slot {
+    width: min(90vw, 260px);
+    height: min(90vw, 260px);
+    max-width: 260px;
+    max-height: 260px;
+  }
+
+  .tic-tac-toe-cell-slot {
+    font-size: min(12vw, 2rem);
+  }
+}

@@ -17,6 +17,7 @@ import {
   getDifficultySettings,
   getHint
 } from './logic';
+import './SudokuGame.css';
 
 // Sudoku game configuration
 const SUDOKU_CONFIG: GameConfig = {
