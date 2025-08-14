@@ -91,6 +91,7 @@ interface Game2048Props {
 export const Game2048: React.FC<Game2048Props> = ({ playerId }) => {
   const controller = useMemo(() => new Game2048Controller(), []);
   const gameContainerRef = useRef<HTMLDivElement>(null);
+  const gameGridRef = useRef<HTMLDivElement>(null);
   const { earnCoins, awardGameCompletion, spendCoins, canSpend, balance } = useCoinService();
   const userService = useMemo(() => UserService.getInstance(), []);
   
@@ -392,8 +393,8 @@ export const Game2048: React.FC<Game2048Props> = ({ playerId }) => {
     };
   }, [handleKeyPress]);
 
-  // Swipe gesture support
-  useSwipeGestures(gameContainerRef, {
+  // Swipe gesture support - only on game grid, not entire container
+  useSwipeGestures(gameGridRef, {
     onSwipeLeft: () => handleMove('left'),
     onSwipeRight: () => handleMove('right'),
     onSwipeUp: () => handleMove('up'),
@@ -566,7 +567,7 @@ export const Game2048: React.FC<Game2048Props> = ({ playerId }) => {
         </div>
       )}
 
-      <div className="game2048-grid-container">
+      <div className="game2048-grid-container" ref={gameGridRef}>
         <div 
           className="game2048-grid"
           style={{
