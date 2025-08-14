@@ -1,20 +1,54 @@
 /**
- * Ping Pong Game CSS Styles
+ * Ping Pong Game CSS Styles - Modern Industry Standard Design
  */
+
+:root {
+  --pp-primary: #2563eb;
+  --pp-primary-dark: #1d4ed8;
+  --pp-accent: #3b82f6;
+  --pp-success: #059669;
+  --pp-warning: #d97706;
+  --pp-error: #dc2626;
+  --pp-surface: #ffffff;
+  --pp-surface-dark: #1f2937;
+  --pp-text: #111827;
+  --pp-text-secondary: #6b7280;
+  --pp-text-light: #ffffff;
+  --pp-border: #e5e7eb;
+  --pp-border-dark: #374151;
+  --pp-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --pp-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --pp-radius: 0.5rem;
+  --pp-radius-lg: 0.75rem;
+  --pp-transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
 .ping-pong-game {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 1rem;
+  padding: clamp(0.5rem, 2vw, 1.5rem);
   max-width: 1200px;
   margin: 0 auto;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background-color: var(--color-gameBackground, #f8f9fa);
-  color: var(--color-text, #333);
+  font-family: var(--font-primary, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+  background: linear-gradient(135deg, var(--color-gameBackground, #f8fafc) 0%, var(--color-surface, #f1f5f9) 100%);
+  color: var(--color-text, var(--pp-text));
+  min-height: 100vh;
+  position: relative;
 }
 
-/* Game Field Component (used in slots) */
+/* Portrait Mode - Auto Rotation for Standalone Component */
+@media (orientation: portrait) and (max-aspect-ratio: 3/4) {
+  .ping-pong-game--auto-rotate .ping-pong-canvas-container {
+    transform: rotate(-90deg) scale(0.7);
+    transform-origin: center center;
+    margin: 3rem 0;
+    max-width: 90vh;
+    max-height: 90vw;
+  }
+}
+
+/* Game Field Component (used in slots) - Modern card-based design */
 .ping-pong-game-field {
   display: flex;
   flex-direction: column;
@@ -22,43 +56,95 @@
   justify-content: center;
   height: 100%;
   width: 100%;
-  padding: 1rem;
-  background-color: var(--color-gameBackground, #000);
-  color: var(--color-text, #fff);
+  padding: clamp(0.5rem, 2vw, 1.5rem);
+  background: var(--color-gameBackground, var(--pp-surface-dark));
+  color: var(--color-text, var(--pp-text-light));
   position: relative;
   overflow: hidden;
+  transition: var(--pp-transition);
+}
+
+/* Game Canvas Container - Modern elevated design */
+.ping-pong-canvas-container {
+  position: relative;
+  background: var(--pp-surface-dark);
+  border-radius: var(--pp-radius-lg);
+  box-shadow: var(--pp-shadow-lg);
+  padding: 1rem;
+  transition: var(--pp-transition);
+  border: 1px solid var(--pp-border-dark);
+}
+
+.ping-pong-canvas-container:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15);
 }
 
 .ping-pong-canvas {
-  border: 2px solid var(--color-border, #fff);
-  border-radius: 4px;
-  background-color: #000;
   display: block;
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
+  border-radius: var(--pp-radius);
+  background: #000;
+  transition: var(--pp-transition);
 }
 
+/* Responsive Rotation for Portrait Mode */
+@media (max-aspect-ratio: 1/1) and (orientation: portrait) {
+  .ping-pong-game-field--rotated .ping-pong-canvas-container {
+    transform: rotate(-90deg) scale(0.8);
+    transform-origin: center center;
+    margin: 2rem 0;
+  }
+  
+  .ping-pong-game-field--rotated .ping-pong-status {
+    transform: rotate(-90deg);
+    transform-origin: center center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin: -10rem 0 0 -5rem;
+    width: 20rem;
+    text-align: center;
+  }
+}
+
+/* Modern Status Display */
 .ping-pong-status {
   position: absolute;
   top: 1rem;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 1.2rem;
-  font-weight: bold;
-  color: var(--color-text, #fff);
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  font-size: clamp(1rem, 3vw, 1.25rem);
+  font-weight: 600;
+  color: var(--color-text, var(--pp-text-light));
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
   z-index: 10;
+  padding: 0.5rem 1rem;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: var(--pp-radius);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+/* Modern Score Display */
 .ping-pong-score {
   display: flex;
-  gap: 2rem;
+  justify-content: center;
   align-items: center;
-  font-size: 1.5rem;
-  font-weight: bold;
+  gap: clamp(1rem, 4vw, 2rem);
+  font-size: clamp(1.5rem, 5vw, 2.5rem);
+  font-weight: 700;
+  font-family: var(--font-mono, 'JetBrains Mono', 'Fira Code', Consolas, monospace);
   margin-bottom: 1rem;
-  color: var(--color-text, #fff);
+  color: var(--color-text, var(--pp-text));
+  text-align: center;
+  padding: 1rem;
+  background: var(--pp-surface);
+  border-radius: var(--pp-radius-lg);
+  box-shadow: var(--pp-shadow);
+  border: 1px solid var(--pp-border);
 }
 
 .ping-pong-score-player,
@@ -66,56 +152,104 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.25rem;
+  min-width: 4rem;
 }
 
-.ping-pong-score-label {
-  font-size: 1rem;
-  opacity: 0.8;
+.ping-pong-score-player .score-label {
+  color: var(--color-accent, var(--pp-primary));
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-.ping-pong-score-value {
-  font-size: 2rem;
-  color: var(--color-accent, #4CAF50);
+.ping-pong-score-ai .score-label {
+  color: var(--color-error, var(--pp-error));
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-/* Controls and Instructions */
-.ping-pong-instructions {
-  position: absolute;
-  bottom: 1rem;
-  left: 50%;
-  transform: translateX(-50%);
-  text-align: center;
-  color: var(--color-text, #fff);
-  font-size: 0.9rem;
-  background: rgba(0, 0, 0, 0.6);
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  z-index: 10;
-}
-
-.ping-pong-controls {
-  display: flex;
-  gap: 1rem;
-  margin-top: 1rem;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
+/* Modern Button System */
 .ping-pong-btn {
-  padding: 0.5rem 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
   border: none;
-  border-radius: 4px;
-  font-size: 0.9rem;
-  font-weight: bold;
+  border-radius: var(--pp-radius);
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: inherit;
   cursor: pointer;
-  transition: all 0.2s ease;
-  background-color: var(--color-accent, #4CAF50);
-  color: white;
+  transition: var(--pp-transition);
+  text-decoration: none;
+  white-space: nowrap;
+  user-select: none;
+  touch-action: manipulation;
+  min-height: 44px; /* Touch-friendly */
+  position: relative;
+  overflow: hidden;
 }
 
-.ping-pong-btn:hover {
-  background-color: var(--color-accent-hover, #45a049);
+.ping-pong-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.ping-pong-btn:hover::before {
+  left: 100%;
+}
+
+.ping-pong-btn--primary {
+  background: var(--color-accent, var(--pp-primary));
+  color: var(--pp-text-light);
+  box-shadow: var(--pp-shadow);
+}
+
+.ping-pong-btn--primary:hover {
+  background: var(--pp-primary-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--pp-shadow-lg);
+}
+
+.ping-pong-btn--secondary {
+  background: var(--color-surface, var(--pp-surface));
+  color: var(--color-text, var(--pp-text));
+  border: 1px solid var(--color-border, var(--pp-border));
+}
+
+.ping-pong-btn--secondary:hover {
+  background: var(--color-card, #f8fafc);
+  transform: translateY(-1px);
+}
+
+.ping-pong-btn--warning {
+  background: var(--color-warning, var(--pp-warning));
+  color: var(--pp-text-light);
+}
+
+.ping-pong-btn--warning:hover {
+  background: #b45309;
+  transform: translateY(-1px);
+}
+
+.ping-pong-btn--success {
+  background: var(--color-success, var(--pp-success));
+  color: var(--pp-text-light);
+}
+
+.ping-pong-btn--success:hover {
+  background: #047857;
   transform: translateY(-1px);
 }
 
@@ -125,218 +259,173 @@
   transform: none;
 }
 
-.ping-pong-btn.pause {
-  background-color: var(--color-warning, #FF9800);
+.ping-pong-btn:disabled:hover {
+  transform: none;
+  box-shadow: var(--pp-shadow);
 }
 
-.ping-pong-btn.pause:hover {
-  background-color: #F57C00;
-}
+/* Clean up duplicate styles and add comprehensive responsive system */
 
-.ping-pong-btn.reset {
-  background-color: var(--color-error, #f44336);
-}
-
-.ping-pong-btn.reset:hover {
-  background-color: #da190b;
-}
-
-/* Game Over Overlay */
-.ping-pong-game-over {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: rgba(0, 0, 0, 0.9);
-  color: white;
-  padding: 2rem;
-  border-radius: 8px;
-  text-align: center;
-  border: 2px solid var(--color-accent, #4CAF50);
-  z-index: 20;
-}
-
-.ping-pong-game-over h2 {
-  margin: 0 0 1rem 0;
-  font-size: 2rem;
-  color: var(--color-accent, #4CAF50);
-}
-
-.ping-pong-game-over p {
-  margin: 0.5rem 0;
-  font-size: 1.1rem;
-}
-
-/* Mobile Controls */
-.ping-pong-mobile-controls {
-  display: none;
-  position: absolute;
-  bottom: 5rem;
-  left: 50%;
-  transform: translateX(-50%);
-  gap: 1rem;
-  z-index: 10;
-}
-
-.ping-pong-mobile-btn {
-  padding: 1rem 1.5rem;
-  border: none;
-  border-radius: 8px;
-  font-size: 1.2rem;
-  font-weight: bold;
-  cursor: pointer;
-  background-color: rgba(255, 255, 255, 0.2);
-  color: white;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  transition: all 0.2s ease;
-  user-select: none;
-  touch-action: manipulation;
-}
-
-.ping-pong-mobile-btn:hover,
-.ping-pong-mobile-btn:active {
-  background-color: rgba(255, 255, 255, 0.3);
-  border-color: rgba(255, 255, 255, 0.5);
-}
-
-/* Game Statistics */
-.ping-pong-stats {
-  display: flex;
-  gap: 2rem;
-  margin-bottom: 1rem;
-  text-align: center;
-  font-size: 0.9rem;
-  color: var(--color-text-secondary, #666);
-}
-
-.ping-pong-stat {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.ping-pong-stat-label {
-  font-size: 0.8rem;
-  opacity: 0.8;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.ping-pong-stat-value {
-  font-size: 1.2rem;
-  font-weight: bold;
-  color: var(--color-text, #333);
-}
-
-/* Loading State */
-.ping-pong-loading {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  color: var(--color-text, #333);
-}
-
-.ping-pong-loading h2 {
-  margin: 0 0 1rem 0;
-  font-size: 1.5rem;
-}
-
-/* Mobile Responsiveness */
+/* Mobile Responsiveness - Enhanced for Modern Devices */
 @media (max-width: 768px) {
   .ping-pong-game {
-    padding: 0.5rem;
+    padding: clamp(0.25rem, 1vw, 0.5rem);
+    min-height: calc(100vh - 2rem);
   }
 
   .ping-pong-game-field {
     padding: 0.5rem;
+    min-height: 70vh;
   }
 
   .ping-pong-score {
-    font-size: 1.2rem;
-    gap: 1.5rem;
-    margin-bottom: 0.5rem;
+    gap: 1rem;
+    font-size: clamp(1.25rem, 4vw, 1.75rem);
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
   }
 
-  .ping-pong-score-value {
-    font-size: 1.5rem;
-  }
-
-  .ping-pong-instructions {
-    font-size: 0.8rem;
-    padding: 0.4rem 0.8rem;
-  }
-
-  .ping-pong-controls {
-    gap: 0.5rem;
-    margin-top: 0.5rem;
+  .ping-pong-canvas-container {
+    padding: 0.5rem;
+    margin: 0.5rem 0;
   }
 
   .ping-pong-btn {
-    padding: 0.4rem 0.8rem;
-    font-size: 0.8rem;
+    padding: 0.625rem 1.25rem;
+    font-size: 0.9rem;
+    min-height: 48px; /* Larger touch target on mobile */
+  }
+
+  .ping-pong-game-stats {
+    gap: 0.5rem;
+    padding: 0.75rem;
+  }
+
+  .ping-pong-controls-info {
+    padding: 0.75rem;
+    font-size: 0.85rem;
   }
 
   /* Show mobile controls on mobile */
   .ping-pong-mobile-controls {
     display: flex;
   }
-
-  .ping-pong-mobile-btn {
-    padding: 0.8rem 1.2rem;
-    font-size: 1rem;
-  }
-
-  .ping-pong-game-over {
-    padding: 1.5rem;
-  }
-
-  .ping-pong-game-over h2 {
-    font-size: 1.5rem;
-  }
-
-  .ping-pong-game-over p {
-    font-size: 1rem;
-  }
-
-  .ping-pong-stats {
-    gap: 1rem;
-    font-size: 0.8rem;
-  }
 }
 
+/* Extra Small Mobile Devices */
 @media (max-width: 480px) {
   .ping-pong-game-field {
     padding: 0.25rem;
   }
-
+  
   .ping-pong-score {
-    font-size: 1rem;
-    gap: 1rem;
-  }
-
-  .ping-pong-score-value {
-    font-size: 1.2rem;
-  }
-
-  .ping-pong-mobile-btn {
-    padding: 0.6rem 1rem;
-    font-size: 0.9rem;
-  }
-
-  .ping-pong-game-over {
-    padding: 1rem;
-    margin: 1rem;
-  }
-
-  .ping-pong-game-over h2 {
-    font-size: 1.2rem;
-  }
-
-  .ping-pong-stats {
-    flex-direction: column;
     gap: 0.5rem;
+    padding: 0.5rem;
+    flex-direction: column;
+  }
+
+  .ping-pong-score-player,
+  .ping-pong-score-ai {
+    flex-direction: row;
+    gap: 0.5rem;
+  }
+
+  .ping-pong-canvas-container {
+    padding: 0.25rem;
+  }
+
+  .ping-pong-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    min-width: 100px;
+  }
+
+  .ping-pong-game-stats {
+    gap: 0.25rem;
+    padding: 0.5rem;
+  }
+
+  .ping-pong-stat {
+    min-width: 3rem;
+    padding: 0.25rem;
+  }
+
+  .ping-pong-stat-value {
+    font-size: 1.25rem;
+  }
+}
+
+/* Landscape Mobile - Optimized for game play */
+@media (max-height: 500px) and (orientation: landscape) {
+  .ping-pong-game {
+    flex-direction: row;
+    align-items: stretch;
+  }
+  
+  .ping-pong-game-field {
+    flex: 1;
+    min-height: auto;
+    height: 100vh;
+  }
+  
+  .ping-pong-canvas-container {
+    max-height: 80vh;
+  }
+}
+
+/* Portrait Mode - Game Field Rotation for Better UX */
+@media (orientation: portrait) and (max-aspect-ratio: 3/4) {
+  .ping-pong-game-field--auto-rotate .ping-pong-canvas-container {
+    transform: rotate(-90deg) scale(0.7);
+    transform-origin: center center;
+    margin: 3rem 0;
+    max-width: 90vh;
+    max-height: 90vw;
+  }
+  
+  .ping-pong-game-field--auto-rotate .ping-pong-status {
+    position: fixed;
+    top: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+  }
+
+  /* Adjust controls for rotated mode */
+  .ping-pong-game-field--auto-rotate .ping-pong-controls-info {
+    transform: scale(0.9);
+    margin-top: 2rem;
+  }
+}
+
+/* High DPI Displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .ping-pong-canvas {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --pp-surface: #111827;
+    --pp-text: #f9fafb;
+    --pp-text-secondary: #9ca3af;
+    --pp-border: #374151;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .ping-pong-btn::before {
+    display: none;
   }
 }
 
@@ -351,13 +440,83 @@
   }
 }
 
-/* Reduced motion support */
-@media (prefers-reduced-motion: reduce) {
-  .ping-pong-btn {
-    transition: none;
-  }
+/* Game Over State - Enhanced */
+.ping-pong-game-over {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.95);
+  color: var(--pp-text-light);
+  padding: 2rem;
+  border-radius: var(--pp-radius-lg);
+  text-align: center;
+  border: 2px solid var(--color-accent, var(--pp-primary));
+  z-index: 20;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  min-width: 300px;
+}
 
-  .ping-pong-mobile-btn {
-    transition: none;
-  }
+.ping-pong-game-over h2 {
+  margin: 0 0 1rem 0;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-accent, var(--pp-primary));
+}
+
+.ping-pong-game-over p {
+  margin: 0.5rem 0;
+  font-size: 1.1rem;
+  color: var(--pp-text-secondary);
+}
+
+/* Mobile Touch Controls - Enhanced */
+.ping-pong-mobile-controls {
+  display: none;
+  position: absolute;
+  bottom: 5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  gap: 1rem;
+  z-index: 10;
+}
+
+.ping-pong-mobile-btn {
+  padding: 1rem 1.5rem;
+  background: rgba(0, 0, 0, 0.8);
+  color: var(--pp-text-light);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--pp-radius);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--pp-transition);
+  backdrop-filter: blur(10px);
+  touch-action: manipulation;
+  min-height: 48px;
+}
+
+.ping-pong-mobile-btn:active {
+  transform: scale(0.95);
+  background: rgba(0, 0, 0, 0.9);
+}
+
+/* Touch Area Highlight */
+.ping-pong-touch-area {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
+  background: rgba(var(--color-accent-rgb, 59, 130, 246), 0.1);
+  border: 2px dashed rgba(var(--color-accent-rgb, 59, 130, 246), 0.3);
+  border-radius: var(--pp-radius);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.ping-pong-canvas:active .ping-pong-touch-area {
+  opacity: 1;
 }

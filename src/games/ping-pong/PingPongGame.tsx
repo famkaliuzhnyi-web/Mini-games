@@ -47,17 +47,30 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
     calculateGameDimensions(LEGACY_GAME_CONFIG.GAME_WIDTH, LEGACY_GAME_CONFIG.GAME_HEIGHT)
   );
   
-  // Mobile detection state
+  // Mobile detection state and rotation logic
   const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 768);
+  const [shouldRotate, setShouldRotate] = useState(false);
 
-  // Update mobile state on resize
+  // Update mobile state and rotation decision on resize
   useEffect(() => {
     const updateMobileState = () => {
-      setIsMobile(window.innerWidth <= 768);
+      const newIsMobile = window.innerWidth <= 768;
+      setIsMobile(newIsMobile);
+      
+      // Auto-rotate for portrait mode on smaller screens for better UX
+      const isPortrait = window.innerHeight > window.innerWidth;
+      const aspectRatio = window.innerWidth / window.innerHeight;
+      setShouldRotate(isPortrait && aspectRatio < 0.75 && window.innerWidth < 768);
     };
 
+    updateMobileState();
     window.addEventListener('resize', updateMobileState);
-    return () => window.removeEventListener('resize', updateMobileState);
+    window.addEventListener('orientationchange', updateMobileState);
+    
+    return () => {
+      window.removeEventListener('resize', updateMobileState);
+      window.removeEventListener('orientationchange', updateMobileState);
+    };
   }, []);
 
   // Key state for paddle control
@@ -541,29 +554,11 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
 
   if (isLoading) {
     return (
-      <div style={{ 
-        padding: '2rem', 
-        textAlign: 'center',
-        minHeight: '300px',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center'
-      }}>
-        <h2>Loading Ping Pong...</h2>
-        <div style={{ 
-          marginTop: '1rem', 
-          fontSize: '0.9rem', 
-          color: '#666' 
-        }}>
-          Checking for saved games...
-        </div>
-        <div style={{ 
-          marginTop: '2rem', 
-          fontSize: '0.8rem', 
-          color: '#999' 
-        }}>
-          If this takes too long, try refreshing the page
+      <div className="ping-pong-game">
+        <div className="ping-pong-loading">
+          <div className="ping-pong-loading-spinner"></div>
+          <h2>Loading Ping Pong...</h2>
+          <p>Preparing the ping-pong experience...</p>
         </div>
       </div>
     );
@@ -572,74 +567,50 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
   return (
     <div 
       ref={containerRef}
-      style={{ 
-        padding: '1rem', 
-        textAlign: 'center', 
-        maxWidth: '1000px', 
-        margin: '0 auto',
-        border: '1px solid #ddd',
-        borderRadius: '8px',
-        backgroundColor: '#f9f9f9'
-      }}
+      className={`ping-pong-game ${shouldRotate ? 'ping-pong-game--auto-rotate' : ''}`}
     >
       <h2>{controller.config.name}</h2>
       <p>{controller.config.description}</p>
       
       {/* Game Status and Score */}
-      <div style={{ 
-        marginBottom: '1.5rem', 
-        padding: '1rem', 
-        backgroundColor: '#fff', 
-        borderRadius: '4px',
-        border: '1px solid #eee'
-      }}>
-        <div style={{ 
-          fontSize: '1.5rem', 
-          fontWeight: 'bold', 
-          color: gameState.data.gameStatus === 'playing' ? '#333' : 
-                 gameState.data.gameStatus === 'paused' ? '#ff9800' : '#4CAF50',
-          marginBottom: '0.5rem'
-        }}>
-          {getStatusMessage()}
+      <div className="ping-pong-score">
+        <div className="ping-pong-score-player">
+          <div className="score-label">Player</div>
+          <div>{gameState.data.score.player}</div>
         </div>
-        
-        {/* Score Display */}
-        <div style={{ 
-          fontSize: '2rem', 
-          fontWeight: 'bold', 
-          marginBottom: '0.5rem',
-          fontFamily: 'monospace'
-        }}>
-          Player {gameState.data.score.player} - {gameState.data.score.ai} AI
+        <div className="ping-pong-score-ai">
+          <div className="score-label">AI</div>
+          <div>{gameState.data.score.ai}</div>
         </div>
+      </div>
+      
+      {/* Game Status */}
+      <div className="ping-pong-status">
+        {getStatusMessage()}
+      </div>
         
-        {/* Game Statistics */}
-        <div style={{ fontSize: '0.9rem', color: '#666' }}>
-          Games: {gameState.data.gamesPlayed} | 
-          Won: {gameState.data.gamesWon} | 
-          Lost: {gameState.data.gamesLost}
+      {/* Game Statistics */}
+      <div className="ping-pong-game-stats">
+        <div className="ping-pong-stat">
+          <div className="ping-pong-stat-label">Games</div>
+          <div className="ping-pong-stat-value">{gameState.data.gamesPlayed}</div>
+        </div>
+        <div className="ping-pong-stat">
+          <div className="ping-pong-stat-label">Won</div>
+          <div className="ping-pong-stat-value">{gameState.data.gamesWon}</div>
+        </div>
+        <div className="ping-pong-stat">
+          <div className="ping-pong-stat-label">Lost</div>
+          <div className="ping-pong-stat-value">{gameState.data.gamesLost}</div>
         </div>
       </div>
 
       {/* Game Canvas */}
-      <div style={{ 
-        marginBottom: '1.5rem',
-        display: 'inline-block',
-        border: '2px solid #333',
-        borderRadius: '8px',
-        backgroundColor: '#000',
-        position: 'relative',
-        maxWidth: '100%'
-      }}>
+      <div className="ping-pong-canvas-container">
         <svg
           width={gameDimensions.width}
           height={gameDimensions.height}
-          style={{ 
-            display: 'block',
-            maxWidth: '100%',
-            height: 'auto',
-            touchAction: 'none' // Prevent default touch behaviors
-          }}
+          className="ping-pong-canvas"
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={(e) => {
@@ -675,8 +646,8 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
               y={0}
               width={gameDimensions.width / 2}
               height={gameDimensions.height}
-              fill="rgba(76, 175, 80, 0.1)"
-              stroke="rgba(76, 175, 80, 0.3)"
+              fill="rgba(59, 130, 246, 0.1)"
+              stroke="var(--color-accent, #3b82f6)"
               strokeWidth="2"
               strokeDasharray="5,5"
             />
@@ -688,7 +659,7 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
             y={gameState.data.playerPaddle.y}
             width={gameState.data.playerPaddle.width}
             height={gameState.data.playerPaddle.height}
-            fill="#4CAF50"
+            fill="var(--color-accent, #3b82f6)"
             rx={2}
           />
           
@@ -698,7 +669,7 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
             y={gameState.data.aiPaddle.y}
             width={gameState.data.aiPaddle.width}
             height={gameState.data.aiPaddle.height}
-            fill="#f44336"
+            fill="var(--color-error, #dc2626)"
             rx={2}
           />
           
@@ -712,143 +683,103 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
         </svg>
         
         {/* Mobile instructions overlay */}
-        <div style={{
-          position: 'absolute',
-          bottom: '8px',
-          left: '8px',
-          right: '8px',
-          fontSize: '0.8rem',
-          color: '#fff',
-          textAlign: 'center',
-          opacity: 0.7,
-          pointerEvents: 'none',
-          display: isMobile ? 'block' : 'none'
-        }}>
-          Touch & drag to move paddle • Swipe for quick actions
-        </div>
+        {isMobile && (
+          <div style={{
+            position: 'absolute',
+            bottom: '8px',
+            left: '8px',
+            right: '8px',
+            fontSize: '0.8rem',
+            color: '#fff',
+            textAlign: 'center',
+            opacity: 0.7,
+            pointerEvents: 'none'
+          }}>
+            Touch & drag to move paddle • Swipe for quick actions
+          </div>
+        )}
       </div>
 
+      {/* Rotation hint for portrait mode */}
+      {shouldRotate && (
+        <div style={{
+          position: 'absolute',
+          bottom: '1rem',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          padding: '0.5rem 1rem',
+          background: 'rgba(0, 0, 0, 0.8)',
+          color: 'white',
+          borderRadius: '0.5rem',
+          fontSize: '0.8rem',
+          textAlign: 'center',
+          zIndex: 100
+        }}>
+          🔄 Game rotated for better portrait experience
+        </div>
+      )}
+
       {/* Game Controls */}
-      <div style={{ marginBottom: '1.5rem' }}>
+      <div style={{ marginBottom: '1.5rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
         <button 
           onClick={startNewGame}
-          style={{ 
-            fontSize: '1rem', 
-            padding: '0.75rem 1.5rem',
-            backgroundColor: '#4CAF50',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            marginRight: '0.5rem',
-            marginBottom: '0.5rem',
-            minHeight: '44px', // Touch-friendly
-            minWidth: '120px'
-          }}
+          className="ping-pong-btn ping-pong-btn--primary"
         >
-          New Game
+          🎮 New Game
         </button>
         
         {gameState.data.gameStatus === 'playing' && (
           <button 
             onClick={pauseGame}
-            style={{ 
-              fontSize: '1rem', 
-              padding: '0.75rem 1.5rem',
-              backgroundColor: '#ff9800',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              marginBottom: '0.5rem',
-              minHeight: '44px', // Touch-friendly
-              minWidth: '120px'
-            }}
+            className="ping-pong-btn ping-pong-btn--warning"
           >
-            Pause
+            ⏸️ Pause
           </button>
         )}
         
         {gameState.data.gameStatus === 'paused' && (
           <button 
             onClick={resumeGame}
-            style={{ 
-              fontSize: '1rem', 
-              padding: '0.75rem 1.5rem',
-              backgroundColor: '#4CAF50',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              marginBottom: '0.5rem',
-              minHeight: '44px', // Touch-friendly
-              minWidth: '120px'
-            }}
+            className="ping-pong-btn ping-pong-btn--success"
           >
-            Resume
+            ▶️ Resume
           </button>
         )}
       </div>
 
       {/* Controls Instructions */}
-      <div style={{ 
-        marginBottom: '1.5rem',
-        padding: '1rem',
-        backgroundColor: '#fff',
-        borderRadius: '8px',
-        border: '1px solid #eee'
-      }}>
-        <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.1rem' }}>Controls</h3>
-        <div style={{ 
-          display: 'flex', 
-          flexDirection: 'column', 
-          gap: '0.5rem',
-          fontSize: '0.9rem'
-        }}>
+      <div className="ping-pong-controls-info">
+        <h3>🎯 Game Controls</h3>
+        <div>
           {/* Desktop controls */}
-          <div style={{ 
-            display: !isMobile ? 'block' : 'none'
-          }}>
-            <strong>Desktop:</strong> W/S or ↑/↓ Arrow Keys to move paddle • Space to pause/resume
-          </div>
+          {!isMobile && (
+            <div className="ping-pong-control-item">
+              <span className="ping-pong-control-icon">⌨️</span>
+              <span><strong>Desktop:</strong> W/S or ↑/↓ Arrow Keys to move paddle • Space to pause/resume</span>
+            </div>
+          )}
           
           {/* Mobile controls */}
-          <div style={{ 
-            display: isMobile ? 'block' : 'none'
-          }}>
-            <strong>Mobile:</strong> Touch & drag on your paddle area to move • Tap anywhere to pause/resume
-          </div>
-          
-          {/* Swipe gestures */}
-          <div style={{ 
-            display: isMobile ? 'block' : 'none',
-            color: '#4CAF50',
-            fontSize: '0.85rem',
-            fontWeight: 'bold'
-          }}>
-            📱 <strong>Swipe Gestures:</strong> Swipe ↓ to pause • Swipe ↑ to resume • Swipe → to start new game
-          </div>
-          
-          {/* Always visible controls */}
-          <div style={{ 
-            display: isMobile ? 'block' : 'none',
-            color: '#666',
-            fontSize: '0.8rem'
-          }}>
-            Desktop keyboard controls also work if you have a keyboard
-          </div>
+          {isMobile && (
+            <>
+              <div className="ping-pong-control-item">
+                <span className="ping-pong-control-icon">📱</span>
+                <span><strong>Mobile:</strong> Touch & drag on your paddle area to move • Tap anywhere to pause/resume</span>
+              </div>
+              
+              {/* Swipe gestures */}
+              <div className="ping-pong-control-item">
+                <span className="ping-pong-control-icon">👆</span>
+                <span><strong>Swipe Gestures:</strong> Swipe ↓ to pause • Swipe ↑ to resume • Swipe → to start new game</span>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
       {/* Save/Load Controls */}
-      <div style={{ 
-        marginBottom: '1.5rem',
-        padding: '1rem',
-        backgroundColor: '#fff',
-        borderRadius: '4px',
-        border: '1px solid #eee'
-      }}>
-        <h3 style={{ margin: '0 0 1rem 0' }}>Save Management</h3>
+      <div className="ping-pong-controls-info">
+        <h3>💾 Save Management</h3>
         
         <div style={{ marginBottom: '1rem' }}>
           <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
@@ -856,6 +787,7 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
               type="checkbox"
               checked={autoSaveEnabled}
               onChange={toggleAutoSave}
+              style={{ accentColor: 'var(--color-accent, #3b82f6)' }}
             />
             Auto-save enabled (saves every {controller.config.autoSaveIntervalMs / 1000}s)
           </label>
@@ -864,57 +796,38 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
         <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
           <button 
             onClick={handleManualSave}
-            style={{ 
-              padding: '0.5rem 1rem',
-              backgroundColor: '#2196F3',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              minHeight: '44px', // Touch-friendly
-              fontSize: '0.9rem'
-            }}
+            className="ping-pong-btn ping-pong-btn--primary"
+            style={{ fontSize: '0.9rem', padding: '0.5rem 1rem' }}
           >
-            Manual Save
+            💾 Save
           </button>
           
           <button 
             onClick={handleManualLoad}
             disabled={!hasSave}
-            style={{ 
-              padding: '0.5rem 1rem',
-              backgroundColor: hasSave ? '#4CAF50' : '#ccc',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: hasSave ? 'pointer' : 'not-allowed',
-              minHeight: '44px', // Touch-friendly
-              fontSize: '0.9rem'
-            }}
+            className={`ping-pong-btn ${hasSave ? 'ping-pong-btn--success' : 'ping-pong-btn--secondary'}`}
+            style={{ fontSize: '0.9rem', padding: '0.5rem 1rem' }}
           >
-            Load Game
+            📂 Load Game
           </button>
           
           <button 
             onClick={handleDropSave}
             disabled={!hasSave}
+            className="ping-pong-btn"
             style={{ 
+              fontSize: '0.9rem', 
               padding: '0.5rem 1rem',
-              backgroundColor: hasSave ? '#f44336' : '#ccc',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: hasSave ? 'pointer' : 'not-allowed',
-              minHeight: '44px', // Touch-friendly
-              fontSize: '0.9rem'
+              backgroundColor: hasSave ? 'var(--color-error, #dc2626)' : 'var(--color-surface)',
+              color: hasSave ? 'white' : 'var(--color-textMuted)'
             }}
           >
-            Delete Save
+            🗑️ Delete Save
           </button>
         </div>
 
-        <div style={{ marginTop: '1rem', fontSize: '0.9rem', color: '#666' }}>
-          {hasSave ? '💾 Save available' : '❌ No save data'}
+        <div style={{ marginTop: '1rem', fontSize: '0.9rem', color: 'var(--color-textSecondary)', textAlign: 'center' }}>
+          {hasSave ? '✅ Save available' : '❌ No save data'}
         </div>
       </div>
 
@@ -922,10 +835,12 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
       {lastSaveEvent && (
         <div style={{ 
           padding: '0.5rem',
-          backgroundColor: lastSaveEvent.success ? '#e8f5e8' : '#fde8e8',
-          border: `1px solid ${lastSaveEvent.success ? '#4CAF50' : '#f44336'}`,
-          borderRadius: '4px',
-          fontSize: '0.9rem'
+          backgroundColor: lastSaveEvent.success ? 'var(--color-success, #059669)' : 'var(--color-error, #dc2626)',
+          color: 'white',
+          borderRadius: 'var(--pp-radius)',
+          fontSize: '0.9rem',
+          textAlign: 'center',
+          marginTop: '1rem'
         }}>
           {lastSaveEvent.success ? '✅' : '❌'} 
           {lastSaveEvent.action === 'auto-save' ? 'Auto-saved' : 
