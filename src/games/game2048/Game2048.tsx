@@ -305,7 +305,7 @@ export const Game2048: React.FC<Game2048Props> = ({ playerId }) => {
     
     console.log(`Undo successful! Spent ${UNDO_COST} coins.`);
     return true;
-  }, [gameState, setGameState, triggerAutoSave, canSpend, spendCoins]);
+  }, [gameState, setGameState, triggerAutoSave, canSpend, spendCoins, balance]);
 
   // Handle new game
   const handleNewGame = useCallback(async () => {
