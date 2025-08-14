@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useCoinService } from '../../hooks/useCoinService';
 import { MultiplayerModal } from '../multiplayer/MultiplayerModal';
+import { getProfileInitials } from '../../utils/nameUtils';
 import './Navigation.css';
 
 interface NavigationProps {
@@ -44,12 +45,12 @@ export const Navigation: React.FC<NavigationProps> = ({
             </div>
             <div className="nav-user">
               <button 
-                className="nav-user-name" 
+                className="nav-profile-btn" 
                 onClick={onProfileClick}
-                aria-label="Open profile"
-                title="Click to edit profile"
+                aria-label={`Open profile for ${playerName}`}
+                title={`${playerName} - Click to edit profile`}
               >
-                {playerName}
+                {getProfileInitials(playerName)}
               </button>
               <button 
                 className="nav-multiplayer-btn" 

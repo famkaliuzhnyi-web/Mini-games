@@ -66,6 +66,34 @@
   white-space: nowrap;
 }
 
+.nav-profile-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-surface, #f0f0f0);
+  border: 2px solid var(--color-border, #e0e0e0);
+  color: var(--color-text, #333);
+  cursor: pointer;
+  font-size: 0.7rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.nav-profile-btn:hover {
+  background: var(--color-card, #ffffff);
+  border-color: var(--color-accent, #2196F3);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+}
+
+.nav-profile-btn:active {
+  transform: translateY(0);
+}
+
 .nav-user-name {
   font-weight: 600;
   color: var(--color-text, #333);
@@ -134,6 +162,12 @@
     font-size: 0.8rem;
   }
   
+  .nav-profile-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 0.65rem;
+  }
+
   .nav-user-name {
     font-size: 0.85rem;
     padding: 0.4rem 0.6rem;
@@ -165,6 +199,12 @@
     font-size: 0.75rem;
   }
   
+  .nav-profile-btn {
+    width: 26px;
+    height: 26px;
+    font-size: 0.6rem;
+  }
+
   .nav-user-name {
     font-size: 0.8rem;
     max-width: 120px;
