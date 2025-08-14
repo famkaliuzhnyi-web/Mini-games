@@ -191,12 +191,15 @@ export function detectCollision(
   // Wall collision
   if (position.x < 0 || position.x >= config.gridWidth || 
       position.y < 0 || position.y >= config.gridHeight) {
+    console.log(`Wall collision: position (${position.x}, ${position.y}), bounds (0-${config.gridWidth-1}, 0-${config.gridHeight-1})`);
     return 'wall';
   }
 
   // Self collision (skip head, which is at index 0)
   for (let i = 1; i < snake.segments.length; i++) {
     if (position.x === snake.segments[i].x && position.y === snake.segments[i].y) {
+      console.log(`Self collision: head (${position.x}, ${position.y}) hit body segment ${i} (${snake.segments[i].x}, ${snake.segments[i].y})`);
+      console.log('All segments:', snake.segments);
       return 'self';
     }
   }
@@ -206,6 +209,7 @@ export function detectCollision(
     if (otherSnake.id !== snake.id && otherSnake.alive) {
       for (const segment of otherSnake.segments) {
         if (position.x === segment.x && position.y === segment.y) {
+          console.log(`Other snake collision: head (${position.x}, ${position.y}) hit snake ${otherSnake.id} segment (${segment.x}, ${segment.y})`);
           return 'other_snake';
         }
       }

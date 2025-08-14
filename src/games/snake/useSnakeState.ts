@@ -49,21 +49,22 @@ function snakeGameReducer(state: SnakeGameData, action: SnakeAction): SnakeGameD
     case 'TICK': {
       if (state.gameOver || state.isPaused) return state;
 
-      // Move all snakes
-      let updatedSnakes = state.snakes.map(snake => moveSnake(snake));
       let updatedFood = [...state.food];
       let foodEaten = false;
 
-      // Check collisions and handle food consumption
-      updatedSnakes = updatedSnakes.map(snake => {
+      // Check collisions and handle food consumption for each snake
+      const updatedSnakes = state.snakes.map(snake => {
         if (!snake.alive) return snake;
 
-        const head = snake.segments[0];
+        // Move the snake first
+        const movedSnake = moveSnake(snake);
+        const head = movedSnake.segments[0];
         
         // Check collision with walls, self, or other snakes
-        const collision = detectCollision(head, snake, updatedSnakes, state.config);
+        // Use original snakes array to avoid checking against already moved snakes
+        const collision = detectCollision(head, movedSnake, state.snakes, state.config);
         if (collision) {
-          return { ...snake, alive: false };
+          return { ...movedSnake, alive: false };
         }
 
         // Check food collision
@@ -74,10 +75,10 @@ function snakeGameReducer(state: SnakeGameData, action: SnakeAction): SnakeGameD
           foodEaten = true;
           
           // Grow snake
-          return growSnake(snake);
+          return growSnake(movedSnake);
         }
 
-        return snake;
+        return movedSnake;
       });
 
       // Spawn new food if any was eaten
@@ -147,9 +148,6 @@ function snakeGameReducer(state: SnakeGameData, action: SnakeAction): SnakeGameD
       };
     }
 
-    case 'RESET':
-      return snakeGameController.getInitialState().data;
-
     default:
       return state;
   }
@@ -161,6 +159,19 @@ function snakeGameReducer(state: SnakeGameData, action: SnakeAction): SnakeGameD
 export function useSnakeState(playerId: string) {
   const gameIntervalRef = useRef<NodeJS.Timeout | null>(null);
   
+  // Create player-specific initial state
+  const createPlayerInitialState = useCallback(() => {
+    const baseState = snakeGameController.getInitialState();
+    return {
+      ...baseState,
+      playerId,
+      data: {
+        ...baseState.data,
+        snakes: baseState.data.snakes.map(snake => ({ ...snake, id: playerId }))
+      }
+    };
+  }, [playerId]);
+  
   // Use platform's game save system
   const {
     gameState,
@@ -171,13 +182,21 @@ export function useSnakeState(playerId: string) {
     gameId: snakeGameController.config.id,
     playerId,
     gameConfig: snakeGameController.config,
-    initialState: snakeGameController.getInitialState(),
+    initialState: createPlayerInitialState(),
     onSaveLoad: snakeGameController.onSaveLoad,
     onSaveDropped: snakeGameController.onSaveDropped
   });
 
+  // Local game state reducer with player context
+  const snakeGameReducerWithPlayer = useCallback((state: SnakeGameData, action: SnakeAction): SnakeGameData => {
+    if (action.type === 'RESET') {
+      return createPlayerInitialState().data;
+    }
+    return snakeGameReducer(state, action);
+  }, [createPlayerInitialState]);
+
   // Local game state reducer
-  const [localGameData, dispatch] = useReducer(snakeGameReducer, gameState?.data);
+  const [localGameData, dispatch] = useReducer(snakeGameReducerWithPlayer, gameState?.data || createPlayerInitialState().data);
 
   // Sync local state with saved state when it changes
   useEffect(() => {
