@@ -60,3 +60,27 @@ export interface AnimatedTile {
   animationState: TileAnimationState;
   key: string; // Unique key for React rendering
 }
+
+// Theme system types
+export type Game2048Theme = 'classic' | 'dark' | 'ocean' | 'forest' | 'sunset';
+
+export interface Game2048ThemeData {
+  id: Game2048Theme;
+  name: string;
+  description: string;
+  cost: number;
+  colors: {
+    background: string;
+    container: string;
+    gridBackground: string;
+    emptyCell: string;
+    text: string;
+    title: string;
+    tiles: Record<TileValue, { background: string; color: string }>;
+  };
+}
+
+// Add theme to game data
+export interface Game2048DataWithTheme extends Game2048Data {
+  currentTheme?: Game2048Theme;
+}

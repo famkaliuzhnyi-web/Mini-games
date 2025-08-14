@@ -545,3 +545,162 @@
 .game2048-score-animated {
   animation: score-increase 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+/* Theme System Styles */
+.game2048-btn-theme {
+  background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+  color: white;
+  border: none;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin: 0 0.25rem;
+}
+
+.game2048-btn-theme:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(156, 39, 176, 0.3);
+}
+
+.game2048-theme-selector {
+  width: 100%;
+  max-width: 500px;
+  margin: 1rem 0;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.game2048-theme-selector h3 {
+  text-align: center;
+  margin: 0 0 1rem 0;
+  color: #776e65;
+  font-size: 1.2rem;
+}
+
+.game2048-themes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  width: 100%;
+}
+
+.game2048-theme-card {
+  padding: 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+  text-align: center;
+  position: relative;
+}
+
+.game2048-theme-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+.game2048-theme-card.current {
+  border-width: 3px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+}
+
+.game2048-theme-card.locked:hover {
+  transform: none;
+}
+
+.theme-preview {
+  display: flex;
+  gap: 2px;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+  padding: 0.25rem;
+  border-radius: 4px;
+}
+
+.theme-tile {
+  width: 20px;
+  height: 20px;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  font-weight: bold;
+}
+
+.theme-info h4 {
+  margin: 0.25rem 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.theme-info p {
+  margin: 0.25rem 0;
+  font-size: 0.7rem;
+  line-height: 1.2;
+}
+
+.theme-cost {
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: #4CAF50;
+  margin: 0.25rem 0;
+}
+
+.theme-cost.insufficient {
+  color: #f44336;
+}
+
+.current-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #4CAF50;
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+/* Update score container to handle 3 boxes */
+.game2048-score-container {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.game2048-score-box:nth-child(3) {
+  background: linear-gradient(135deg, #ffd700, #ffa500);
+  color: #8b4513;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .game2048-themes-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .game2048-theme-card {
+    padding: 0.5rem;
+  }
+  
+  .game2048-score-container {
+    gap: 0.5rem;
+  }
+  
+  .game2048-controls {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+}

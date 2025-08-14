@@ -7,6 +7,9 @@ export interface UserProfile {
   playerName: string;
   playerId: string;
   coins: CoinBalance;
+  purchasedThemes?: {
+    game2048?: string[]; // Array of purchased theme IDs
+  };
   createdAt: string;
   updatedAt: string;
 }

@@ -5,8 +5,10 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useGameSave } from '../../hooks/useGameSave';
 import { useSwipeGestures } from '../../hooks/useSwipeGestures';
 import { useCoinService } from '../../hooks/useCoinService';
+import { UserService } from '../../services/UserService';
 import type { GameController, GameState, GameConfig } from '../../types/game';
-import type { Game2048Data, Direction } from './types';
+import type { Game2048Data, Direction, Game2048Theme, TileValue } from './types';
+import { THEME_DATA, UNDO_COST } from './themes';
 import {
   createInitialGrid,
   moveGrid,
@@ -89,13 +91,19 @@ interface Game2048Props {
 export const Game2048: React.FC<Game2048Props> = ({ playerId }) => {
   const controller = useMemo(() => new Game2048Controller(), []);
   const gameContainerRef = useRef<HTMLDivElement>(null);
-  const { earnCoins, awardGameCompletion } = useCoinService();
+  const { earnCoins, awardGameCompletion, spendCoins, canSpend, balance } = useCoinService();
+  const userService = useMemo(() => UserService.getInstance(), []);
   
   // Animation state for tiles
   const [animatingTiles, setAnimatingTiles] = useState<Set<string>>(new Set());
   const [newTiles, setNewTiles] = useState<Set<string>>(new Set());
   const [mergedTiles, setMergedTiles] = useState<Set<string>>(new Set());
   const [scoreAnimated, setScoreAnimated] = useState(false);
+  
+  // Theme management
+  const [currentTheme, setCurrentTheme] = useState<Game2048Theme>('classic');
+  const [purchasedThemes, setPurchasedThemes] = useState<string[]>(['classic']);
+  const [showThemeSelector, setShowThemeSelector] = useState(false);
   
   const {
     gameState,
@@ -111,6 +119,66 @@ export const Game2048: React.FC<Game2048Props> = ({ playerId }) => {
     onSaveLoad: controller.onSaveLoad,
     onSaveDropped: controller.onSaveDropped
   });
+
+  // Load user's purchased themes and current theme on component mount
+  useEffect(() => {
+    const profile = userService.loadProfile();
+    if (profile?.purchasedThemes?.game2048) {
+      setPurchasedThemes(profile.purchasedThemes.game2048);
+    }
+    // Load saved theme from game state or default to classic
+    const savedTheme = ((gameState.data as Game2048Data & { currentTheme?: Game2048Theme })?.currentTheme) || 'classic';
+    setCurrentTheme(savedTheme);
+  }, [userService, gameState.data]);
+
+  // Theme management functions
+  const purchaseTheme = useCallback(async (themeId: Game2048Theme) => {
+    const theme = THEME_DATA[themeId];
+    if (!theme || purchasedThemes.includes(themeId)) return;
+
+    if (!canSpend(theme.cost)) {
+      alert(`Insufficient coins! You need ${theme.cost} coins to purchase this theme.`);
+      return;
+    }
+
+    const transaction = spendCoins(theme.cost, 'theme', `Purchased ${theme.name} theme for 2048`);
+    if (transaction) {
+      const updatedThemes = [...purchasedThemes, themeId];
+      setPurchasedThemes(updatedThemes);
+      
+      // Update user profile
+      const profile = userService.loadProfile();
+      if (profile) {
+        const updatedProfile = {
+          ...profile,
+          purchasedThemes: {
+            ...profile.purchasedThemes,
+            game2048: updatedThemes
+          }
+        };
+        userService.saveProfile(updatedProfile);
+      }
+      
+      // Auto-select the purchased theme
+      setCurrentTheme(themeId);
+      alert(`Successfully purchased ${theme.name} theme!`);
+    }
+  }, [canSpend, spendCoins, purchasedThemes, userService]);
+
+  const selectTheme = useCallback((themeId: Game2048Theme) => {
+    if (!purchasedThemes.includes(themeId)) return;
+    setCurrentTheme(themeId);
+    
+    // Save theme to game state
+    const newGameState = {
+      ...gameState,
+      data: {
+        ...gameState.data,
+        currentTheme: themeId
+      }
+    };
+    setGameState(newGameState);
+  }, [purchasedThemes, gameState, setGameState]);
 
   // Handle keyboard input
   const handleMove = useCallback(async (direction: Direction) => {
@@ -263,9 +331,22 @@ export const Game2048: React.FC<Game2048Props> = ({ playerId }) => {
     }
   }, [gameState.data.gameOver, handleMove]);
 
-  // Handle undo
+  // Handle undo with coin cost
   const handleUndo = useCallback(async () => {
     if (!gameState.data.canUndo || !gameState.data.previousGrid) return;
+    
+    // Check if user has enough coins for undo
+    if (!canSpend(UNDO_COST)) {
+      alert(`Insufficient coins! You need ${UNDO_COST} coins to undo your last move.`);
+      return;
+    }
+
+    // Spend coins for undo
+    const transaction = spendCoins(UNDO_COST, 'undo', `Undid last move in 2048 game`);
+    if (!transaction) {
+      alert(`Failed to spend coins for undo. Please try again.`);
+      return;
+    }
 
     const newGameState: GameState<Game2048Data> = {
       ...gameState,
@@ -285,7 +366,7 @@ export const Game2048: React.FC<Game2048Props> = ({ playerId }) => {
 
     setGameState(newGameState);
     await triggerAutoSave();
-  }, [gameState, setGameState, triggerAutoSave]);
+  }, [gameState, setGameState, triggerAutoSave, canSpend, spendCoins]);
 
   // Handle new game
   const handleNewGame = useCallback(async () => {
@@ -357,10 +438,30 @@ export const Game2048: React.FC<Game2048Props> = ({ playerId }) => {
     );
   }
 
+  // Get current theme data
+  const themeData = THEME_DATA[currentTheme];
+
   return (
-    <div className="game2048-container" ref={gameContainerRef}>
+    <div 
+      className="game2048-container" 
+      ref={gameContainerRef}
+      style={{
+        background: themeData.colors.container,
+        color: themeData.colors.text
+      }}
+    >
       <div className="game2048-header">
-        <h1 className="game2048-title">2048</h1>
+        <h1 
+          className="game2048-title"
+          style={{
+            background: themeData.colors.title,
+            backgroundClip: 'text',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent'
+          }}
+        >
+          2048
+        </h1>
       </div>
 
       <div className="game2048-score-container">
@@ -374,6 +475,10 @@ export const Game2048: React.FC<Game2048Props> = ({ playerId }) => {
           <div className="game2048-score-label">Best</div>
           <div className="game2048-score-value">{gameState.data.bestScore}</div>
         </div>
+        <div className="game2048-score-box">
+          <div className="game2048-score-label">Coins</div>
+          <div className="game2048-score-value">🪙 {balance}</div>
+        </div>
       </div>
 
       <div className="game2048-controls">
@@ -386,9 +491,16 @@ export const Game2048: React.FC<Game2048Props> = ({ playerId }) => {
         <button 
           className="game2048-btn game2048-btn-secondary"
           onClick={handleUndo}
-          disabled={!gameState.data.canUndo}
+          disabled={!gameState.data.canUndo || !canSpend(UNDO_COST)}
+          title={!canSpend(UNDO_COST) ? `Need ${UNDO_COST} coins to undo` : `Undo last move (${UNDO_COST} coins)`}
         >
-          Undo
+          Undo ({UNDO_COST} 🪙)
+        </button>
+        <button 
+          className="game2048-btn game2048-btn-theme"
+          onClick={() => setShowThemeSelector(!showThemeSelector)}
+        >
+          🎨 Themes
         </button>
       </div>
 
@@ -405,13 +517,73 @@ export const Game2048: React.FC<Game2048Props> = ({ playerId }) => {
         </div>
       )}
 
+      {/* Theme Selector */}
+      {showThemeSelector && (
+        <div className="game2048-theme-selector">
+          <h3>Choose Your Theme</h3>
+          <div className="game2048-themes-grid">
+            {Object.entries(THEME_DATA).map(([themeId, theme]) => {
+              const isOwned = purchasedThemes.includes(themeId);
+              const isCurrent = currentTheme === themeId;
+              const canAfford = canSpend(theme.cost);
+              
+              return (
+                <div 
+                  key={themeId}
+                  className={`game2048-theme-card ${isCurrent ? 'current' : ''} ${!isOwned ? 'locked' : ''}`}
+                  onClick={() => {
+                    if (isOwned) {
+                      selectTheme(themeId as Game2048Theme);
+                    } else if (canAfford) {
+                      purchaseTheme(themeId as Game2048Theme);
+                    }
+                  }}
+                  style={{ 
+                    background: theme.colors.container,
+                    borderColor: isCurrent ? theme.colors.text : 'transparent'
+                  }}
+                >
+                  <div className="theme-preview" style={{ background: theme.colors.gridBackground }}>
+                    {/* Mini tile preview */}
+                    <div className="theme-tile" style={{ background: theme.colors.tiles[2].background, color: theme.colors.tiles[2].color }}>2</div>
+                    <div className="theme-tile" style={{ background: theme.colors.tiles[4].background, color: theme.colors.tiles[4].color }}>4</div>
+                    <div className="theme-tile" style={{ background: theme.colors.tiles[8].background, color: theme.colors.tiles[8].color }}>8</div>
+                  </div>
+                  <div className="theme-info">
+                    <h4 style={{ color: theme.colors.text }}>{theme.name}</h4>
+                    <p style={{ color: theme.colors.text, opacity: 0.7 }}>{theme.description}</p>
+                    {!isOwned && (
+                      <div className={`theme-cost ${!canAfford ? 'insufficient' : ''}`}>
+                        {canAfford ? `🪙 ${theme.cost}` : `🚫 ${theme.cost} coins needed`}
+                      </div>
+                    )}
+                    {isCurrent && <div className="current-badge">✓ Active</div>}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       <div className="game2048-grid-container">
-        <div className="game2048-grid">
+        <div 
+          className="game2048-grid"
+          style={{
+            background: themeData.colors.gridBackground
+          }}
+        >
           {gameState.data.grid.map((row, rowIndex) =>
             row.map((tile, colIndex) => (
               <div 
                 key={`${rowIndex}-${colIndex}`}
                 className={getTileClass(tile, rowIndex, colIndex)}
+                style={tile > 0 ? {
+                  background: themeData.colors.tiles[tile as TileValue]?.background || themeData.colors.emptyCell,
+                  color: themeData.colors.tiles[tile as TileValue]?.color || themeData.colors.text
+                } : {
+                  background: themeData.colors.emptyCell
+                }}
               >
                 {tile > 0 ? tile : ''}
               </div>
