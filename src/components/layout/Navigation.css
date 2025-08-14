@@ -81,6 +81,11 @@
   justify-content: center;
   transition: all 0.2s ease;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-right: 0.25rem;
+}
+
+.nav-profile-btn:last-of-type {
+  margin-right: 0;
 }
 
 .nav-profile-btn:hover {
@@ -92,6 +97,33 @@
 
 .nav-profile-btn:active {
   transform: translateY(0);
+}
+
+.nav-profile-btn-current {
+  background: var(--color-surface, #f0f0f0);
+  border-color: var(--color-accent, #2196F3);
+  cursor: pointer;
+}
+
+.nav-profile-btn-current:hover {
+  background: var(--color-card, #ffffff);
+  border-color: var(--color-accent, #2196F3);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+}
+
+.nav-profile-btn-other {
+  background: var(--color-surface, #f0f0f0);
+  border-color: var(--color-border, #e0e0e0);
+  opacity: 0.8;
+  cursor: default;
+}
+
+.nav-profile-btn-other:hover {
+  background: var(--color-surface, #f0f0f0);
+  border-color: var(--color-border, #e0e0e0);
+  transform: none;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .nav-user-name {
@@ -166,6 +198,11 @@
     width: 28px;
     height: 28px;
     font-size: 0.65rem;
+    margin-right: 0.2rem;
+  }
+
+  .nav-profile-btn:last-of-type {
+    margin-right: 0;
   }
 
   .nav-user-name {
@@ -203,6 +240,11 @@
     width: 26px;
     height: 26px;
     font-size: 0.6rem;
+    margin-right: 0.15rem;
+  }
+
+  .nav-profile-btn:last-of-type {
+    margin-right: 0;
   }
 
   .nav-user-name {

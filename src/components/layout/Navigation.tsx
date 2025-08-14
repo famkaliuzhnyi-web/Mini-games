@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useCoinService } from '../../hooks/useCoinService';
+import { useMultiplayerSession } from '../../hooks/useMultiplayerSession';
 import { MultiplayerModal } from '../multiplayer/MultiplayerModal';
 import { getProfileInitials } from '../../utils/nameUtils';
 import './Navigation.css';
@@ -20,6 +21,7 @@ export const Navigation: React.FC<NavigationProps> = ({
   onNavigateToGame
 }) => {
   const { balance } = useCoinService();
+  const { isConnected, players } = useMultiplayerSession();
   const [isMultiplayerModalOpen, setIsMultiplayerModalOpen] = useState(false);
 
   const handleMultiplayerClick = () => {
@@ -44,14 +46,31 @@ export const Navigation: React.FC<NavigationProps> = ({
               🪙 {balance.toLocaleString()}
             </div>
             <div className="nav-user">
-              <button 
-                className="nav-profile-btn" 
-                onClick={onProfileClick}
-                aria-label={`Open profile for ${playerName}`}
-                title={`${playerName} - Click to edit profile`}
-              >
-                {getProfileInitials(playerName)}
-              </button>
+              {isConnected && players.length > 0 ? (
+                // Show all multiplayer players
+                players.map((player) => (
+                  <button
+                    key={player.id}
+                    className={`nav-profile-btn ${player.name === playerName ? 'nav-profile-btn-current' : 'nav-profile-btn-other'}`}
+                    onClick={player.name === playerName ? onProfileClick : undefined}
+                    aria-label={player.name === playerName ? `Open profile for ${player.name}` : `Player ${player.name}`}
+                    title={player.name === playerName ? `${player.name} - Click to edit profile` : `${player.name} (${player.role})`}
+                    disabled={player.name !== playerName}
+                  >
+                    {getProfileInitials(player.name)}
+                  </button>
+                ))
+              ) : (
+                // Show only current player when not in multiplayer
+                <button 
+                  className="nav-profile-btn" 
+                  onClick={onProfileClick}
+                  aria-label={`Open profile for ${playerName}`}
+                  title={`${playerName} - Click to edit profile`}
+                >
+                  {getProfileInitials(playerName)}
+                </button>
+              )}
               <button 
                 className="nav-multiplayer-btn" 
                 onClick={handleMultiplayerClick}
