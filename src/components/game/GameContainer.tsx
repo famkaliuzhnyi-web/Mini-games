@@ -5,7 +5,7 @@ import { TicTacToeGame } from '../../games/tic-tac-toe';
 import { SudokuGame } from '../../games/sudoku';
 import { PingPongGame } from '../../games/ping-pong';
 import { SnakeGame } from '../../games/snake';
-import { DrawingSlotComponent } from '../../games/drawing';
+import { DrawingGame } from '../../games/drawing';
 import './GameContainer.css';
 
 interface GameContainerProps {
@@ -34,7 +34,7 @@ export const GameContainer: React.FC<GameContainerProps> = ({
       case 'snake':
         return <SnakeGame playerId={playerId} />;
       case 'drawing':
-        return <DrawingSlotComponent playerId={playerId} />;
+        return <DrawingGame playerId={playerId} />;
       default:
         return (
           <div className="game-not-found">
