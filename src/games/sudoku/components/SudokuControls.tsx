@@ -28,7 +28,7 @@ export const SudokuControls: React.FC<SudokuControlsProps> = ({
     height: '50px',
     fontSize: '18px',
     fontWeight: 'bold',
-    backgroundColor: '#2196F3',
+    backgroundColor: 'var(--color-accent)',
     color: 'white',
     border: 'none',
     borderRadius: '8px',
@@ -48,8 +48,8 @@ export const SudokuControls: React.FC<SudokuControlsProps> = ({
 
   const difficultyButtonStyle = (difficulty: Difficulty): React.CSSProperties => ({
     ...controlButtonStyle,
-    backgroundColor: difficulty === currentDifficulty ? '#4CAF50' : '#E0E0E0',
-    color: difficulty === currentDifficulty ? 'white' : '#333'
+    backgroundColor: difficulty === currentDifficulty ? 'var(--color-success)' : 'var(--color-surface)',
+    color: difficulty === currentDifficulty ? 'white' : 'var(--color-text)'
   });
 
   const getDifficultyIcon = (difficulty: Difficulty): string => {
@@ -72,11 +72,11 @@ export const SudokuControls: React.FC<SudokuControlsProps> = ({
       {/* Number Pad */}
       <div style={{
         padding: '1rem',
-        backgroundColor: '#f9f9f9',
+        backgroundColor: 'var(--color-surface)',
         borderRadius: '8px',
-        border: '1px solid #ddd'
+        border: `1px solid var(--color-border)`
       }}>
-        <h4 style={{ margin: '0 0 1rem 0', textAlign: 'center' }}>Number Pad</h4>
+        <h4 style={{ margin: '0 0 1rem 0', textAlign: 'center', color: 'var(--color-text)' }}>Number Pad</h4>
         
         <div style={{
           display: 'grid',
@@ -90,11 +90,11 @@ export const SudokuControls: React.FC<SudokuControlsProps> = ({
               style={numberButtonStyle}
               onClick={() => onNumberInput(num as CellValue)}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#1976D2';
+                e.currentTarget.style.backgroundColor = 'var(--color-accentHover)';
                 e.currentTarget.style.transform = 'scale(1.05)';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#2196F3';
+                e.currentTarget.style.backgroundColor = 'var(--color-accent)';
                 e.currentTarget.style.transform = 'scale(1)';
               }}
             >
@@ -112,15 +112,15 @@ export const SudokuControls: React.FC<SudokuControlsProps> = ({
           <button
             style={{
               ...controlButtonStyle,
-              backgroundColor: '#FF9800',
+              backgroundColor: 'var(--color-warning)',
               color: 'white'
             }}
             onClick={onClearCell}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#F57C00';
+              e.currentTarget.style.backgroundColor = 'var(--color-warningLight)';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#FF9800';
+              e.currentTarget.style.backgroundColor = 'var(--color-warning)';
             }}
           >
             🧹 Clear
@@ -129,19 +129,19 @@ export const SudokuControls: React.FC<SudokuControlsProps> = ({
           <button
             style={{
               ...controlButtonStyle,
-              backgroundColor: canHint ? '#4CAF50' : '#BDBDBD',
-              color: 'white'
+              backgroundColor: canHint ? 'var(--color-success)' : 'var(--color-surfaceDarker)',
+              color: canHint ? 'white' : 'var(--color-textMuted)'
             }}
             onClick={onHint}
             disabled={!canHint}
             onMouseEnter={(e) => {
               if (canHint) {
-                e.currentTarget.style.backgroundColor = '#388E3C';
+                e.currentTarget.style.backgroundColor = 'var(--color-successLight)';
               }
             }}
             onMouseLeave={(e) => {
               if (canHint) {
-                e.currentTarget.style.backgroundColor = '#4CAF50';
+                e.currentTarget.style.backgroundColor = 'var(--color-success)';
               }
             }}
           >
@@ -153,13 +153,13 @@ export const SudokuControls: React.FC<SudokuControlsProps> = ({
       {/* New Game Section */}
       <div style={{
         padding: '1rem',
-        backgroundColor: '#f9f9f9',
+        backgroundColor: 'var(--color-surface)',
         borderRadius: '8px',
-        border: '1px solid #ddd',
+        border: `1px solid var(--color-border)`,
         width: '100%',
         maxWidth: '400px'
       }}>
-        <h4 style={{ margin: '0 0 1rem 0', textAlign: 'center' }}>
+        <h4 style={{ margin: '0 0 1rem 0', textAlign: 'center', color: 'var(--color-text)' }}>
           {isComplete ? '🎉 Start New Game' : '🎮 New Game'}
         </h4>
         
@@ -175,12 +175,12 @@ export const SudokuControls: React.FC<SudokuControlsProps> = ({
               onClick={() => onNewGame(difficulty)}
               onMouseEnter={(e) => {
                 if (difficulty !== currentDifficulty) {
-                  e.currentTarget.style.backgroundColor = '#BDBDBD';
+                  e.currentTarget.style.backgroundColor = 'var(--color-surfaceHover)';
                 }
               }}
               onMouseLeave={(e) => {
                 if (difficulty !== currentDifficulty) {
-                  e.currentTarget.style.backgroundColor = '#E0E0E0';
+                  e.currentTarget.style.backgroundColor = 'var(--color-surface)';
                 }
               }}
             >
@@ -192,7 +192,7 @@ export const SudokuControls: React.FC<SudokuControlsProps> = ({
         <div style={{
           marginTop: '0.5rem',
           fontSize: '0.8rem',
-          color: '#666',
+          color: 'var(--color-textSecondary)',
           textAlign: 'center'
         }}>
           Current: {getDifficultyIcon(currentDifficulty)} {currentDifficulty.charAt(0).toUpperCase() + currentDifficulty.slice(1)}
@@ -202,12 +202,12 @@ export const SudokuControls: React.FC<SudokuControlsProps> = ({
       {/* Instructions */}
       <div style={{
         padding: '1rem',
-        backgroundColor: '#E3F2FD',
+        backgroundColor: 'var(--color-accentLight)',
         borderRadius: '8px',
-        border: '1px solid #2196F3',
+        border: `1px solid var(--color-accent)`,
         maxWidth: '400px',
         fontSize: '0.9rem',
-        color: '#1565C0'
+        color: 'var(--color-text)'
       }}>
         <div style={{ fontWeight: 'bold', marginBottom: '0.5rem' }}>How to Play:</div>
         <ul style={{ margin: 0, paddingLeft: '1.5rem' }}>

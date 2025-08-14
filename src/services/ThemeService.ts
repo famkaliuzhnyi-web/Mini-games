@@ -12,6 +12,8 @@ export interface Theme {
     primary: string;
     secondary: string;
     surface: string;
+    surfaceDarker: string;
+    surfaceHover: string;
     card: string;
     
     // Text colors
@@ -21,11 +23,18 @@ export interface Theme {
     
     // UI colors
     border: string;
+    borderLight: string;
     accent: string;
+    accentLight: string;
     accentHover: string;
     success: string;
+    successLight: string;
     error: string;
+    errorLight: string;
     warning: string;
+    warningLight: string;
+    info: string;
+    infoLight: string;
     
     // Game specific
     gameBackground: string;
@@ -46,6 +55,8 @@ export const THEMES: Record<ThemeName, Theme> = {
       primary: '#1a1a1a',
       secondary: '#2d2d2d',
       surface: '#3d3d3d',
+      surfaceDarker: '#2a2a2a',
+      surfaceHover: '#4d4d4d',
       card: '#4a4a4a',
       
       text: '#ffffff',
@@ -53,11 +64,18 @@ export const THEMES: Record<ThemeName, Theme> = {
       textMuted: '#a0a0a0',
       
       border: '#555555',
+      borderLight: '#666666',
       accent: '#646cff',
+      accentLight: '#7c84ff',
       accentHover: '#747bff',
       success: '#4caf50',
+      successLight: '#81c784',
       error: '#f44336',
+      errorLight: '#ef5350',
       warning: '#ff9800',
+      warningLight: '#ffb74d',
+      info: '#00BCD4',
+      infoLight: '#4dd0e1',
       
       gameBackground: '#2d2d2d',
       gameSurface: '#3d3d3d',
@@ -76,6 +94,8 @@ export const THEMES: Record<ThemeName, Theme> = {
       primary: '#ffffff',
       secondary: '#f8f9fa',
       surface: '#f1f3f4',
+      surfaceDarker: '#e8eaed',
+      surfaceHover: '#f8f9fa',
       card: '#ffffff',
       
       text: '#333333',
@@ -83,11 +103,18 @@ export const THEMES: Record<ThemeName, Theme> = {
       textMuted: '#777777',
       
       border: '#e0e0e0',
+      borderLight: '#f0f0f0',
       accent: '#1976d2',
+      accentLight: '#e3f2fd',
       accentHover: '#1565c0',
       success: '#2e7d32',
+      successLight: '#e8f5e8',
       error: '#d32f2f',
+      errorLight: '#ffebee',
       warning: '#ed6c02',
+      warningLight: '#fff3e0',
+      info: '#0288d1',
+      infoLight: '#e1f5fe',
       
       gameBackground: '#f8f9fa',
       gameSurface: '#ffffff',
@@ -106,6 +133,8 @@ export const THEMES: Record<ThemeName, Theme> = {
       primary: '#000000',
       secondary: '#001100',
       surface: '#002200',
+      surfaceDarker: '#001100',
+      surfaceHover: '#003300',
       card: '#003300',
       
       text: '#00ff00',
@@ -113,11 +142,18 @@ export const THEMES: Record<ThemeName, Theme> = {
       textMuted: '#00aa00',
       
       border: '#004400',
+      borderLight: '#006600',
       accent: '#00ff41',
+      accentLight: '#66ff66',
       accentHover: '#00cc33',
       success: '#00ff00',
+      successLight: '#44ff44',
       error: '#ff0000',
+      errorLight: '#ff4444',
       warning: '#ffff00',
+      warningLight: '#ffff88',
+      info: '#00ffff',
+      infoLight: '#88ffff',
       
       gameBackground: '#001100',
       gameSurface: '#002200',
