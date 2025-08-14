@@ -11,7 +11,8 @@ import type {
   JoinSessionOptions,
   MultiplayerMessage,
   MultiplayerEvent,
-  MultiplayerEventCallback
+  MultiplayerEventCallback,
+  MessageType
 } from '../types/multiplayer';
 
 // Default STUN servers for WebRTC (commented out for now as not used)
@@ -27,9 +28,11 @@ export class WebRTCMultiplayerService implements MultiplayerService {
   private eventListeners: Map<MultiplayerEvent, MultiplayerEventCallback[]> = new Map();
   private isHostRole: boolean = false;
   private localPlayerId: string = '';
+  private communicationKey: string = 'multiplayer-session';
 
   constructor() {
     this.initializeEventListeners();
+    this.initializeCrossTabCommunication();
   }
 
   private initializeEventListeners(): void {
@@ -42,6 +45,23 @@ export class WebRTCMultiplayerService implements MultiplayerService {
     
     events.forEach(event => {
       this.eventListeners.set(event, []);
+    });
+  }
+
+  private initializeCrossTabCommunication(): void {
+    // Listen for storage events to simulate WebRTC communication across tabs/windows
+    window.addEventListener('storage', (event) => {
+      if (event.key === this.communicationKey && event.newValue) {
+        try {
+          const message: MultiplayerMessage = JSON.parse(event.newValue);
+          // Only process messages not sent by ourselves
+          if (message.playerId !== this.localPlayerId) {
+            this.handleReceivedMessage(message);
+          }
+        } catch (error) {
+          console.error('Error parsing cross-tab message:', error);
+        }
+      }
     });
   }
 
@@ -160,8 +180,7 @@ export class WebRTCMultiplayerService implements MultiplayerService {
     this.localPlayerId = this.generateId();
     this.isHostRole = false;
 
-    // In a real implementation, this would connect to the host via WebRTC
-    // For now, we'll simulate joining by creating a session structure
+    // Create guest player
     const guestPlayer: MultiplayerPlayer = {
       id: this.localPlayerId,
       name: options.playerName,
@@ -171,8 +190,7 @@ export class WebRTCMultiplayerService implements MultiplayerService {
       joinedAt: new Date().toISOString()
     };
 
-    // This is a simplified version - in reality, we'd need a signaling mechanism
-    // to exchange WebRTC offer/answer with the host
+    // Create local session (will be updated when host responds)
     this.currentSession = {
       id: options.sessionId,
       gameId: undefined, // No game selected yet - will be set by host
@@ -182,6 +200,19 @@ export class WebRTCMultiplayerService implements MultiplayerService {
       state: 'waiting',
       createdAt: new Date().toISOString()
     };
+
+    // Send player-join message to notify host
+    const joinMessage: MultiplayerMessage = {
+      type: 'player-join',
+      sessionId: options.sessionId,
+      playerId: this.localPlayerId,
+      timestamp: new Date().toISOString(),
+      data: {
+        player: guestPlayer
+      }
+    };
+
+    this.broadcastMessage(joinMessage);
 
     console.log(`Joined multiplayer session: ${options.sessionId}`);
     this.emit('session-joined', this.currentSession);
@@ -274,20 +305,112 @@ export class WebRTCMultiplayerService implements MultiplayerService {
   }
 
   private broadcastMessage(message: MultiplayerMessage): void {
-    // In a full WebRTC implementation, this would send the message through all data channels
-    // For now, we'll just log it
+    // Use localStorage for cross-tab communication to simulate WebRTC
+    try {
+      localStorage.setItem(this.communicationKey, JSON.stringify(message));
+      // Remove the item immediately to trigger storage event for other tabs
+      localStorage.removeItem(this.communicationKey);
+    } catch (error) {
+      console.error('Error broadcasting message:', error);
+    }
+    
     console.log('Broadcasting message:', message);
 
-    // Simulate receiving the message for local testing
+    // Also process locally for same-tab scenarios with a small delay
     setTimeout(() => {
       this.handleReceivedMessage(message);
     }, 50);
   }
 
+  private handlePlayerJoinMessage(data: { player: MultiplayerPlayer }): void {
+    if (!this.currentSession) {
+      return;
+    }
+
+    const { player } = data;
+
+    // Check if player is already in the session
+    const existingPlayerIndex = this.currentSession.players.findIndex(p => p.id === player.id);
+    if (existingPlayerIndex >= 0) {
+      // Update existing player info
+      this.currentSession.players[existingPlayerIndex] = {
+        ...this.currentSession.players[existingPlayerIndex],
+        ...player,
+        connectionState: 'connected'
+      };
+    } else {
+      // Add new player to session
+      const newPlayer = {
+        ...player,
+        connectionState: 'connected' as const
+      };
+      this.currentSession.players.push(newPlayer);
+    }
+
+    console.log(`Player joined: ${player.name} (${player.id})`);
+    this.emit('player-connected', { player: { ...player, connectionState: 'connected' } });
+
+    // If we're the host, send session sync to the new player
+    if (this.isHostRole) {
+      this.sendSessionSync(player.id);
+    }
+  }
+
+  private handleSessionSync(data: { session: GameSession; targetPlayerId: string }): void {
+    const { session, targetPlayerId } = data;
+    
+    // Only process if this sync is meant for us
+    if (targetPlayerId !== this.localPlayerId || !this.currentSession) {
+      return;
+    }
+
+    // Update our session with the host's session data
+    this.currentSession = {
+      ...this.currentSession,
+      ...session,
+      // Keep our own player data accurate
+      players: session.players.map(p => 
+        p.id === this.localPlayerId ? { ...p, ...this.currentSession!.players.find(lp => lp.id === this.localPlayerId) } : p
+      )
+    };
+
+    console.log('Session synchronized with host data');
+  }
+
+  private sendSessionSync(targetPlayerId: string): void {
+    if (!this.currentSession) {
+      return;
+    }
+
+    const syncMessage: MultiplayerMessage = {
+      type: 'session-sync' as MessageType,
+      sessionId: this.currentSession.id,
+      playerId: this.localPlayerId,
+      timestamp: new Date().toISOString(),
+      data: {
+        session: this.currentSession,
+        targetPlayerId
+      }
+    };
+
+    this.broadcastMessage(syncMessage);
+  }
+
   private handleReceivedMessage(message: MultiplayerMessage): void {
     console.log('Received multiplayer message:', message);
 
+    // Only process messages for our current session
+    if (!this.currentSession || message.sessionId !== this.currentSession.id) {
+      return;
+    }
+
     switch (message.type) {
+      case 'player-join':
+        this.handlePlayerJoinMessage(message.data as { player: MultiplayerPlayer });
+        break;
+      case 'session-sync':
+        this.handleSessionSync(message.data as { session: GameSession; targetPlayerId: string });
+        break;
       case 'game-move':
         this.emit('game-move-received', message.data);
         break;
