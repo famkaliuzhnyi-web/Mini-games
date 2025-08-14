@@ -59,6 +59,13 @@ const AVAILABLE_GAMES: GameInfo[] = [
     description: 'Classic snake game - eat food, grow longer, avoid collisions!',
     emoji: '🐍',
     category: 'Arcade'
+  },
+  {
+    id: 'drawing',
+    name: 'Drawing',
+    description: 'Draw on 32x32 pixel canvas with multiplayer support!',
+    emoji: '🎨',
+    category: 'Creative'
   }
 ];
 

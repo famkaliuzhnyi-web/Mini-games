@@ -26,6 +26,7 @@ export interface ActivePiece {
   shape: PieceShape;
   position: Position;
   rotation: number; // 0, 1, 2, 3 (0°, 90°, 180°, 270°)
+  playerId?: string; // For multiplayer mode
 }
 
 // Game statistics
@@ -37,6 +38,27 @@ export interface GameStats {
   elapsedTime: number; // seconds since game start
 }
 
+// Multiplayer player state
+export interface TetrisPlayer {
+  id: string;
+  name: string;
+  columnStart: number; // Starting column for this player's pieces
+  columnEnd: number;   // Ending column (exclusive)
+  activePiece: ActivePiece | null;
+  ghostPiece: ActivePiece | null;
+  holdPiece: PieceType | null;
+  nextPieces: PieceType[];
+  canHold: boolean;
+  stats: GameStats;
+}
+
+// Multiplayer state
+export interface MultiplayerGameState {
+  isMultiplayer: boolean;
+  players: TetrisPlayer[];
+  currentPlayerId?: string;
+  gridWidth: number; // Dynamic width based on player count
+}
 // Tetris-specific game data that extends the platform's game state
 export interface TetrisGameData extends Record<string, unknown> {
   grid: TetrisGrid;
@@ -52,6 +74,8 @@ export interface TetrisGameData extends Record<string, unknown> {
   canHold: boolean; // Can only hold once per piece
   gameStartTime: number; // For timer display
   dangerZoneActive: boolean; // Warning when pieces get too high
+  // Multiplayer fields
+  multiplayer?: MultiplayerGameState;
 }
 
 // Movement directions
@@ -60,10 +84,10 @@ export type RotationDirection = 'clockwise' | 'counterclockwise';
 
 // Game actions
 export type TetrisAction = 
-  | { type: 'MOVE'; direction: MoveDirection }
-  | { type: 'ROTATE'; direction: RotationDirection }
-  | { type: 'DROP' }
-  | { type: 'HOLD' } // Hold current piece
+  | { type: 'MOVE'; direction: MoveDirection; playerId?: string }
+  | { type: 'ROTATE'; direction: RotationDirection; playerId?: string }
+  | { type: 'DROP'; playerId?: string }
+  | { type: 'HOLD'; playerId?: string } // Hold current piece
   | { type: 'PAUSE' }
   | { type: 'UNPAUSE' }
   | { type: 'RESET' }
