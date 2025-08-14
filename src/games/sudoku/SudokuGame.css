@@ -14,7 +14,7 @@
   color: var(--color-text, #333);
 }
 
-/* Game Field Component (used in slots) */
+/* Game Field Component (used in slots) - Responsive Container */
 .sudoku-game-field {
   display: flex;
   flex-direction: column;
@@ -22,30 +22,45 @@
   justify-content: flex-start;
   height: 100%;
   width: 100%;
-  padding: 1rem;
+  padding: clamp(0.5rem, 2vw, 1rem);
   background-color: var(--color-gameBackground, #f8f9fa);
   color: var(--color-text, #333);
-  gap: 1rem;
+  gap: clamp(0.5rem, 2vw, 1rem);
   overflow-y: auto;
+  
+  /* Ensure proper mobile viewport handling */
+  min-height: 100vh;
+  min-height: 100dvh; /* Dynamic viewport height for mobile */
 }
 
-/* Modern Sudoku Board */
+/* Modern Sudoku Board - Responsive Container-based Design */
 .modern-sudoku-board {
   display: grid;
   grid-template-columns: repeat(9, 1fr);
   grid-template-rows: repeat(9, 1fr);
-  gap: 1px;
   background-color: var(--color-border, #2c3e50);
-  border: 3px solid var(--color-border, #2c3e50);
-  border-radius: 12px;
-  padding: 3px;
-  margin: 1rem 0;
-  max-width: min(80vw, 420px);
+  border: min(3px, 0.5vw) solid var(--color-border, #2c3e50);
+  border-radius: min(12px, 2vw);
+  padding: min(3px, 0.5vw);
+  margin: clamp(0.5rem, 2vw, 1rem) 0;
+  
+  /* Dynamic sizing - uses full available width while maintaining square aspect ratio */
+  width: min(95vw, min(95vh, 600px));
+  height: min(95vw, min(95vh, 600px));
   aspect-ratio: 1;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  
+  /* Dynamic gap based on container size */
+  gap: max(0.5px, min(2px, 0.3vw));
+  
+  box-shadow: 0 min(8px, 1vw) min(32px, 4vw) rgba(0, 0, 0, 0.1);
+  
+  /* Ensure proper positioning */
+  margin-left: auto;
+  margin-right: auto;
+  position: relative;
 }
 
-/* Modern Sudoku Cell */
+/* Modern Sudoku Cell - Responsive Design */
 .modern-sudoku-cell {
   background-color: var(--color-surface, #ffffff);
   border: none;
@@ -55,8 +70,14 @@
   position: relative;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  border-radius: 2px;
+  border-radius: min(2px, 0.3vw);
   outline: none;
+  
+  /* Responsive cell sizing - minimum touch target while maximizing space usage */
+  min-height: max(32px, min(10vw, 6vh));
+  min-width: max(32px, min(10vw, 6vh));
+  
+  /* Aspect ratio is maintained by grid container */
 }
 
 .modern-sudoku-cell:hover:not(.given) {
@@ -70,12 +91,17 @@
   z-index: 1;
 }
 
-/* Cell Value Styling */
+/* Cell Value Styling - Responsive Typography */
 .cell-value {
-  font-size: clamp(1.1rem, 4vw, 1.8rem);
+  /* Dynamic font sizing based on container size */
+  font-size: clamp(0.8rem, min(4vw, 4vh), 2.2rem);
   font-weight: 600;
   font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
   line-height: 1;
+  
+  /* Prevent text selection on mobile */
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 /* Cell States */
@@ -125,31 +151,32 @@
   color: var(--color-error, #f44336);
 }
 
-/* 3x3 Box Borders */
+/* 3x3 Box Borders - Responsive */
 .modern-sudoku-cell.right-box-border {
-  border-right: 3px solid var(--color-border, #2c3e50);
+  border-right: max(2px, min(3px, 0.4vw)) solid var(--color-border, #2c3e50);
 }
 
 .modern-sudoku-cell.bottom-box-border {
-  border-bottom: 3px solid var(--color-border, #2c3e50);
+  border-bottom: max(2px, min(3px, 0.4vw)) solid var(--color-border, #2c3e50);
 }
 
-/* Notes System */
+/* Notes System - Responsive */
 .cell-notes {
   position: absolute;
-  top: 2px;
-  left: 2px;
-  right: 2px;
-  bottom: 2px;
+  top: min(2px, 0.3vw);
+  left: min(2px, 0.3vw);
+  right: min(2px, 0.3vw);
+  bottom: min(2px, 0.3vw);
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(3, 1fr);
-  gap: 1px;
+  gap: max(0.5px, min(1px, 0.1vw));
   pointer-events: none;
 }
 
 .note {
-  font-size: 0.6rem;
+  /* Dynamic note font size based on container */
+  font-size: clamp(0.35rem, min(1.2vw, 1.2vh), 0.75rem);
   font-weight: 500;
   color: var(--color-text-secondary, #666);
   display: flex;
@@ -471,173 +498,59 @@
   50% { transform: translate(-50%, -50%) scale(1.1); }
 }
 
-/* Mobile Responsiveness */
-@media (max-width: 768px) {
-  .sudoku-game {
-    padding: 0.25rem;
-  }
+/* Responsive optimizations for all screen sizes */
 
-  .sudoku-game-field {
-    padding: 0.25rem;
-    gap: 0.75rem;
-  }
-
-  /* Modern board mobile adjustments */
+/* Extra small mobile devices (< 400px) */
+@media (max-width: 400px) {
   .modern-sudoku-board {
-    max-width: min(92vw, 360px);
-    gap: 0.5px;
-    margin: 0.5rem 0;
-    border-width: 2px;
-    padding: 2px;
+    /* Use even more available space on very small screens */
+    width: min(98vw, 98vh);
+    height: min(98vw, 98vh);
+    border-width: max(1px, min(2px, 0.4vw));
+    padding: max(1px, min(2px, 0.4vw));
+    margin: clamp(0.25rem, 1vw, 0.5rem) 0;
   }
-
+  
   .cell-value {
-    font-size: clamp(1rem, 3.5vw, 1.6rem);
+    /* Ensure text remains readable on very small screens */
+    font-size: clamp(0.7rem, min(3.8vw, 3.8vh), 1.8rem);
   }
-
-  /* Ensure cells are touch-friendly */
+  
+  .note {
+    font-size: clamp(0.3rem, min(1vw, 1vh), 0.6rem);
+  }
+  
   .modern-sudoku-cell {
-    min-height: 36px;
-    min-width: 36px;
-  }
-
-  /* Legacy board mobile adjustments */
-  .sudoku-board {
-    max-width: min(92vw, 360px);
-    gap: 0.5px;
-  }
-
-  .sudoku-cell {
-    font-size: clamp(0.9rem, 3vw, 1.4rem);
-    min-height: 36px;
-    min-width: 36px;
-  }
-
-  .sudoku-controls {
-    gap: 0.25rem;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  .sudoku-btn {
-    padding: 0.5rem 0.75rem;
-    font-size: 0.85rem;
-    min-height: 44px;
-  }
-
-  .sudoku-number-pad {
-    max-width: min(92vw, 300px);
-    gap: 0.25rem;
-  }
-
-  .sudoku-number-btn {
-    padding: 0.75rem;
-    font-size: 1.1rem;
-    min-height: 44px;
-    min-width: 44px;
-  }
-
-  .sudoku-stats {
-    gap: 0.75rem;
-    font-size: 0.85rem;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  .sudoku-difficulty {
-    gap: 0.25rem;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  .sudoku-difficulty-btn {
-    padding: 0.5rem 0.75rem;
-    font-size: 0.85rem;
-    min-height: 44px;
+    /* Reduce minimum size slightly for very small screens while maintaining usability */
+    min-height: max(30px, min(9vw, 5.5vh));
+    min-width: max(30px, min(9vw, 5.5vh));
   }
 }
 
-@media (max-width: 480px) {
-  .sudoku-game-field {
-    padding: 0.125rem;
-    gap: 0.5rem;
-  }
-
-  /* Modern board very small mobile adjustments */
+/* Large screens (> 1024px) - optimize for desktop */
+@media (min-width: 1024px) {
   .modern-sudoku-board {
-    max-width: min(96vw, 280px);
-    margin: 0.25rem 0;
-    border-width: 2px;
-    padding: 1px;
-    gap: 0.25px;
+    /* Prevent board from becoming too large on big screens */
+    width: min(70vw, min(70vh, 500px));
+    height: min(70vw, min(70vh, 500px));
   }
-
+  
   .cell-value {
-    font-size: clamp(0.9rem, 3vw, 1.3rem);
+    /* Better typography sizing for desktop */
+    font-size: clamp(1.2rem, min(3.5vw, 3.5vh), 2rem);
   }
+}
 
-  .note {
-    font-size: 0.45rem;
+/* Landscape orientation optimizations */
+@media (orientation: landscape) and (max-height: 500px) {
+  .modern-sudoku-board {
+    /* Use height-based sizing in landscape on short screens */
+    width: min(85vh, 95vw);
+    height: min(85vh, 95vw);
   }
-
-  /* Ensure minimum touch targets on very small screens */
-  .modern-sudoku-cell {
-    min-height: 32px;
-    min-width: 32px;
-  }
-
-  /* Legacy board very small mobile adjustments */
-  .sudoku-board {
-    max-width: min(96vw, 280px);
-  }
-
-  .sudoku-cell {
-    font-size: clamp(0.8rem, 2.5vw, 1.1rem);
-    min-height: 32px;
-    min-width: 32px;
-  }
-
-  .sudoku-number-pad {
-    max-width: min(96vw, 270px);
-    gap: 0.125rem;
-  }
-
-  .sudoku-number-btn {
-    padding: 0.6rem 0.5rem;
-    font-size: 1rem;
-    min-height: 42px;
-    min-width: 42px;
-  }
-
-  .sudoku-stats {
-    flex-direction: column;
-    gap: 0.5rem;
-    align-items: center;
-  }
-
-  .sudoku-btn {
-    padding: 0.5rem 0.6rem;
-    font-size: 0.8rem;
-    min-height: 42px;
-  }
-
-  .sudoku-difficulty-btn {
-    padding: 0.4rem 0.6rem;
-    font-size: 0.8rem;
-    min-height: 42px;
-  }
-
-  /* Make sure game controls are properly sized */
-  .sudoku-controls {
-    max-width: min(96vw, 280px);
-    margin: 0 auto;
-  }
-
-  /* Adjust complete celebration for small screens */
-  .sudoku-complete-celebration {
-    padding: 1rem;
-    margin: 0.5rem;
-    font-size: 0.9rem;
+  
+  .sudoku-game-field {
+    gap: clamp(0.25rem, 1vh, 0.75rem);
   }
 }
 
