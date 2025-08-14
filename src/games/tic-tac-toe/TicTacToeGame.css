@@ -58,17 +58,19 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(3, 1fr);
-  gap: 2px;
-  width: min(60vw, 300px);
-  height: min(60vw, 300px);
-  max-width: 300px;
-  max-height: 300px;
+  gap: clamp(2px, 0.5vw, 4px);
+  
+  /* Improved responsive sizing for slot components */
+  width: clamp(240px, min(65vw, 65vh), 360px);
+  height: clamp(240px, min(65vw, 65vh), 360px);
 }
 
 .tic-tac-toe-cell-slot {
   background-color: var(--color-gameSurface, #fff);
   border: none;
-  font-size: min(8vw, 3rem);
+  
+  /* Responsive font sizing for slot components */
+  font-size: clamp(1.25rem, calc(1rem + 2vw), 3rem);
   font-weight: bold;
   cursor: pointer;
   display: flex;
@@ -77,7 +79,13 @@
   color: var(--color-text, #333);
   transition: all 0.3s ease;
   aspect-ratio: 1;
-  min-height: 44px; /* Touch-friendly */
+  
+  /* Touch-friendly sizing */
+  min-height: clamp(50px, 10vw, 100px);
+  min-width: clamp(50px, 10vw, 100px);
+  
+  /* Responsive border radius */
+  border-radius: clamp(4px, 1vw, 8px);
   touch-action: manipulation;
 }
 
@@ -205,14 +213,17 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(3, 1fr);
-  gap: 8px;
-  width: min(min(70vw, 70vh), 360px);
-  height: min(min(70vw, 70vh), 360px);
-  max-width: 360px;
-  max-height: 360px;
-  padding: 16px;
+  gap: clamp(6px, 1.5vw, 12px);
+  
+  /* Responsive size calculation - uses available space more efficiently */
+  width: clamp(280px, min(85vw, 80vh), 480px);
+  height: clamp(280px, min(85vw, 80vh), 480px);
+  
+  /* Dynamic padding based on board size */
+  padding: clamp(12px, 2.5vw, 20px);
+  
   background: var(--color-gameSurface, rgba(255, 255, 255, 0.9));
-  border-radius: 24px;
+  border-radius: clamp(16px, 3vw, 24px);
   box-shadow: 
     0 20px 40px rgba(0, 0, 0, 0.1),
     0 8px 16px rgba(0, 0, 0, 0.05),
@@ -233,7 +244,9 @@
 .tic-tac-toe-cell {
   background: var(--color-card, rgba(255, 255, 255, 0.8));
   border: none;
-  font-size: clamp(2.5rem, 8vw, 4rem);
+  
+  /* Improved responsive font sizing based on container */
+  font-size: clamp(1.5rem, calc(1.5rem + 2.5vw), 4rem);
   font-weight: 900;
   cursor: pointer;
   display: flex;
@@ -241,14 +254,20 @@
   justify-content: center;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   color: var(--color-text, #333);
-  border-radius: 16px;
+  
+  /* Dynamic border radius based on screen size */
+  border-radius: clamp(8px, 2vw, 16px);
+  
   box-shadow: 
     0 4px 12px rgba(0, 0, 0, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.5);
   border: 1px solid var(--color-border, rgba(255, 255, 255, 0.2));
   backdrop-filter: blur(10px);
-  min-height: 80px;
-  min-width: 80px;
+  
+  /* Improved touch target sizing - responsive to screen size */
+  min-height: clamp(70px, 12vw, 120px);
+  min-width: clamp(70px, 12vw, 120px);
+  
   aspect-ratio: 1;
   position: relative;
   overflow: hidden;
@@ -599,8 +618,26 @@
   border-color: var(--color-warning, #FF9800);
 }
 
-/* Enhanced Mobile Responsiveness */
-@media (max-width: 768px) {
+/* Enhanced Mobile Responsiveness - Multiple Breakpoints */
+
+/* Large tablets and small desktops (769px - 1199px) */
+@media (min-width: 769px) and (max-width: 1199px) {
+  .tic-tac-toe-board {
+    width: clamp(320px, min(70vw, 70vh), 400px);
+    height: clamp(320px, min(70vw, 70vh), 400px);
+    gap: clamp(8px, 1.5vw, 10px);
+    padding: clamp(14px, 2.5vw, 18px);
+  }
+
+  .tic-tac-toe-cell {
+    font-size: clamp(2rem, calc(1.5rem + 3vw), 3.5rem);
+    min-height: clamp(85px, 12vw, 110px);
+    min-width: clamp(85px, 12vw, 110px);
+  }
+}
+
+/* Standard tablets (481px - 768px) */
+@media (min-width: 481px) and (max-width: 768px) {
   .tic-tac-toe-game {
     padding: 1.5rem 1rem;
     margin: 0.5rem;
@@ -611,24 +648,17 @@
     font-size: clamp(1.75rem, 6vw, 2rem);
   }
 
-  .tic-tac-toe-header p {
-    font-size: 1rem;
-  }
-
   .tic-tac-toe-board {
-    width: min(min(85vw, 85vh), 320px);
-    height: min(min(85vw, 85vh), 320px);
-    max-width: 320px;
-    max-height: 320px;
-    padding: 12px;
-    gap: 6px;
+    width: clamp(300px, min(80vw, 75vh), 360px);
+    height: clamp(300px, min(80vw, 75vh), 360px);
+    gap: clamp(6px, 1.5vw, 8px);
+    padding: clamp(12px, 2.5vw, 16px);
   }
 
   .tic-tac-toe-cell {
-    font-size: clamp(2rem, 7vw, 3rem);
-    border-radius: 12px;
-    min-height: 70px;
-    min-width: 70px;
+    font-size: clamp(1.75rem, calc(1.5rem + 3.5vw), 3rem);
+    min-height: clamp(75px, 13vw, 95px);
+    min-width: clamp(75px, 13vw, 95px);
   }
 
   .tic-tac-toe-status {
@@ -646,51 +676,44 @@
     gap: 0.5rem;
   }
 
-  .tic-tac-toe-stats span {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.8rem;
-  }
-
   .tic-tac-toe-new-game-btn {
     font-size: 1rem;
     padding: 0.875rem 1.5rem;
   }
+}
 
-  .tic-tac-toe-save-buttons {
-    flex-direction: column;
-    align-items: center;
-    gap: 0.75rem;
+/* Large mobile devices (376px - 480px) */
+@media (min-width: 376px) and (max-width: 480px) {
+  .tic-tac-toe-game {
+    padding: 1.25rem 0.875rem;
+    margin: 0.375rem;
+    border-radius: 14px;
   }
 
-  .tic-tac-toe-save-btn {
-    width: 100%;
-    max-width: 250px;
-    padding: 1rem 1.25rem;
+  .tic-tac-toe-board {
+    width: clamp(280px, min(85vw, 80vh), 320px);
+    height: clamp(280px, min(85vw, 80vh), 320px);
+    gap: clamp(5px, 1.2vw, 6px);
+    padding: clamp(10px, 2.2vw, 14px);
   }
 
-  .tic-tac-toe-save-header {
-    padding: 1rem;
+  .tic-tac-toe-cell {
+    font-size: clamp(1.5rem, calc(1.25rem + 4vw), 2.5rem);
+    min-height: clamp(65px, 15vw, 85px);
+    min-width: clamp(65px, 15vw, 85px);
   }
 
-  .tic-tac-toe-save-content {
-    padding: 1.25rem;
+  .tic-tac-toe-header h2 {
+    font-size: clamp(1.5rem, 7vw, 1.875rem);
   }
 
-  /* Slot component mobile styles */
-  .tic-tac-toe-board-slot {
-    width: min(85vw, 300px);
-    height: min(85vw, 300px);
-    max-width: 300px;
-    max-height: 300px;
-  }
-
-  .tic-tac-toe-cell-slot {
-    font-size: min(10vw, 2.5rem);
-    border-radius: 12px;
+  .tic-tac-toe-status-message {
+    font-size: clamp(1rem, 5.5vw, 1.25rem);
   }
 }
 
-@media (max-width: 480px) {
+/* Small mobile devices (320px - 375px) */
+@media (max-width: 375px) {
   .tic-tac-toe-game {
     padding: 1rem 0.75rem;
     margin: 0.25rem;
@@ -698,23 +721,21 @@
   }
 
   .tic-tac-toe-board {
-    width: min(min(90vw, 90vh), 280px);
-    height: min(min(90vw, 90vh), 280px);
-    max-width: 280px;
-    max-height: 280px;
-    padding: 10px;
-    gap: 4px;
+    width: clamp(260px, min(90vw, 85vh), 300px);
+    height: clamp(260px, min(90vw, 85vh), 300px);
+    gap: clamp(4px, 1vw, 5px);
+    padding: clamp(8px, 2vw, 12px);
   }
 
   .tic-tac-toe-cell {
-    font-size: clamp(1.75rem, 6vw, 2.5rem);
-    border-radius: 10px;
-    min-height: 60px;
-    min-width: 60px;
+    font-size: clamp(1.25rem, calc(1rem + 4.5vw), 2.25rem);
+    min-height: clamp(60px, 18vw, 75px);
+    min-width: clamp(60px, 18vw, 75px);
+    border-radius: clamp(6px, 1.5vw, 12px);
   }
 
   .tic-tac-toe-header h2 {
-    font-size: clamp(1.5rem, 7vw, 1.75rem);
+    font-size: clamp(1.375rem, 8vw, 1.75rem);
     margin-bottom: 0.5rem;
   }
 
@@ -728,7 +749,7 @@
   }
 
   .tic-tac-toe-status-message {
-    font-size: clamp(1rem, 6vw, 1.25rem);
+    font-size: clamp(0.875rem, 6vw, 1.125rem);
   }
 
   .tic-tac-toe-stats {
@@ -752,15 +773,33 @@
 
   /* Slot component small mobile styles */
   .tic-tac-toe-board-slot {
-    width: min(95vw, 260px);
-    height: min(95vw, 260px);
-    max-width: 260px;
-    max-height: 260px;
+    width: clamp(240px, min(95vw, 90vh), 280px);
+    height: clamp(240px, min(95vw, 90vh), 280px);
   }
 
   .tic-tac-toe-cell-slot {
-    font-size: min(12vw, 2rem);
-    border-radius: 8px;
+    font-size: clamp(1rem, 12vw, 2rem);
+    border-radius: clamp(6px, 1.5vw, 10px);
+  }
+
+  .tic-tac-toe-save-buttons {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .tic-tac-toe-save-btn {
+    width: 100%;
+    max-width: 250px;
+    padding: 1rem 1.25rem;
+  }
+
+  .tic-tac-toe-save-header {
+    padding: 1rem;
+  }
+
+  .tic-tac-toe-save-content {
+    padding: 1.25rem;
   }
 }
 
@@ -775,13 +814,67 @@
   }
 }
 
-/* Ultra-wide screen optimization */
-@media (min-width: 1400px) {
+/* Large desktop screens (1200px - 1599px) */
+@media (min-width: 1200px) and (max-width: 1599px) {
   .tic-tac-toe-board {
-    width: min(min(50vw, 70vh), 400px);
-    height: min(min(50vw, 70vh), 400px);
-    max-width: 400px;
-    max-height: 400px;
+    width: clamp(400px, min(60vw, 65vh), 500px);
+    height: clamp(400px, min(60vw, 65vh), 500px);
+    gap: clamp(10px, 1.8vw, 14px);
+    padding: clamp(18px, 3vw, 24px);
+  }
+
+  .tic-tac-toe-cell {
+    font-size: clamp(2.5rem, calc(2rem + 2vw), 4.5rem);
+    min-height: clamp(100px, 11vw, 140px);
+    min-width: clamp(100px, 11vw, 140px);
+  }
+}
+
+/* Ultra-wide and very large desktop screens (1600px+) */
+@media (min-width: 1600px) {
+  .tic-tac-toe-board {
+    /* Better utilization of very large screens while maintaining playability */
+    width: clamp(500px, min(45vw, 55vh), 600px);
+    height: clamp(500px, min(45vw, 55vh), 600px);
+    gap: clamp(12px, 2vw, 16px);
+    padding: clamp(20px, 3.5vw, 28px);
+  }
+
+  .tic-tac-toe-cell {
+    font-size: clamp(3rem, calc(2.5rem + 1.5vw), 5rem);
+    min-height: clamp(120px, 10vw, 160px);
+    min-width: clamp(120px, 10vw, 160px);
+  }
+
+  .tic-tac-toe-game {
+    max-width: 900px; /* Prevent excessive width on ultra-wide screens */
+  }
+}
+
+/* Landscape orientation optimizations */
+@media (orientation: landscape) and (max-height: 600px) {
+  .tic-tac-toe-board {
+    /* Use height as primary constraint in landscape */
+    width: clamp(250px, min(70vw, 75vh), 400px);
+    height: clamp(250px, min(70vw, 75vh), 400px);
+  }
+
+  .tic-tac-toe-game {
+    padding: 1rem;
+  }
+
+  .tic-tac-toe-status {
+    margin-bottom: 1rem;
+    padding: 1rem;
+  }
+}
+
+/* Portrait orientation optimizations for tall screens */
+@media (orientation: portrait) and (min-height: 800px) {
+  .tic-tac-toe-board {
+    /* Take advantage of height in tall portrait screens */
+    width: clamp(320px, min(75vw, 60vh), 450px);
+    height: clamp(320px, min(75vw, 60vh), 450px);
   }
 }
 
