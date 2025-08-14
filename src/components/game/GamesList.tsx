@@ -52,6 +52,13 @@ const AVAILABLE_GAMES: GameInfo[] = [
     description: 'Classic number puzzle with multiple difficulty levels',
     emoji: '🧩',
     category: 'Puzzle'
+  },
+  {
+    id: 'snake',
+    name: 'Snake',
+    description: 'Classic snake game - eat food, grow longer, avoid collisions!',
+    emoji: '🐍',
+    category: 'Arcade'
   }
 ];
 
