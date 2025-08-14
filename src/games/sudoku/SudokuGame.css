@@ -81,7 +81,7 @@
 }
 
 .modern-sudoku-cell:hover:not(.given) {
-  background-color: var(--color-accent-light, #e3f2fd);
+  background-color: var(--color-accentLight, #e3f2fd);
   transform: scale(1.02);
 }
 
@@ -106,7 +106,7 @@
 
 /* Cell States */
 .modern-sudoku-cell.given {
-  background-color: var(--color-surface-darker, #f8f9fa);
+  background-color: var(--color-surfaceDarker, #f8f9fa);
   cursor: default;
 }
 
@@ -133,16 +133,16 @@
 }
 
 .modern-sudoku-cell.related {
-  background-color: var(--color-accent-light, #e3f2fd);
+  background-color: var(--color-accentLight, #e3f2fd);
 }
 
 .modern-sudoku-cell.same-number {
-  background-color: var(--color-warning-light, #fff3e0);
+  background-color: var(--color-warningLight, #fff3e0);
   border: 2px solid var(--color-warning, #ff9800);
 }
 
 .modern-sudoku-cell.invalid {
-  background-color: var(--color-error-light, #ffebee) !important;
+  background-color: var(--color-errorLight, #ffebee) !important;
   border: 2px solid var(--color-error, #f44336);
   animation: shake 0.5s ease-in-out;
 }
@@ -178,7 +178,7 @@
   /* Dynamic note font size based on container */
   font-size: clamp(0.35rem, min(1.2vw, 1.2vh), 0.75rem);
   font-weight: 500;
-  color: var(--color-text-secondary, #666);
+  color: var(--color-textSecondary, #666);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -202,7 +202,7 @@
 
 .progress-hint {
   font-size: 0.9rem;
-  color: var(--color-text-secondary, #666);
+  color: var(--color-textSecondary, #666);
   font-weight: 400;
 }
 
@@ -242,26 +242,26 @@
 }
 
 .sudoku-cell:hover {
-  background-color: var(--color-surface-hover, #f0f0f0);
+  background-color: var(--color-surfaceHover, #f0f0f0);
 }
 
 .sudoku-cell.selected {
-  background-color: var(--color-accent-light, #e3f2fd);
+  background-color: var(--color-accentLight, #e3f2fd);
   border: 2px solid var(--color-accent, #2196F3);
 }
 
 .sudoku-cell.highlighted {
-  background-color: var(--color-warning-light, #fff3e0);
+  background-color: var(--color-warningLight, #fff3e0);
 }
 
 .sudoku-cell.error {
-  background-color: var(--color-error-light, #ffebee);
+  background-color: var(--color-errorLight, #ffebee);
   color: var(--color-error, #f44336);
 }
 
 .sudoku-cell.given {
-  background-color: var(--color-surface-darker, #f5f5f5);
-  color: var(--color-text-primary, #333);
+  background-color: var(--color-surfaceDarker, #f5f5f5);
+  color: var(--color-text, #333);
   font-weight: 900;
   cursor: default;
 }
@@ -349,7 +349,7 @@
 
 .sudoku-number-btn {
   padding: 0.75rem;
-  border: 2px solid var(--color-border-light, #ddd);
+  border: 2px solid var(--color-borderLight, #ddd);
   border-radius: 6px;
   font-size: 1.2rem;
   font-weight: bold;
@@ -360,12 +360,12 @@
 }
 
 .sudoku-number-btn:hover {
-  background-color: var(--color-accent-light, #e3f2fd);
+  background-color: var(--color-accentLight, #e3f2fd);
   border-color: var(--color-accent, #2196F3);
 }
 
 .sudoku-number-btn.clear {
-  background-color: var(--color-error-light, #ffebee);
+  background-color: var(--color-errorLight, #ffebee);
   color: var(--color-error, #f44336);
   border-color: var(--color-error, #f44336);
   grid-column: span 2;
@@ -386,17 +386,17 @@
 }
 
 .sudoku-status.playing {
-  background-color: var(--color-info-light, #e1f5fe);
+  background-color: var(--color-infoLight, #e1f5fe);
   color: var(--color-info, #00BCD4);
 }
 
 .sudoku-status.completed {
-  background-color: var(--color-success-light, #e8f5e8);
+  background-color: var(--color-successLight, #e8f5e8);
   color: var(--color-success, #4CAF50);
 }
 
 .sudoku-status.error {
-  background-color: var(--color-error-light, #ffebee);
+  background-color: var(--color-errorLight, #ffebee);
   color: var(--color-error, #f44336);
 }
 
@@ -411,7 +411,7 @@
 
 .sudoku-difficulty-btn {
   padding: 0.5rem 1rem;
-  border: 2px solid var(--color-border-light, #ddd);
+  border: 2px solid var(--color-borderLight, #ddd);
   border-radius: 20px;
   font-size: 0.9rem;
   font-weight: bold;
@@ -423,7 +423,7 @@
 
 .sudoku-difficulty-btn:hover {
   border-color: var(--color-accent, #2196F3);
-  background-color: var(--color-accent-light, #e3f2fd);
+  background-color: var(--color-accentLight, #e3f2fd);
 }
 
 .sudoku-difficulty-btn.active {
@@ -439,7 +439,7 @@
   margin-bottom: 1rem;
   text-align: center;
   font-size: 0.9rem;
-  color: var(--color-text-secondary, #666);
+  color: var(--color-textSecondary, #666);
   flex-wrap: wrap;
   justify-content: center;
 }
