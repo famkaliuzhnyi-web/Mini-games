@@ -479,6 +479,18 @@
     padding: 0.5rem;
   }
 
+  /* Modern board mobile adjustments */
+  .modern-sudoku-board {
+    max-width: min(95vw, 400px);
+    gap: 0.5px;
+    margin: 0.5rem 0;
+  }
+
+  .cell-value {
+    font-size: clamp(0.9rem, 3vw, 1.4rem);
+  }
+
+  /* Legacy board mobile adjustments */
   .sudoku-board {
     max-width: min(95vw, 400px);
     gap: 0.5px;
@@ -527,6 +539,23 @@
     padding: 0.25rem;
   }
 
+  /* Modern board very small mobile adjustments */
+  .modern-sudoku-board {
+    max-width: min(98vw, 320px);
+    margin: 0.25rem 0;
+    border-width: 2px;
+    padding: 2px;
+  }
+
+  .cell-value {
+    font-size: clamp(0.8rem, 2.5vw, 1.2rem);
+  }
+
+  .note {
+    font-size: 0.5rem;
+  }
+
+  /* Legacy board very small mobile adjustments */
   .sudoku-board {
     max-width: min(98vw, 350px);
   }
