@@ -189,13 +189,19 @@ export const TetrisGame: React.FC<TetrisGameProps> = ({ playerId }) => {
               
               // Spawn next piece for this player
               const player = data.multiplayer.players[playerIndex];
+              // Ensure player nextPieces array is valid
+              if (!player.nextPieces || !Array.isArray(player.nextPieces) || player.nextPieces.length === 0) {
+                player.nextPieces = generateNextPieces();
+              }
               player.activePiece = createActivePiece(
                 player.nextPieces[0], 
                 action.playerId, 
                 player.columnStart,
                 data.multiplayer.gridWidth
               );
-              player.nextPieces = [...player.nextPieces.slice(1), getRandomPieceType()];
+              player.nextPieces = (player.nextPieces && player.nextPieces.length > 1) 
+                ? [...player.nextPieces.slice(1), getRandomPieceType()]
+                : generateNextPieces();
               player.canHold = true;
               
               // Check game over for this player
@@ -239,8 +245,14 @@ export const TetrisGame: React.FC<TetrisGameProps> = ({ playerId }) => {
             data.stats = updateStats(data.stats, linesCleared, data.gameStartTime);
             
             // Spawn next piece
+            // Ensure nextPieces array is valid  
+            if (!data.nextPieces || !Array.isArray(data.nextPieces) || data.nextPieces.length === 0) {
+              data.nextPieces = generateNextPieces();
+            }
             data.activePiece = createActivePiece(data.nextPieces[0]);
-            data.nextPieces = [...data.nextPieces.slice(1), getRandomPieceType()];
+            data.nextPieces = (data.nextPieces && data.nextPieces.length > 1) 
+              ? [...data.nextPieces.slice(1), getRandomPieceType()]
+              : generateNextPieces();
             
             // Check game over
             if (isGameOver(data.grid, data.activePiece)) {
@@ -276,13 +288,19 @@ export const TetrisGame: React.FC<TetrisGameProps> = ({ playerId }) => {
             if (player.holdPiece === null && player.activePiece) {
               // First hold - store current piece and spawn next
               player.holdPiece = player.activePiece.type;
+              // Ensure player nextPieces array is valid
+              if (!player.nextPieces || !Array.isArray(player.nextPieces) || player.nextPieces.length === 0) {
+                player.nextPieces = generateNextPieces();
+              }
               player.activePiece = createActivePiece(
                 player.nextPieces[0], 
                 action.playerId, 
                 player.columnStart,
                 data.multiplayer.gridWidth
               );
-              player.nextPieces = [...player.nextPieces.slice(1), getRandomPieceType()];
+              player.nextPieces = (player.nextPieces && player.nextPieces.length > 1) 
+                ? [...player.nextPieces.slice(1), getRandomPieceType()]
+                : generateNextPieces();
             } else if (player.activePiece) {
               // Swap current piece with held piece
               const currentType = player.activePiece.type;
@@ -309,8 +327,14 @@ export const TetrisGame: React.FC<TetrisGameProps> = ({ playerId }) => {
           if (data.holdPiece === null) {
             // First hold - store current piece and spawn next
             data.holdPiece = data.activePiece.type;
+            // Ensure nextPieces array is valid
+            if (!data.nextPieces || !Array.isArray(data.nextPieces) || data.nextPieces.length === 0) {
+              data.nextPieces = generateNextPieces();
+            }
             data.activePiece = createActivePiece(data.nextPieces[0]);
-            data.nextPieces = [...data.nextPieces.slice(1), getRandomPieceType()];
+            data.nextPieces = (data.nextPieces && data.nextPieces.length > 1) 
+              ? [...data.nextPieces.slice(1), getRandomPieceType()]
+              : generateNextPieces();
           } else {
             // Swap current piece with held piece
             const currentType = data.activePiece.type;
@@ -463,8 +487,14 @@ export const TetrisGame: React.FC<TetrisGameProps> = ({ playerId }) => {
             data.stats = updateStats(data.stats, linesCleared, data.gameStartTime);
             
             // Spawn next piece
+            // Ensure nextPieces array is valid
+            if (!data.nextPieces || !Array.isArray(data.nextPieces) || data.nextPieces.length === 0) {
+              data.nextPieces = generateNextPieces();
+            }
             data.activePiece = createActivePiece(data.nextPieces[0]);
-            data.nextPieces = [...data.nextPieces.slice(1), getRandomPieceType()];
+            data.nextPieces = (data.nextPieces && data.nextPieces.length > 1) 
+              ? [...data.nextPieces.slice(1), getRandomPieceType()]
+              : generateNextPieces();
             
             // Check game over
             if (isGameOver(data.grid, data.activePiece)) {

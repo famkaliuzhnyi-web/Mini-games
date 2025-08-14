@@ -80,6 +80,7 @@ class TetrisGameController implements GameController<TetrisGameData> {
       state.data.stats &&
       typeof state.data.stats.score === 'number' &&
       Array.isArray(state.data.nextPieces) &&
+      state.data.nextPieces.length > 0 &&
       typeof state.data.canHold === 'boolean' &&
       typeof state.data.gameStartTime === 'number' &&
       typeof state.data.dangerZoneActive === 'boolean'
@@ -87,7 +88,7 @@ class TetrisGameController implements GameController<TetrisGameData> {
     
     // If validation fails, it might be an old save format - return false to trigger reset
     if (!isValid) {
-      console.warn('Tetris save validation failed - likely old save format, will reset');
+      console.warn('Tetris save validation failed - likely old save format or corrupted nextPieces, will reset');
     }
     
     return isValid;
@@ -196,7 +197,7 @@ export const useTetrisState = (playerId: string) => {
           }
           
           data.activePiece = createActivePiece(data.nextPieces[0]);
-          data.nextPieces = data.nextPieces.length > 1 
+          data.nextPieces = (data.nextPieces && data.nextPieces.length > 1)
             ? [...data.nextPieces.slice(1), getRandomPieceType()]
             : generateNextPieces();
           
@@ -274,7 +275,7 @@ export const useTetrisState = (playerId: string) => {
           }
           
           data.activePiece = createActivePiece(data.nextPieces[0]);
-          data.nextPieces = data.nextPieces.length > 1 
+          data.nextPieces = (data.nextPieces && data.nextPieces.length > 1)
             ? [...data.nextPieces.slice(1), getRandomPieceType()]
             : generateNextPieces();
         } else {
@@ -346,7 +347,7 @@ export const useTetrisState = (playerId: string) => {
             }
             
             data.activePiece = createActivePiece(data.nextPieces[0]);
-            data.nextPieces = data.nextPieces.length > 1 
+            data.nextPieces = (data.nextPieces && data.nextPieces.length > 1)
               ? [...data.nextPieces.slice(1), getRandomPieceType()]
               : generateNextPieces();
             
