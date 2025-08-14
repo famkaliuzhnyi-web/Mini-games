@@ -153,13 +153,13 @@ export function useMultiplayerTetris({
 
   // Set up event listeners
   useEffect(() => {
-    const handleGameMoveReceived = (data: any) => {
+    const handleGameMoveReceived = (data: { action?: TetrisAction }) => {
       if (data.action && onAction) {
         onAction(data.action);
       }
     };
 
-    const handleGameStateUpdated = (data: any) => {
+    const handleGameStateUpdated = (data: { multiplayerState?: MultiplayerGameState }) => {
       if (data.multiplayerState) {
         setMultiplayerState(data.multiplayerState);
       }

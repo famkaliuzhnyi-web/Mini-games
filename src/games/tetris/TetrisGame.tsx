@@ -1,13 +1,14 @@
 /**
  * Tetris Game - Classic falling blocks puzzle game
  */
-import React, { useCallback, useEffect, useRef, useMemo } from 'react';
+import React, { useCallback, useEffect, useRef, useMemo, useState } from 'react';
 import { useGameSave } from '../../hooks/useGameSave';
 import { useSwipeGestures } from '../../hooks/useSwipeGestures';
 import type { GameController, GameState, GameConfig } from '../../types/game';
-import type { TetrisGameData, TetrisAction } from './types';
+import type { TetrisGameData, TetrisAction, MultiplayerGameState as _MultiplayerGameState, TetrisPlayer as _TetrisPlayer } from './types';
 import { TetrisBoard } from './components/TetrisBoard';
 import { TetrisControls } from './components/TetrisControls';
+// import { useMultiplayerTetris } from './useMultiplayerTetris'; // For future multiplayer integration
 import './TetrisGame.css';
 import {
   createEmptyGrid,
@@ -25,6 +26,8 @@ import {
   isGameOver,
   updateStats,
   calculateDropSpeed,
+  calculateGridWidth as _calculateGridWidth,
+  getPlayerById,
   INITIAL_DROP_SPEED
 } from './logic';
 
@@ -117,6 +120,7 @@ export const TetrisGame: React.FC<TetrisGameProps> = ({ playerId }) => {
   const controller = useMemo(() => new TetrisGameController(), []);
   const gameLoopRef = useRef<number | null>(null);
   const gameContainerRef = useRef<HTMLDivElement>(null);
+  const [_showMultiplayerOptions, _setShowMultiplayerOptions] = useState(false);
   
   const {
     gameState,
@@ -131,6 +135,9 @@ export const TetrisGame: React.FC<TetrisGameProps> = ({ playerId }) => {
     onSaveLoad: controller.onSaveLoad,
     onSaveDropped: controller.onSaveDropped
   });
+
+  // Note: Multiplayer hook integration placeholder - will be used for real multiplayer features
+  // const multiplayer = useMultiplayerTetris(...);
 
   // Game action dispatcher
   const dispatch = useCallback((action: TetrisAction) => {
@@ -148,110 +155,270 @@ export const TetrisGame: React.FC<TetrisGameProps> = ({ playerId }) => {
 
     switch (action.type) {
       case 'MOVE': {
-        if (!data.activePiece) break;
-        
-        const movedPiece = movePiece(data.activePiece, action.direction);
-        if (isValidPosition(data.grid, movedPiece)) {
-          data.activePiece = movedPiece;
-          if (action.direction === 'down') {
-            data.lastMoveTime = Date.now();
+        // Handle multiplayer mode
+        if (data.multiplayer?.isMultiplayer && action.playerId) {
+          const currentPlayer = getPlayerById(data.multiplayer, action.playerId);
+          if (!currentPlayer?.activePiece) break;
+          
+          const movedPiece = movePiece(currentPlayer.activePiece, action.direction);
+          if (isValidPosition(data.grid, movedPiece)) {
+            // Update the specific player's active piece
+            const playerIndex = data.multiplayer.players.findIndex(p => p.id === action.playerId);
+            if (playerIndex >= 0) {
+              data.multiplayer.players[playerIndex].activePiece = movedPiece;
+              if (action.direction === 'down') {
+                data.lastMoveTime = Date.now();
+              }
+            }
+          } else if (action.direction === 'down') {
+            // Piece can't move down anymore, place it
+            data.grid = placePiece(data.grid, currentPlayer.activePiece);
+            
+            // Check for line clears
+            const { grid: clearedGrid, linesCleared } = clearCompletedLines(data.grid);
+            data.grid = clearedGrid;
+            
+            // Update player stats
+            const playerIndex = data.multiplayer.players.findIndex(p => p.id === action.playerId);
+            if (playerIndex >= 0) {
+              data.multiplayer.players[playerIndex].stats = updateStats(
+                currentPlayer.stats, 
+                linesCleared, 
+                data.gameStartTime
+              );
+              
+              // Spawn next piece for this player
+              const player = data.multiplayer.players[playerIndex];
+              player.activePiece = createActivePiece(
+                player.nextPieces[0], 
+                action.playerId, 
+                player.columnStart,
+                data.multiplayer.gridWidth
+              );
+              player.nextPieces = [...player.nextPieces.slice(1), getRandomPieceType()];
+              player.canHold = true;
+              
+              // Check game over for this player
+              if (isGameOver(data.grid, player.activePiece)) {
+                data.gameOver = true;
+                newState.isComplete = true;
+              }
+            }
+            
+            data.dangerZoneActive = isDangerZoneActive(data.grid);
           }
-        } else if (action.direction === 'down') {
-          // Piece can't move down anymore, place it
-          data.grid = placePiece(data.grid, data.activePiece);
           
-          // Check for line clears
-          const { grid: clearedGrid, linesCleared } = clearCompletedLines(data.grid);
-          data.grid = clearedGrid;
-          data.stats = updateStats(data.stats, linesCleared, data.gameStartTime);
+          // Update ghost pieces for all players
+          if (data.multiplayer) {
+            data.multiplayer.players.forEach(player => {
+              if (player.activePiece) {
+                const playerIndex = data.multiplayer!.players.findIndex(p => p.id === player.id);
+                if (playerIndex >= 0) {
+                  data.multiplayer!.players[playerIndex].ghostPiece = createGhostPiece(data.grid, player.activePiece);
+                }
+              }
+            });
+          }
+        } else {
+          // Single player mode (original logic)
+          if (!data.activePiece) break;
           
-          // Spawn next piece
-          data.activePiece = createActivePiece(data.nextPieces[0]);
-          data.nextPieces = [...data.nextPieces.slice(1), getRandomPieceType()];
-          
-          // Check game over
-          if (isGameOver(data.grid, data.activePiece)) {
-            data.gameOver = true;
-            newState.isComplete = true;
+          const movedPiece = movePiece(data.activePiece, action.direction);
+          if (isValidPosition(data.grid, movedPiece)) {
+            data.activePiece = movedPiece;
+            if (action.direction === 'down') {
+              data.lastMoveTime = Date.now();
+            }
+          } else if (action.direction === 'down') {
+            // Piece can't move down anymore, place it
+            data.grid = placePiece(data.grid, data.activePiece);
+            
+            // Check for line clears
+            const { grid: clearedGrid, linesCleared } = clearCompletedLines(data.grid);
+            data.grid = clearedGrid;
+            data.stats = updateStats(data.stats, linesCleared, data.gameStartTime);
+            
+            // Spawn next piece
+            data.activePiece = createActivePiece(data.nextPieces[0]);
+            data.nextPieces = [...data.nextPieces.slice(1), getRandomPieceType()];
+            
+            // Check game over
+            if (isGameOver(data.grid, data.activePiece)) {
+              data.gameOver = true;
+              newState.isComplete = true;
+            }
+            
+            // Update drop speed based on level and other flags
+            data.dropSpeed = calculateDropSpeed(data.stats.level);
+            data.stats.pieces++;
+            data.canHold = true; // Can hold again after placing piece
+            data.dangerZoneActive = isDangerZoneActive(data.grid);
           }
           
-          // Update drop speed based on level and other flags
-          data.dropSpeed = calculateDropSpeed(data.stats.level);
-          data.stats.pieces++;
-          data.canHold = true; // Can hold again after placing piece
-          data.dangerZoneActive = isDangerZoneActive(data.grid);
-        }
-        
-        // Update ghost piece
-        if (data.activePiece) {
-          data.ghostPiece = createGhostPiece(data.grid, data.activePiece);
+          // Update ghost piece
+          if (data.activePiece) {
+            data.ghostPiece = createGhostPiece(data.grid, data.activePiece);
+          }
         }
         break;
       }
 
       case 'HOLD': {
-        if (!data.activePiece || !data.canHold) break;
-        
-        if (data.holdPiece === null) {
-          // First hold - store current piece and spawn next
-          data.holdPiece = data.activePiece.type;
-          data.activePiece = createActivePiece(data.nextPieces[0]);
-          data.nextPieces = [...data.nextPieces.slice(1), getRandomPieceType()];
+        // Handle multiplayer mode
+        if (data.multiplayer?.isMultiplayer && action.playerId) {
+          const currentPlayer = getPlayerById(data.multiplayer, action.playerId);
+          if (!currentPlayer?.activePiece || !currentPlayer.canHold) break;
+          
+          const playerIndex = data.multiplayer.players.findIndex(p => p.id === action.playerId);
+          if (playerIndex >= 0) {
+            const player = data.multiplayer.players[playerIndex];
+            
+            if (player.holdPiece === null && player.activePiece) {
+              // First hold - store current piece and spawn next
+              player.holdPiece = player.activePiece.type;
+              player.activePiece = createActivePiece(
+                player.nextPieces[0], 
+                action.playerId, 
+                player.columnStart,
+                data.multiplayer.gridWidth
+              );
+              player.nextPieces = [...player.nextPieces.slice(1), getRandomPieceType()];
+            } else if (player.activePiece) {
+              // Swap current piece with held piece
+              const currentType = player.activePiece.type;
+              player.activePiece = createActivePiece(
+                player.holdPiece!,
+                action.playerId,
+                player.columnStart,
+                data.multiplayer.gridWidth
+              );
+              player.holdPiece = currentType;
+            }
+            
+            player.canHold = false; // Can only hold once per piece
+            
+            // Update ghost piece for this player
+            if (player.activePiece) {
+              player.ghostPiece = createGhostPiece(data.grid, player.activePiece);
+            }
+          }
         } else {
-          // Swap current piece with held piece
-          const currentType = data.activePiece.type;
-          data.activePiece = createActivePiece(data.holdPiece);
-          data.holdPiece = currentType;
-        }
-        
-        data.canHold = false; // Can only hold once per piece
-        
-        // Update ghost piece
-        if (data.activePiece) {
-          data.ghostPiece = createGhostPiece(data.grid, data.activePiece);
+          // Single player mode (original logic)
+          if (!data.activePiece || !data.canHold) break;
+          
+          if (data.holdPiece === null) {
+            // First hold - store current piece and spawn next
+            data.holdPiece = data.activePiece.type;
+            data.activePiece = createActivePiece(data.nextPieces[0]);
+            data.nextPieces = [...data.nextPieces.slice(1), getRandomPieceType()];
+          } else {
+            // Swap current piece with held piece
+            const currentType = data.activePiece.type;
+            data.activePiece = createActivePiece(data.holdPiece);
+            data.holdPiece = currentType;
+          }
+          
+          data.canHold = false; // Can only hold once per piece
+          
+          // Update ghost piece
+          if (data.activePiece) {
+            data.ghostPiece = createGhostPiece(data.grid, data.activePiece);
+          }
         }
         break;
       }
 
       case 'ROTATE': {
-        if (!data.activePiece) break;
-        
-        const rotatedPiece = rotatePiece(data.activePiece, action.direction);
-        if (isValidPosition(data.grid, rotatedPiece)) {
-          data.activePiece = rotatedPiece;
+        // Handle multiplayer mode
+        if (data.multiplayer?.isMultiplayer && action.playerId) {
+          const currentPlayer = getPlayerById(data.multiplayer, action.playerId);
+          if (!currentPlayer?.activePiece) break;
           
-          // Update ghost piece
-          data.ghostPiece = createGhostPiece(data.grid, data.activePiece);
+          const rotatedPiece = rotatePiece(currentPlayer.activePiece, action.direction);
+          if (isValidPosition(data.grid, rotatedPiece)) {
+            const playerIndex = data.multiplayer.players.findIndex(p => p.id === action.playerId);
+            if (playerIndex >= 0) {
+              data.multiplayer.players[playerIndex].activePiece = rotatedPiece;
+              // Update ghost piece for this player
+              data.multiplayer.players[playerIndex].ghostPiece = createGhostPiece(data.grid, rotatedPiece);
+            }
+          }
+        } else {
+          // Single player mode (original logic)
+          if (!data.activePiece) break;
+          
+          const rotatedPiece = rotatePiece(data.activePiece, action.direction);
+          if (isValidPosition(data.grid, rotatedPiece)) {
+            data.activePiece = rotatedPiece;
+            
+            // Update ghost piece
+            data.ghostPiece = createGhostPiece(data.grid, data.activePiece);
+          }
         }
         break;
       }
 
       case 'DROP': {
-        if (!data.activePiece) break;
-        
-        // Hard drop - move piece down until it can't move anymore
-        let dropPiece = data.activePiece;
-        let dropDistance = 0;
-        
-        while (true) {
-          const nextPiece = movePiece(dropPiece, 'down');
-          if (isValidPosition(data.grid, nextPiece)) {
-            dropPiece = nextPiece;
-            dropDistance++;
-          } else {
-            break;
-          }
-        }
-        
-        if (dropDistance > 0) {
-          data.activePiece = dropPiece;
-          // Award points for hard drop
-          data.stats.score += dropDistance * 2;
-          // Trigger placement by setting lastMoveTime to force TICK to place piece
-          data.lastMoveTime = 0;
+        // Handle multiplayer mode
+        if (data.multiplayer?.isMultiplayer && action.playerId) {
+          const currentPlayer = getPlayerById(data.multiplayer, action.playerId);
+          if (!currentPlayer?.activePiece) break;
           
-          // Update ghost piece
-          data.ghostPiece = createGhostPiece(data.grid, data.activePiece);
+          // Hard drop - move piece down until it can't move anymore
+          let dropPiece = currentPlayer.activePiece;
+          let dropDistance = 0;
+          
+          while (true) {
+            const nextPiece = movePiece(dropPiece, 'down');
+            if (isValidPosition(data.grid, nextPiece)) {
+              dropPiece = nextPiece;
+              dropDistance++;
+            } else {
+              break;
+            }
+          }
+          
+          if (dropDistance > 0) {
+            const playerIndex = data.multiplayer.players.findIndex(p => p.id === action.playerId);
+            if (playerIndex >= 0) {
+              data.multiplayer.players[playerIndex].activePiece = dropPiece;
+              // Award points for hard drop
+              data.multiplayer.players[playerIndex].stats.score += dropDistance * 2;
+              // Trigger placement by setting lastMoveTime to force TICK to place piece
+              data.lastMoveTime = 0;
+              
+              // Update ghost piece for this player
+              data.multiplayer.players[playerIndex].ghostPiece = createGhostPiece(data.grid, dropPiece);
+            }
+          }
+        } else {
+          // Single player mode (original logic)
+          if (!data.activePiece) break;
+          
+          // Hard drop - move piece down until it can't move anymore
+          let dropPiece = data.activePiece;
+          let dropDistance = 0;
+          
+          while (true) {
+            const nextPiece = movePiece(dropPiece, 'down');
+            if (isValidPosition(data.grid, nextPiece)) {
+              dropPiece = nextPiece;
+              dropDistance++;
+            } else {
+              break;
+            }
+          }
+          
+          if (dropDistance > 0) {
+            data.activePiece = dropPiece;
+            // Award points for hard drop
+            data.stats.score += dropDistance * 2;
+            // Trigger placement by setting lastMoveTime to force TICK to place piece
+            data.lastMoveTime = 0;
+            
+            // Update ghost piece
+            data.ghostPiece = createGhostPiece(data.grid, data.activePiece);
+          }
         }
         break;
       }
@@ -332,38 +499,40 @@ export const TetrisGame: React.FC<TetrisGameProps> = ({ playerId }) => {
   const handleKeyPress = useCallback((event: KeyboardEvent) => {
     if (isLoading) return;
     
+    const actionPlayerId = gameState.data.multiplayer?.isMultiplayer ? playerId : undefined;
+    
     switch (event.code) {
       case 'ArrowLeft':
         event.preventDefault();
-        dispatch({ type: 'MOVE', direction: 'left' });
+        dispatch({ type: 'MOVE', direction: 'left', playerId: actionPlayerId });
         break;
       case 'ArrowRight':
         event.preventDefault();
-        dispatch({ type: 'MOVE', direction: 'right' });
+        dispatch({ type: 'MOVE', direction: 'right', playerId: actionPlayerId });
         break;
       case 'ArrowDown':
         event.preventDefault();
-        dispatch({ type: 'MOVE', direction: 'down' });
+        dispatch({ type: 'MOVE', direction: 'down', playerId: actionPlayerId });
         break;
       case 'ArrowUp':
         event.preventDefault();
-        dispatch({ type: 'ROTATE', direction: 'clockwise' });
+        dispatch({ type: 'ROTATE', direction: 'clockwise', playerId: actionPlayerId });
         break;
       case 'Space':
         event.preventDefault();
-        dispatch({ type: 'DROP' });
+        dispatch({ type: 'DROP', playerId: actionPlayerId });
         break;
       case 'KeyC':
       case 'KeyH':
         event.preventDefault();
-        dispatch({ type: 'HOLD' });
+        dispatch({ type: 'HOLD', playerId: actionPlayerId });
         break;
       case 'KeyP':
         event.preventDefault();
         dispatch({ type: 'PAUSE' });
         break;
     }
-  }, [dispatch, isLoading]);
+  }, [dispatch, isLoading, gameState.data.multiplayer, playerId]);
 
   // Set up keyboard listeners
   useEffect(() => {
@@ -404,44 +573,52 @@ export const TetrisGame: React.FC<TetrisGameProps> = ({ playerId }) => {
   // Mobile control handlers
   const handleMobileMove = useCallback((direction: 'left' | 'right' | 'down') => {
     if (isLoading) return;
-    dispatch({ type: 'MOVE', direction });
-  }, [dispatch, isLoading]);
+    const actionPlayerId = gameState.data.multiplayer?.isMultiplayer ? playerId : undefined;
+    dispatch({ type: 'MOVE', direction, playerId: actionPlayerId });
+  }, [dispatch, isLoading, gameState.data.multiplayer, playerId]);
 
   const handleMobileRotate = useCallback(() => {
     if (isLoading) return;
-    dispatch({ type: 'ROTATE', direction: 'clockwise' });
-  }, [dispatch, isLoading]);
+    const actionPlayerId = gameState.data.multiplayer?.isMultiplayer ? playerId : undefined;
+    dispatch({ type: 'ROTATE', direction: 'clockwise', playerId: actionPlayerId });
+  }, [dispatch, isLoading, gameState.data.multiplayer, playerId]);
 
   const handleMobileHardDrop = useCallback(() => {
     if (isLoading) return;
-    dispatch({ type: 'DROP' });
-  }, [dispatch, isLoading]);
+    const actionPlayerId = gameState.data.multiplayer?.isMultiplayer ? playerId : undefined;
+    dispatch({ type: 'DROP', playerId: actionPlayerId });
+  }, [dispatch, isLoading, gameState.data.multiplayer, playerId]);
 
   const handleMobileHold = useCallback(() => {
     if (isLoading) return;
-    dispatch({ type: 'HOLD' });
-  }, [dispatch, isLoading]);
+    const actionPlayerId = gameState.data.multiplayer?.isMultiplayer ? playerId : undefined;
+    dispatch({ type: 'HOLD', playerId: actionPlayerId });
+  }, [dispatch, isLoading, gameState.data.multiplayer, playerId]);
 
   // Swipe gesture support
   useSwipeGestures(gameContainerRef, {
     onSwipeLeft: () => {
       if (!isLoading && !gameState.data.gameOver && !gameState.data.paused) {
-        dispatch({ type: 'MOVE', direction: 'left' });
+        const actionPlayerId = gameState.data.multiplayer?.isMultiplayer ? playerId : undefined;
+        dispatch({ type: 'MOVE', direction: 'left', playerId: actionPlayerId });
       }
     },
     onSwipeRight: () => {
       if (!isLoading && !gameState.data.gameOver && !gameState.data.paused) {
-        dispatch({ type: 'MOVE', direction: 'right' });
+        const actionPlayerId = gameState.data.multiplayer?.isMultiplayer ? playerId : undefined;
+        dispatch({ type: 'MOVE', direction: 'right', playerId: actionPlayerId });
       }
     },
     onSwipeDown: () => {
       if (!isLoading && !gameState.data.gameOver && !gameState.data.paused) {
-        dispatch({ type: 'MOVE', direction: 'down' });
+        const actionPlayerId = gameState.data.multiplayer?.isMultiplayer ? playerId : undefined;
+        dispatch({ type: 'MOVE', direction: 'down', playerId: actionPlayerId });
       }
     },
     onSwipeUp: () => {
       if (!isLoading && !gameState.data.gameOver && !gameState.data.paused) {
-        dispatch({ type: 'ROTATE', direction: 'clockwise' });
+        const actionPlayerId = gameState.data.multiplayer?.isMultiplayer ? playerId : undefined;
+        dispatch({ type: 'ROTATE', direction: 'clockwise', playerId: actionPlayerId });
       }
     },
     minSwipeDistance: 30,
@@ -461,6 +638,109 @@ export const TetrisGame: React.FC<TetrisGameProps> = ({ playerId }) => {
     <div className="tetris-game" ref={gameContainerRef}>
       <div className="tetris-header">
         <h2>{TETRIS_CONFIG.name}</h2>
+        
+        {/* Multiplayer controls */}
+        <div className="multiplayer-controls">
+          {!gameState.data.multiplayer?.isMultiplayer ? (
+            <button 
+              className="action-btn"
+              onClick={() => {
+                // For demo purposes, create a simple multiplayer setup
+                const newState = { ...gameState };
+                newState.data.multiplayer = {
+                  isMultiplayer: true,
+                  players: [
+                    {
+                      id: playerId,
+                      name: 'Player 1',
+                      columnStart: 0,
+                      columnEnd: 10,
+                      activePiece: gameState.data.activePiece,
+                      ghostPiece: gameState.data.ghostPiece,
+                      holdPiece: gameState.data.holdPiece,
+                      nextPieces: gameState.data.nextPieces,
+                      canHold: gameState.data.canHold,
+                      stats: gameState.data.stats
+                    }
+                  ],
+                  currentPlayerId: playerId,
+                  gridWidth: 10
+                };
+                // Clear single-player state
+                newState.data.activePiece = null;
+                newState.data.ghostPiece = null;
+                setGameState(newState);
+              }}
+            >
+              🎮 Enable Multiplayer Mode
+            </button>
+          ) : (
+            <div className="multiplayer-status">
+              <span>🎮 Multiplayer Mode ({gameState.data.multiplayer.players.length} players)</span>
+              <button 
+                className="action-btn danger"
+                onClick={() => {
+                  // Disable multiplayer mode
+                  const newState = { ...gameState };
+                  const firstPlayer = newState.data.multiplayer?.players[0];
+                  if (firstPlayer) {
+                    newState.data.activePiece = firstPlayer.activePiece;
+                    newState.data.ghostPiece = firstPlayer.ghostPiece;
+                    newState.data.holdPiece = firstPlayer.holdPiece;
+                    newState.data.nextPieces = firstPlayer.nextPieces;
+                    newState.data.canHold = firstPlayer.canHold;
+                    newState.data.stats = firstPlayer.stats;
+                  }
+                  newState.data.multiplayer = undefined;
+                  setGameState(newState);
+                }}
+              >
+                Disable Multiplayer
+              </button>
+              {gameState.data.multiplayer.players.length < 4 && (
+                <button 
+                  className="action-btn"
+                  onClick={() => {
+                    // Add another player (demo)
+                    const newState = { ...gameState };
+                    if (newState.data.multiplayer) {
+                      const playerCount = newState.data.multiplayer.players.length + 1;
+                      const newGridWidth = playerCount * 10;
+                      
+                      // Create new player
+                      const newPlayer = {
+                        id: `player-${playerCount}`,
+                        name: `Player ${playerCount}`,
+                        columnStart: (playerCount - 1) * 10,
+                        columnEnd: playerCount * 10,
+                        activePiece: createActivePiece(
+                          getRandomPieceType(),
+                          `player-${playerCount}`,
+                          (playerCount - 1) * 10,
+                          newGridWidth
+                        ),
+                        ghostPiece: null,
+                        holdPiece: null,
+                        nextPieces: generateNextPieces(),
+                        canHold: true,
+                        stats: createInitialStats()
+                      };
+                      
+                      // Update grid
+                      newState.data.grid = createEmptyGrid(newGridWidth);
+                      newState.data.multiplayer.players.push(newPlayer);
+                      newState.data.multiplayer.gridWidth = newGridWidth;
+                      
+                      setGameState(newState);
+                    }
+                  }}
+                >
+                  + Add Player
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       </div>
       
       <div className="tetris-content">
@@ -470,6 +750,7 @@ export const TetrisGame: React.FC<TetrisGameProps> = ({ playerId }) => {
           ghostPiece={gameState.data.ghostPiece}
           gameOver={gameState.data.gameOver}
           dangerZoneActive={gameState.data.dangerZoneActive}
+          multiplayer={gameState.data.multiplayer}
         />
         
         <TetrisControls
