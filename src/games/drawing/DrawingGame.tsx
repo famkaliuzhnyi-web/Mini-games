@@ -162,7 +162,8 @@ export const DrawingGame: React.FC<DrawingGameProps> = ({
     drawPixel(x, y, gameData.selectedColor);
   }, [isDrawing, getCanvasPosition, drawPixel, gameData.selectedColor]);
 
-  const handleTouchEnd = useCallback(() => {
+  const handleTouchEnd = useCallback((event: React.TouchEvent<HTMLCanvasElement>) => {
+    event.preventDefault();
     setIsDrawing(false);
     setLastDrawnPosition(null);
   }, []);
