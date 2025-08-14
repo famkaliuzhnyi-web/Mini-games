@@ -55,6 +55,7 @@ const usePingPongState = (playerId: string) => {
   const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 768);
   const [keyState, setKeyState] = useState<KeyState>(keyStateRef.current);
   const [touchState, setTouchState] = useState<TouchState>(touchStateRef.current);
+  const [shouldRotate, setShouldRotate] = useState(false);
   
   const {
     gameState,
@@ -86,6 +87,25 @@ const usePingPongState = (playerId: string) => {
     return () => window.removeEventListener('resize', updateMobileState);
   }, []);
 
+  // Check orientation and decide on rotation
+  useEffect(() => {
+    const checkOrientation = () => {
+      const isPortrait = window.innerHeight > window.innerWidth;
+      const aspectRatio = window.innerWidth / window.innerHeight;
+      // Auto-rotate for portrait mode on smaller screens for better UX
+      setShouldRotate(isPortrait && aspectRatio < 0.75 && window.innerWidth < 768);
+    };
+
+    checkOrientation();
+    window.addEventListener('resize', checkOrientation);
+    window.addEventListener('orientationchange', checkOrientation);
+    
+    return () => {
+      window.removeEventListener('resize', checkOrientation);
+      window.removeEventListener('orientationchange', checkOrientation);
+    };
+  }, []);
+
   // Update refs when state changes
   useEffect(() => {
     gameStateRef.current = gameState;
@@ -106,6 +126,13 @@ const usePingPongState = (playerId: string) => {
     if (!currentTouchState.isActive) return paddle;
     
     const touchDelta = currentTouchState.currentY - currentTouchState.startY;
+    
+    // Note: When rotated -90deg, we use clientX instead of clientY in touch handlers,
+    // so horizontal screen movement (clientX) directly maps to vertical paddle movement (Y)
+    // Moving finger right (increasing clientX) -> increasing Y (paddle moves down)
+    // Moving finger left (decreasing clientX) -> decreasing Y (paddle moves up)
+    // No inversion needed since the mapping is natural
+    
     const newY = Math.max(0, Math.min(
       gameArea.height - paddle.height,
       currentTouchState.paddleStartY + touchDelta
@@ -352,6 +379,7 @@ const usePingPongState = (playerId: string) => {
     gameState,
     isLoading,
     isMobile,
+    shouldRotate,
     currentTheme,
     touchState,
     gameDimensions,
@@ -372,12 +400,12 @@ const usePingPongState = (playerId: string) => {
 // Game Field Component (the ping-pong game area)
 export const PingPongGameField: React.FC<SlotComponentProps> = ({ playerId }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [shouldRotate, setShouldRotate] = useState(false);
   
   const {
     gameState,
     isLoading,
     isMobile,
+    shouldRotate,
     touchState,
     gameDimensions,
     startNewGame,
@@ -386,48 +414,37 @@ export const PingPongGameField: React.FC<SlotComponentProps> = ({ playerId }) =>
     setTouchState
   } = usePingPongState(playerId);
 
-  // Check orientation and decide on rotation
-  useEffect(() => {
-    const checkOrientation = () => {
-      const isPortrait = window.innerHeight > window.innerWidth;
-      const aspectRatio = window.innerWidth / window.innerHeight;
-      // Auto-rotate for portrait mode on smaller screens for better UX
-      setShouldRotate(isPortrait && aspectRatio < 0.75 && window.innerWidth < 768);
-    };
-
-    checkOrientation();
-    window.addEventListener('resize', checkOrientation);
-    window.addEventListener('orientationchange', checkOrientation);
-    
-    return () => {
-      window.removeEventListener('resize', checkOrientation);
-      window.removeEventListener('orientationchange', checkOrientation);
-    };
-  }, []);
-
   // Touch handlers
   const handleTouchStart = useCallback((event: React.TouchEvent) => {
     event.preventDefault();
     const touch = event.touches[0];
     
+    // In rotated mode, use clientX instead of clientY for paddle movement
+    // The rotation is -90deg, so horizontal screen movement controls vertical paddle movement
+    const touchCoordinate = shouldRotate ? touch.clientX : touch.clientY;
+    
     setTouchState({
       isActive: true,
-      startY: touch.clientY,
-      currentY: touch.clientY,
+      startY: touchCoordinate,
+      currentY: touchCoordinate,
       paddleStartY: gameState.data.playerPaddle.y
     });
-  }, [gameState.data.playerPaddle.y, setTouchState]);
+  }, [gameState.data.playerPaddle.y, setTouchState, shouldRotate]);
 
   const handleTouchMove = useCallback((event: React.TouchEvent) => {
     event.preventDefault();
     if (!touchState.isActive) return;
     
     const touch = event.touches[0];
+    // In rotated mode, use clientX instead of clientY for paddle movement
+    // The rotation is -90deg, so horizontal screen movement controls vertical paddle movement
+    const touchCoordinate = shouldRotate ? touch.clientX : touch.clientY;
+    
     setTouchState(prev => ({
       ...prev,
-      currentY: touch.clientY
+      currentY: touchCoordinate
     }));
-  }, [touchState.isActive, setTouchState]);
+  }, [touchState.isActive, setTouchState, shouldRotate]);
 
   const handleTouchEnd = useCallback((event: React.TouchEvent) => {
     event.preventDefault();
