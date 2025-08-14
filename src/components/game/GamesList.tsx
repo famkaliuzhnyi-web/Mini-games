@@ -1,6 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import './GamesList.css';
 import packageJson from '../../../package.json';
+import { useWindowResize } from '../../hooks/useWindowResize';
+
+export type LayoutMode = 'vertical' | 'horizontal';
 
 export interface GameInfo {
   id: string;
@@ -53,8 +56,17 @@ const AVAILABLE_GAMES: GameInfo[] = [
 ];
 
 export const GamesList: React.FC<GamesListProps> = ({ onGameSelect }) => {
+  const { width, height } = useWindowResize();
+  
+  // Determine layout mode based on screen proportions (aspect ratio)
+  // Horizontal for landscape orientation (width > height), vertical for portrait orientation (width <= height)
+  const layoutMode: LayoutMode = useMemo(() => {
+    const aspectRatio = width / height;
+    return aspectRatio > 1 ? 'horizontal' : 'vertical';
+  }, [width, height]);
+
   return (
-    <div className="games-list">
+    <div className={`games-list games-list--${layoutMode}`}>
       <div className="games-list-header">
         <h1>🎮 Choose Your Game</h1>
         <p>Select a game to start playing!</p>
