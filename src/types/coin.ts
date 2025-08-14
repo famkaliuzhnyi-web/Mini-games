@@ -5,7 +5,7 @@
 // Coin transaction types
 export type CoinTransactionType = 'earn' | 'spend';
 export type CoinEarnReason = 'game_completion' | 'game_play' | 'daily_bonus' | 'achievement' | 'manual';
-export type CoinSpendReason = 'purchase' | 'unlock' | 'upgrade' | 'manual';
+export type CoinSpendReason = 'purchase' | 'unlock' | 'upgrade' | 'manual' | 'undo' | 'theme';
 
 // Coin transaction record
 export interface CoinTransaction {
