@@ -38,6 +38,7 @@ export type MessageType =
   | 'player-join' 
   | 'player-leave' 
   | 'player-ready' 
+  | 'session-sync'
   | 'game-select'
   | 'game-start' 
   | 'game-move' 
