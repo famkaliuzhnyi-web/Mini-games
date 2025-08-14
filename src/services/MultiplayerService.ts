@@ -60,7 +60,11 @@ export class WebRTCMultiplayerService implements MultiplayerService {
     });
   }
 
-  // Public method to start a game for all players
+  /**
+   * Start a game for all players in the current session
+   * @param gameId - The ID of the game to start
+   * @throws Error if not host or no active session
+   */
   async startGame(gameId: string): Promise<void> {
     if (!this.currentSession || !this.isHostRole) {
       throw new Error('Only host can start a game');
@@ -107,7 +111,12 @@ export class WebRTCMultiplayerService implements MultiplayerService {
     this.emit('game-selected', { gameId });
   }
 
-  // Session Management
+  /**
+   * Create a new multiplayer session as host
+   * @param options - Configuration options for the session
+   * @returns Promise resolving to the created session
+   * @throws Error if already in a session
+   */
   async createSession(options: CreateSessionOptions): Promise<GameSession> {
     if (this.currentSession) {
       throw new Error('Already in a session. Leave current session first.');

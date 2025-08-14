@@ -269,7 +269,7 @@ const usePingPongState = (playerId: string) => {
         event.preventDefault();
         break;
     }
-  }, [gameState.data.gameStatus]);
+  }, [gameState.data.gameStatus]); // eslint-disable-line react-hooks/exhaustive-deps -- pauseGame and resumeGame are stable functions
 
   const handleKeyUp = useCallback((event: KeyboardEvent) => {
     switch (event.code) {

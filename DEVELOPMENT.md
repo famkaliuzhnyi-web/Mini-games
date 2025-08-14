@@ -200,7 +200,16 @@ export default GameBoard;
 
 ## 🧪 Testing Strategy
 
-### Unit Testing
+> **Note**: Testing framework is planned but not yet implemented. The following examples show the intended testing approach.
+
+### Manual Testing Procedures
+Currently, all functionality is validated through manual testing:
+1. **Functional Testing**: Verify game mechanics, save/load, and UI interactions
+2. **Cross-browser Testing**: Test on Chrome, Firefox, Safari, and Edge
+3. **Mobile Testing**: Validate touch controls and responsive design
+4. **Performance Testing**: Monitor frame rates and loading times
+
+### Planned Unit Testing
 ```typescript
 // src/games/[game-name]/logic/__tests__/GameEngine.test.ts
 import { GameEngine } from '../GameEngine';
@@ -224,7 +233,7 @@ describe('GameEngine', () => {
 });
 ```
 
-### Integration Testing
+### Planned Integration Testing
 ```typescript
 // src/games/[game-name]/components/__tests__/GameBoard.test.tsx
 import { render, fireEvent, screen } from '@testing-library/react';

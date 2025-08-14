@@ -1,13 +1,23 @@
 import { Component } from 'react';
 import type { ErrorInfo, ReactNode } from 'react';
 
+/**
+ * Props for the ErrorBoundary component
+ */
 interface Props {
+  /** Child components to be wrapped and protected by the error boundary */
   children: ReactNode;
+  /** Custom fallback UI to display when an error occurs. If not provided, a default error UI is shown */
   fallback?: ReactNode;
 }
 
+/**
+ * Internal state for the ErrorBoundary component
+ */
 interface State {
+  /** Whether an error has been caught by this boundary */
   hasError: boolean;
+  /** The error object, if any */
   error?: Error;
 }
 

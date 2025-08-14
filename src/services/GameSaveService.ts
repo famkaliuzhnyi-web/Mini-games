@@ -154,6 +154,12 @@ export class GameSaveService {
   /**
    * Drop (delete) saved game data
    */
+  /**
+   * Drop (delete) saved game state from localStorage
+   * @param gameId - Unique identifier for the game type
+   * @param playerId - Unique identifier for the player
+   * @returns Promise resolving to save operation result
+   */
   public async dropSave(gameId: string, playerId: string): Promise<SaveResult> {
     try {
       const saveKey = this.getSaveKey(gameId, playerId);

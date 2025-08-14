@@ -146,7 +146,7 @@ const useSudokuState = (playerId: string) => {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [gameState.data.isComplete, gameState.data.timeSpent, gameStartTime, setGameState]);
+  }, [gameState, gameStartTime, setGameState]);
 
   const startNewGame = useCallback((difficulty: Difficulty) => {
     const completeGrid = generateCompleteGrid();
