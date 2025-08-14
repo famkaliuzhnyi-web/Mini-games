@@ -73,6 +73,7 @@
   padding: 1rem;
   transition: var(--pp-transition);
   border: 1px solid var(--pp-border-dark);
+  touch-action: none; /* Prevent all default touch behaviors including scrolling */
 }
 
 .ping-pong-canvas-container:hover {
@@ -88,6 +89,7 @@
   border-radius: var(--pp-radius);
   background: #000;
   transition: var(--pp-transition);
+  touch-action: none; /* Prevent all default touch behaviors including scrolling */
 }
 
 /* Responsive Rotation for Portrait Mode */
@@ -332,6 +334,8 @@
 
   .ping-pong-canvas-container {
     padding: 0.25rem;
+    /* Use more screen space on small mobile devices */
+    max-width: 95vw;
   }
 
   .ping-pong-btn {
