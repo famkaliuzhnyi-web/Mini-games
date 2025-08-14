@@ -52,6 +52,13 @@ const AVAILABLE_GAMES: GameInfo[] = [
     description: 'Classic number puzzle with multiple difficulty levels',
     emoji: '🧩',
     category: 'Puzzle'
+  },
+  {
+    id: 'drawing',
+    name: 'Drawing',
+    description: 'Draw on 32x32 pixel canvas with multiplayer support!',
+    emoji: '🎨',
+    category: 'Creative'
   }
 ];
 
