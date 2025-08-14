@@ -102,7 +102,8 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
     const updateDimensions = () => {
       if (containerRef.current) {
         const containerWidth = containerRef.current.clientWidth - 40; // Account for padding
-        const maxHeight = window.innerHeight * 0.4; // Max 40% of viewport height
+        // Use more screen space on mobile - 70% of viewport height instead of 40%
+        const maxHeight = isMobile ? window.innerHeight * 0.7 : window.innerHeight * 0.4;
         const newDimensions = calculateGameDimensions(containerWidth, maxHeight);
         setGameDimensions(newDimensions);
       }
@@ -111,7 +112,7 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
     updateDimensions();
     window.addEventListener('resize', updateDimensions);
     return () => window.removeEventListener('resize', updateDimensions);
-  }, []);
+  }, [isMobile]);
 
   // Update game state when dimensions change (for new games only)
   useEffect(() => {
@@ -228,7 +229,7 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
     },
     minSwipeDistance: 40,
     maxSwipeTime: 400,
-    preventDefault: false // Don't interfere with existing paddle touch controls
+    preventDefault: true // Prevent page scrolling during swipe gestures
   });
 
   /**
