@@ -3,6 +3,7 @@
  */
 import { useCallback, useMemo, useState } from 'react';
 import { useGameSave } from '../../hooks/useGameSave';
+import { useCoinService } from '../../hooks/useCoinService';
 import type { GameController, GameState, GameConfig } from '../../types/game';
 import type { Game2048Data, Direction } from './types';
 import {
@@ -82,6 +83,7 @@ class Game2048Controller implements GameController<Game2048Data> {
 // Shared hook for game state and logic
 export const useGame2048State = (playerId: string) => {
   const controller = useMemo(() => new Game2048Controller(), []);
+  const { earnCoins, awardGameCompletion } = useCoinService();
   
   // Animation state for tiles
   const [animatingTiles, setAnimatingTiles] = useState<Set<string>>(new Set());
@@ -156,7 +158,14 @@ export const useGame2048State = (playerId: string) => {
     const newBestScore = Math.max(gameState.data.bestScore, newScore);
     const newMoves = gameState.data.moves + 1;
 
+    // Award coins for scoring (every merge awards coins equal to merged value)
     if (moveResult.scoreIncrease > 0) {
+      earnCoins(
+        Math.floor(moveResult.scoreIncrease / 4), // Convert score to coins (4 points = 1 coin)
+        'game_play',
+        'game2048',
+        `2048 merge: ${moveResult.scoreIncrease} points`
+      );
       setScoreAnimated(true);
       setTimeout(() => setScoreAnimated(false), 400);
     }
@@ -184,13 +193,18 @@ export const useGame2048State = (playerId: string) => {
 
     setGameState(newGameState);
 
+    // Award coins for game completion (reaching 2048)
+    if (moveResult.gameWon && !gameState.data.gameWon) {
+      awardGameCompletion('game2048', 50, newScore); // Base reward + score bonus
+    }
+
     setTimeout(() => setMergedTiles(new Set()), 200);
     setTimeout(() => setNewTiles(new Set()), 300);
 
     if (newMoves % 5 === 0 || newScore > gameState.data.bestScore) {
       await triggerAutoSave();
     }
-  }, [gameState, setGameState, triggerAutoSave]);
+  }, [gameState, setGameState, triggerAutoSave, earnCoins, awardGameCompletion]);
 
   // Additional handler functions
   const handleUndo = useCallback(async () => {

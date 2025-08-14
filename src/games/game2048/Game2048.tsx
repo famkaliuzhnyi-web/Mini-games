@@ -4,6 +4,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useGameSave } from '../../hooks/useGameSave';
 import { useSwipeGestures } from '../../hooks/useSwipeGestures';
+import { useCoinService } from '../../hooks/useCoinService';
 import type { GameController, GameState, GameConfig } from '../../types/game';
 import type { Game2048Data, Direction } from './types';
 import {
@@ -88,6 +89,7 @@ interface Game2048Props {
 export const Game2048: React.FC<Game2048Props> = ({ playerId }) => {
   const controller = useMemo(() => new Game2048Controller(), []);
   const gameContainerRef = useRef<HTMLDivElement>(null);
+  const { earnCoins, awardGameCompletion } = useCoinService();
   
   // Animation state for tiles
   const [animatingTiles, setAnimatingTiles] = useState<Set<string>>(new Set());
@@ -169,8 +171,14 @@ export const Game2048: React.FC<Game2048Props> = ({ playerId }) => {
     const newBestScore = Math.max(gameState.data.bestScore, newScore);
     const newMoves = gameState.data.moves + 1;
 
-    // Animate score if it increased
+    // Award coins for scoring (every merge awards coins equal to merged value)
     if (moveResult.scoreIncrease > 0) {
+      earnCoins(
+        Math.floor(moveResult.scoreIncrease / 4), // Convert score to coins (4 points = 1 coin)
+        'game_play',
+        'game2048',
+        `2048 merge: ${moveResult.scoreIncrease} points`
+      );
       setScoreAnimated(true);
       setTimeout(() => setScoreAnimated(false), 400);
     }
@@ -199,6 +207,11 @@ export const Game2048: React.FC<Game2048Props> = ({ playerId }) => {
 
     setGameState(newGameState);
 
+    // Award coins for game completion (reaching 2048)
+    if (moveResult.gameWon && !gameState.data.gameWon) {
+      awardGameCompletion('game2048', 50, newScore); // Base reward + score bonus
+    }
+
     // Clear animations after delays
     setTimeout(() => {
       setMergedTiles(new Set());
@@ -212,7 +225,7 @@ export const Game2048: React.FC<Game2048Props> = ({ playerId }) => {
     if (newMoves % 5 === 0 || newScore > gameState.data.bestScore) {
       await triggerAutoSave();
     }
-  }, [gameState, setGameState, triggerAutoSave]);
+  }, [gameState, setGameState, triggerAutoSave, earnCoins, awardGameCompletion]);
 
   const handleKeyPress = useCallback(async (event: KeyboardEvent) => {
     if (gameState.data.gameOver) return;

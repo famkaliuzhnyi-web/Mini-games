@@ -5,6 +5,7 @@ import React, { useCallback, useState, useRef, useMemo, useEffect } from 'react'
 import { useGameSave } from '../../hooks/useGameSave';
 import { useSwipeGestures } from '../../hooks/useSwipeGestures';
 import { useTheme } from '../../hooks/useTheme';
+import { useCoinService } from '../../hooks/useCoinService';
 import { PingPongGameController } from './controller';
 import type { PingPongGameData, KeyState, TouchState, Paddle, Size } from './types';
 import type { GameState } from '../../types/game';
@@ -29,6 +30,7 @@ interface SlotComponentProps {
 const usePingPongState = (playerId: string) => {
   const controller = useMemo(() => new PingPongGameController(), []);
   const { currentTheme } = useTheme();
+  const { earnCoins, awardGameCompletion } = useCoinService();
   
   const gameLoopRef = useRef<number | null>(null);
   const lastFrameTime = useRef<number>(0);
@@ -162,6 +164,8 @@ const usePingPongState = (playerId: string) => {
     if (scored) {
       if (scored === 'player') {
         newScore = { ...newScore, player: newScore.player + 1 };
+        // Award coins for player scoring a point
+        earnCoins(3, 'game_play', 'ping-pong', 'Ping Pong: scored a point');
       } else {
         newScore = { ...newScore, ai: newScore.ai + 1 };
       }
@@ -182,6 +186,11 @@ const usePingPongState = (playerId: string) => {
           gamesWon: currentData.gamesWon + (winner === 'player' ? 1 : 0),
           gamesLost: currentData.gamesLost + (winner === 'ai' ? 1 : 0)
         };
+        
+        // Award coins for game completion
+        if (winner === 'player') {
+          awardGameCompletion('ping-pong', 40, newScore.player); // Base reward + points scored
+        }
       }
     }
 
@@ -204,7 +213,7 @@ const usePingPongState = (playerId: string) => {
 
     setGameState(newState);
     gameLoopRef.current = requestAnimationFrame(gameLoop);
-  }, [setGameState, updatePlayerPaddleWithTouch]);
+  }, [setGameState, updatePlayerPaddleWithTouch, earnCoins, awardGameCompletion]);
 
   // Handle keyboard input
   const handleKeyDown = useCallback((event: KeyboardEvent) => {
