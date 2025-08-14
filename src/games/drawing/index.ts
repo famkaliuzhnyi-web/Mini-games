@@ -3,7 +3,6 @@
  */
 
 export { DrawingGame, default } from './DrawingGame';
-export { DrawingSlotComponent } from './SlotComponents';
 export type { 
   DrawingGameData, 
   Color, 
