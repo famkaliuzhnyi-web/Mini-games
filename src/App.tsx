@@ -2,9 +2,10 @@ import './App.css'
 import { HashRouter, Routes, Route, useParams } from 'react-router-dom'
 import { useGameSession } from './hooks/useGameSession'
 import { NameEntry, Profile, GameContainer, GamesList, Navigation, InstallPrompt, ErrorBoundary } from './components'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { ThemeService } from './services/ThemeService'
 import { multiplayerService } from './services/MultiplayerService'
+import { UserService } from './services/UserService'
 
 // Component for the main games list/name entry page
 function MainPage() {
@@ -77,7 +78,22 @@ function ProfilePage() {
 // Component for multiplayer join page
 function MultiplayerJoinPage() {
   const { sessionId } = useParams<{ sessionId: string }>()
-  const navigation = useGameSession()
+  const [forceUpdate, setForceUpdate] = useState(0)
+  
+  // Create a custom navigation that refreshes when forceUpdate changes
+  const baseNavigation = useGameSession()
+  const navigation = useMemo(() => {
+    if (forceUpdate > 0) {
+      const profile = UserService.getInstance().loadProfile()
+      return {
+        ...baseNavigation,
+        playerName: profile?.playerName || '',
+        playerId: profile?.playerId || baseNavigation.playerId
+      }
+    }
+    return baseNavigation
+  }, [baseNavigation, forceUpdate])
+  
   const [isJoining, setIsJoining] = useState(true)
   const [joinError, setJoinError] = useState<string | null>(null)
 
@@ -107,25 +123,22 @@ function MultiplayerJoinPage() {
 
   // Show name entry if no player name
   if (!navigation.playerName) {
-    return (
-      <div>
-        <NameEntry onNameSubmit={navigation.setPlayerName} />
-        <div style={{
-          position: 'fixed',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          backgroundColor: 'rgba(0, 0, 0, 0.8)',
-          color: 'white',
-          padding: '1rem',
-          borderRadius: '8px',
-          textAlign: 'center',
-          zIndex: 1000
-        }}>
-          <p>Please enter your name to join the multiplayer session</p>
-        </div>
-      </div>
-    )
+    const handleNameSubmit = (name: string) => {
+      const trimmedName = name.trim();
+      if (!trimmedName) return;
+      
+      // Use UserService directly to save the profile
+      const userService = UserService.getInstance();
+      userService.saveProfile({
+        playerName: trimmedName,
+        playerId: navigation.playerId
+      });
+
+      // Trigger re-evaluation of navigation state
+      setForceUpdate(1);
+    };
+
+    return <NameEntry onNameSubmit={handleNameSubmit} />
   }
 
   if (isJoining) {
