@@ -353,6 +353,59 @@
   line-height: 1.3;
 }
 
+.theme-price {
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-top: 0.25rem;
+}
+
+.theme-price.affordable {
+  color: var(--color-success, #4caf50);
+}
+
+.theme-price.expensive {
+  color: var(--color-error, #f44336);
+}
+
+/* Theme Store Styles */
+.theme-store h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+  color: var(--color-text-secondary, #666);
+}
+
+.theme-selector h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+  color: var(--color-text, #333);
+}
+
+.theme-option.locked {
+  opacity: 0.8;
+  border-style: dashed;
+}
+
+.theme-option.locked:hover {
+  border-color: var(--color-warning, #ff9800);
+}
+
+.theme-option.purchasing {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.lock-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 16px;
+  background: rgba(0,0,0,0.7);
+  border-radius: 50%;
+  padding: 2px;
+  line-height: 1;
+}
+
 /* Mobile responsiveness */
 @media (max-width: 768px) {
   .profile {

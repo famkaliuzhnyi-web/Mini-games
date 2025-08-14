@@ -195,6 +195,32 @@ export class CoinService implements CoinServiceInterface {
   }
 
   /**
+   * Purchase a theme with coins
+   */
+  public purchaseTheme(themeName: string, cost: number): { success: boolean; transaction?: CoinTransaction; error?: string } {
+    // Check if user already has the theme
+    if (this.userService.hasTheme(themeName)) {
+      return { success: false, error: 'Theme already purchased' };
+    }
+
+    // Try to spend coins
+    const transaction = this.spendCoins(cost, 'purchase', `Theme: ${themeName}`);
+    if (!transaction) {
+      return { success: false, error: 'Insufficient coins' };
+    }
+
+    // Purchase the theme in the user service
+    const purchaseSuccess = this.userService.purchaseTheme(themeName);
+    if (!purchaseSuccess) {
+      console.error('Failed to record theme purchase in user profile');
+      return { success: false, error: 'Purchase failed' };
+    }
+
+    console.log(`Theme purchased successfully: ${themeName} for ${cost} coins`);
+    return { success: true, transaction };
+  }
+
+  /**
    * Event listener management
    */
   public on(event: string, callback: (data: { balance: number; transaction: CoinTransaction }) => void): void {

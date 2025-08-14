@@ -83,7 +83,7 @@ class Game2048Controller implements GameController<Game2048Data> {
 // Shared hook for game state and logic
 export const useGame2048State = (playerId: string) => {
   const controller = useMemo(() => new Game2048Controller(), []);
-  const { earnCoins, awardGameCompletion } = useCoinService();
+  const { earnCoins, awardGameCompletion, spendCoins, canSpend } = useCoinService();
   
   // Animation state for tiles
   const [animatingTiles, setAnimatingTiles] = useState<Set<string>>(new Set());
@@ -208,7 +208,22 @@ export const useGame2048State = (playerId: string) => {
 
   // Additional handler functions
   const handleUndo = useCallback(async () => {
-    if (!gameState.data.canUndo || !gameState.data.previousGrid) return;
+    if (!gameState.data.canUndo || !gameState.data.previousGrid) return false;
+
+    // Coin cost for undo - 5 coins per undo
+    const UNDO_COST = 5;
+    
+    if (!canSpend(UNDO_COST)) {
+      console.warn('Insufficient coins for undo action');
+      return false; // Return false to indicate undo failed
+    }
+
+    // Spend coins for undo
+    const transaction = spendCoins(UNDO_COST, 'unlock', '2048 Undo Action');
+    if (!transaction) {
+      console.warn('Failed to spend coins for undo');
+      return false;
+    }
 
     const newGameState: GameState<Game2048Data> = {
       ...gameState,
@@ -228,7 +243,10 @@ export const useGame2048State = (playerId: string) => {
 
     setGameState(newGameState);
     await triggerAutoSave();
-  }, [gameState, setGameState, triggerAutoSave]);
+    
+    console.log(`Undo successful! Spent ${UNDO_COST} coins.`);
+    return true; // Return true to indicate undo succeeded
+  }, [gameState, setGameState, triggerAutoSave, canSpend, spendCoins]);
 
   const handleNewGame = useCallback(async () => {
     const newState = controller.getInitialState();
@@ -287,6 +305,12 @@ export const useGame2048State = (playerId: string) => {
     return className;
   }, [newTiles, mergedTiles, animatingTiles]);
 
+  // Helper to check if undo is affordable
+  const canAffordUndo = useCallback(() => {
+    const UNDO_COST = 5;
+    return canSpend(UNDO_COST) && gameState.data.canUndo && gameState.data.previousGrid;
+  }, [canSpend, gameState.data.canUndo, gameState.data.previousGrid]);
+
   return {
     gameState,
     isLoading,
@@ -299,6 +323,7 @@ export const useGame2048State = (playerId: string) => {
     handleNewGame,
     handleManualSave,
     handleManualLoad,
-    getTileClass
+    getTileClass,
+    canAffordUndo
   };
 };

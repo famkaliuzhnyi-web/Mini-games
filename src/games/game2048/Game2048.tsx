@@ -89,7 +89,7 @@ interface Game2048Props {
 export const Game2048: React.FC<Game2048Props> = ({ playerId }) => {
   const controller = useMemo(() => new Game2048Controller(), []);
   const gameContainerRef = useRef<HTMLDivElement>(null);
-  const { earnCoins, awardGameCompletion } = useCoinService();
+  const { earnCoins, awardGameCompletion, spendCoins, canSpend, balance } = useCoinService();
   
   // Animation state for tiles
   const [animatingTiles, setAnimatingTiles] = useState<Set<string>>(new Set());
@@ -265,7 +265,24 @@ export const Game2048: React.FC<Game2048Props> = ({ playerId }) => {
 
   // Handle undo
   const handleUndo = useCallback(async () => {
-    if (!gameState.data.canUndo || !gameState.data.previousGrid) return;
+    if (!gameState.data.canUndo || !gameState.data.previousGrid) return false;
+
+    // Coin cost for undo - 5 coins per undo
+    const UNDO_COST = 5;
+    
+    if (!canSpend(UNDO_COST)) {
+      console.warn('Insufficient coins for undo action');
+      alert(`Not enough coins! Undo costs ${UNDO_COST} coins but you only have ${balance} coins.`);
+      return false;
+    }
+
+    // Spend coins for undo
+    const transaction = spendCoins(UNDO_COST, 'unlock', '2048 Undo Action');
+    if (!transaction) {
+      console.warn('Failed to spend coins for undo');
+      alert('Failed to spend coins for undo. Please try again.');
+      return false;
+    }
 
     const newGameState: GameState<Game2048Data> = {
       ...gameState,
@@ -285,7 +302,10 @@ export const Game2048: React.FC<Game2048Props> = ({ playerId }) => {
 
     setGameState(newGameState);
     await triggerAutoSave();
-  }, [gameState, setGameState, triggerAutoSave]);
+    
+    console.log(`Undo successful! Spent ${UNDO_COST} coins.`);
+    return true;
+  }, [gameState, setGameState, triggerAutoSave, canSpend, spendCoins]);
 
   // Handle new game
   const handleNewGame = useCallback(async () => {
@@ -386,9 +406,11 @@ export const Game2048: React.FC<Game2048Props> = ({ playerId }) => {
         <button 
           className="game2048-btn game2048-btn-secondary"
           onClick={handleUndo}
-          disabled={!gameState.data.canUndo}
+          disabled={!gameState.data.canUndo || !canSpend(5)}
+          title={!gameState.data.canUndo ? 'No undo available' : 
+                 !canSpend(5) ? `Need 5 coins to undo (you have ${balance})` : `Undo (5 coins)`}
         >
-          Undo
+          Undo (5 🪙)
         </button>
       </div>
 

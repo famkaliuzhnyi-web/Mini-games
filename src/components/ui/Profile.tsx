@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { UserService } from '../../services/UserService';
 import { useTheme } from '../../hooks/useTheme';
+import { useCoinService } from '../../hooks/useCoinService';
+import type { ThemeName } from '../../services/ThemeService';
 import './Profile.css';
 
 interface ProfileProps {
@@ -17,8 +19,10 @@ export const Profile: React.FC<ProfileProps> = ({
   const [editName, setEditName] = useState(playerName);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [purchasingTheme, setPurchasingTheme] = useState<ThemeName | null>(null);
   const userService = UserService.getInstance();
-  const { currentTheme, availableThemes, setTheme } = useTheme();
+  const { currentTheme, unlockedThemes, lockedThemes, setTheme, isThemeUnlocked } = useTheme();
+  const { balance, purchaseTheme } = useCoinService();
 
   const handleSave = async () => {
     const trimmedName = editName.trim();
@@ -54,6 +58,36 @@ export const Profile: React.FC<ProfileProps> = ({
       handleSave();
     } else if (e.key === 'Escape') {
       handleCancel();
+    }
+  };
+
+  const handleThemeAction = async (themeName: ThemeName, cost: number) => {
+    if (isThemeUnlocked(themeName)) {
+      // Theme is unlocked, just set it
+      setTheme(themeName);
+    } else {
+      // Theme is locked, try to purchase it
+      if (balance < cost) {
+        alert(`Not enough coins! You need ${cost} coins but only have ${balance}.`);
+        return;
+      }
+      
+      setPurchasingTheme(themeName);
+      try {
+        const result = purchaseTheme(themeName, cost);
+        if (result.success) {
+          alert(`Successfully purchased ${themeName} theme for ${cost} coins!`);
+          // Theme is now unlocked, set it as active
+          setTheme(themeName);
+        } else {
+          alert(`Failed to purchase theme: ${result.error}`);
+        }
+      } catch (error) {
+        console.error('Theme purchase error:', error);
+        alert('Failed to purchase theme. Please try again.');
+      } finally {
+        setPurchasingTheme(null);
+      }
     }
   };
 
@@ -143,12 +177,19 @@ export const Profile: React.FC<ProfileProps> = ({
           </div>
 
           <div className="profile-field">
+            <label>Coins: 🪙 {balance}</label>
+          </div>
+
+          <div className="profile-field">
             <label>Theme</label>
+            
+            {/* Unlocked Themes */}
             <div className="theme-selector">
-              {availableThemes.map((theme) => (
+              <h4>Your Themes</h4>
+              {unlockedThemes.map((theme) => (
                 <button
                   key={theme.name}
-                  onClick={() => setTheme(theme.name)}
+                  onClick={() => handleThemeAction(theme.name, theme.cost)}
                   className={`theme-option ${currentTheme === theme.name ? 'active' : ''}`}
                   disabled={isSaving}
                 >
@@ -159,10 +200,39 @@ export const Profile: React.FC<ProfileProps> = ({
                   <div className="theme-info">
                     <span className="theme-name">{theme.displayName}</span>
                     <span className="theme-description">{theme.description}</span>
+                    {theme.cost === 0 && <span className="theme-price">FREE</span>}
                   </div>
                 </button>
               ))}
             </div>
+
+            {/* Locked Themes */}
+            {lockedThemes.length > 0 && (
+              <div className="theme-selector theme-store">
+                <h4>Theme Store</h4>
+                {lockedThemes.map((theme) => (
+                  <button
+                    key={theme.name}
+                    onClick={() => handleThemeAction(theme.name, theme.cost)}
+                    className={`theme-option locked ${purchasingTheme === theme.name ? 'purchasing' : ''}`}
+                    disabled={isSaving || purchasingTheme !== null}
+                  >
+                    <div className="theme-preview" data-theme={theme.name}>
+                      <div className="theme-preview-bg"></div>
+                      <div className="theme-preview-text"></div>
+                      <div className="lock-overlay">🔒</div>
+                    </div>
+                    <div className="theme-info">
+                      <span className="theme-name">{theme.displayName}</span>
+                      <span className="theme-description">{theme.description}</span>
+                      <span className={`theme-price ${balance >= theme.cost ? 'affordable' : 'expensive'}`}>
+                        {purchasingTheme === theme.name ? 'Purchasing...' : `🪙 ${theme.cost}`}
+                      </span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 

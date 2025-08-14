@@ -161,12 +161,16 @@ export const Game2048Controls: React.FC<{ playerId: string }> = ({ playerId }) =
     gameState,
     isLoading,
     handleNewGame,
-    handleUndo
+    handleUndo,
+    canAffordUndo
   } = useGame2048State(playerId);
 
   if (isLoading) {
     return <div>Loading controls...</div>;
   }
+
+  const UNDO_COST = 5;
+  const canUndo = canAffordUndo();
 
   return (
     <div className="game2048-controls">
@@ -180,9 +184,11 @@ export const Game2048Controls: React.FC<{ playerId: string }> = ({ playerId }) =
         <button 
           className="game2048-btn game2048-btn-secondary"
           onClick={handleUndo}
-          disabled={!gameState.data.canUndo}
+          disabled={!canUndo}
+          title={!gameState.data.canUndo ? 'No undo available' : 
+                 !canUndo ? `Need ${UNDO_COST} coins to undo` : `Undo (${UNDO_COST} coins)`}
         >
-          Undo
+          Undo ({UNDO_COST} 🪙)
         </button>
       </div>
     </div>

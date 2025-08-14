@@ -69,6 +69,13 @@ export function useCoinService() {
     return coinService.awardGamePlay(gameId, baseReward);
   }, [coinService]);
 
+  const purchaseTheme = useCallback((
+    themeName: string,
+    cost: number
+  ): { success: boolean; transaction?: CoinTransaction; error?: string } => {
+    return coinService.purchaseTheme(themeName, cost);
+  }, [coinService]);
+
   return {
     balance,
     earnCoins,
@@ -77,6 +84,7 @@ export function useCoinService() {
     getTransactionHistory,
     awardGameCompletion,
     awardGamePlay,
+    purchaseTheme,
     refresh: updateBalance
   };
 }

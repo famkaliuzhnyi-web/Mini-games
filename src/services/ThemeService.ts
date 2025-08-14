@@ -1,12 +1,15 @@
 /**
  * Theme Service - Handles theme management and persistence
  */
+import { UserService } from './UserService';
+
 export type ThemeName = 'dark' | 'light' | 'matrix';
 
 export interface Theme {
   name: ThemeName;
   displayName: string;
   description: string;
+  cost: number; // Cost in coins (0 for free themes)
   colors: {
     // Background colors
     primary: string;
@@ -42,6 +45,7 @@ export const THEMES: Record<ThemeName, Theme> = {
     name: 'dark',
     displayName: 'Dark',
     description: 'A sleek dark theme that\'s easy on the eyes',
+    cost: 0, // Free default theme
     colors: {
       primary: '#1a1a1a',
       secondary: '#2d2d2d',
@@ -72,6 +76,7 @@ export const THEMES: Record<ThemeName, Theme> = {
     name: 'light',
     displayName: 'Light',
     description: 'A clean and bright theme for daytime use',
+    cost: 50, // Premium theme
     colors: {
       primary: '#ffffff',
       secondary: '#f8f9fa',
@@ -102,6 +107,7 @@ export const THEMES: Record<ThemeName, Theme> = {
     name: 'matrix',
     displayName: 'Matrix',
     description: 'Enter the Matrix with green-on-black cyber aesthetics',
+    cost: 100, // Premium theme
     colors: {
       primary: '#000000',
       secondary: '#001100',
@@ -134,8 +140,10 @@ export class ThemeService {
   private static readonly STORAGE_KEY = 'minigames_theme';
   private currentTheme: ThemeName = 'dark'; // Default theme
   private listeners: ((theme: ThemeName) => void)[] = [];
+  private userService: UserService;
 
   private constructor() {
+    this.userService = UserService.getInstance();
     this.loadTheme();
     this.applyTheme(this.currentTheme);
   }
@@ -169,18 +177,52 @@ export class ThemeService {
   }
 
   /**
-   * Set theme and persist to storage
+   * Check if a theme is unlocked/purchased
    */
-  public setTheme(themeName: ThemeName): void {
+  public isThemeUnlocked(themeName: ThemeName): boolean {
+    const theme = THEMES[themeName];
+    if (!theme) return false;
+    
+    // Free themes are always unlocked
+    if (theme.cost === 0) return true;
+    
+    // Check if user has purchased this theme
+    return this.userService.hasTheme(themeName);
+  }
+
+  /**
+   * Get unlocked themes only
+   */
+  public getUnlockedThemes(): Theme[] {
+    return this.getAllThemes().filter(theme => this.isThemeUnlocked(theme.name));
+  }
+
+  /**
+   * Get locked themes that can be purchased
+   */
+  public getLockedThemes(): Theme[] {
+    return this.getAllThemes().filter(theme => !this.isThemeUnlocked(theme.name));
+  }
+
+  /**
+   * Set theme and persist to storage (only works if theme is unlocked)
+   */
+  public setTheme(themeName: ThemeName): boolean {
     if (!THEMES[themeName]) {
       console.warn(`Unknown theme: ${themeName}`);
-      return;
+      return false;
+    }
+
+    if (!this.isThemeUnlocked(themeName)) {
+      console.warn(`Theme not unlocked: ${themeName}`);
+      return false;
     }
 
     this.currentTheme = themeName;
     this.saveTheme();
     this.applyTheme(themeName);
     this.notifyListeners();
+    return true;
   }
 
   /**

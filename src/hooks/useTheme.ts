@@ -31,6 +31,8 @@ export function useTheme() {
     
     // All available themes
     availableThemes: themeService.getAllThemes(),
+    unlockedThemes: themeService.getUnlockedThemes(),
+    lockedThemes: themeService.getLockedThemes(),
     
     // Theme actions
     setTheme: (themeName: ThemeName) => themeService.setTheme(themeName),
@@ -38,6 +40,7 @@ export function useTheme() {
     // Helper functions
     isTheme: (themeName: ThemeName) => currentTheme === themeName,
     getThemeByName: (themeName: ThemeName) => themeService.getTheme(themeName),
+    isThemeUnlocked: (themeName: ThemeName) => themeService.isThemeUnlocked(themeName),
   };
 }
 
