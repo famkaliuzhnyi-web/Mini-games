@@ -219,7 +219,8 @@ export const useGame2048State = (playerId: string) => {
         gameOver: false,
         canUndo: false,
         previousGrid: undefined,
-        previousScore: undefined
+        previousScore: undefined,
+        moves: Math.max(0, gameState.data.moves - 1) // Decrement moves counter
       },
       score: gameState.data.previousScore || 0,
       lastModified: new Date().toISOString()
