@@ -9,7 +9,9 @@ import type {
   CellValue, 
   GameStats,
   MoveDirection,
-  RotationDirection
+  RotationDirection,
+  MultiplayerGameState,
+  TetrisPlayer
 } from './types';
 
 // Game constants
@@ -17,6 +19,14 @@ export const GRID_WIDTH = 10;
 export const GRID_HEIGHT = 20;
 export const INITIAL_DROP_SPEED = 1000; // 1 second
 export const SPEED_INCREASE_FACTOR = 0.9; // Speed multiplies by this each level
+export const COLUMNS_PER_PLAYER = 10; // Each player gets 10 columns
+
+/**
+ * Calculate grid width based on number of players
+ */
+export function calculateGridWidth(playerCount: number): number {
+  return Math.max(GRID_WIDTH, playerCount * COLUMNS_PER_PLAYER);
+}
 
 // Tetromino piece definitions with their shapes and colors
 export const PIECE_SHAPES: Record<PieceType, PieceShape[]> = {
@@ -78,8 +88,8 @@ export const PIECE_COLORS: Record<PieceType, CellValue> = {
 /**
  * Create an empty game grid
  */
-export function createEmptyGrid(): TetrisGrid {
-  return Array(GRID_HEIGHT).fill(null).map(() => Array(GRID_WIDTH).fill(0));
+export function createEmptyGrid(width: number = GRID_WIDTH): TetrisGrid {
+  return Array(GRID_HEIGHT).fill(null).map(() => Array(width).fill(0));
 }
 
 /**
@@ -126,14 +136,19 @@ export function createGhostPiece(grid: TetrisGrid, activePiece: ActivePiece): Ac
 }
 
 /**
- * Create a new active piece
+ * Create a new active piece for a specific player
  */
-export function createActivePiece(type: PieceType): ActivePiece {
+export function createActivePiece(type: PieceType, playerId?: string, columnStart: number = 0, gridWidth: number = GRID_WIDTH): ActivePiece {
+  // Calculate spawn position within player's section
+  const sectionCenter = columnStart + Math.floor(COLUMNS_PER_PLAYER / 2);
+  const spawnX = Math.max(0, Math.min(sectionCenter - 2, gridWidth - 4)); // Ensure piece fits
+  
   return {
     type,
     shape: PIECE_SHAPES[type][0], // Start with 0° rotation
-    position: { x: Math.floor(GRID_WIDTH / 2) - 2, y: 0 }, // Center top
-    rotation: 0
+    position: { x: spawnX, y: 0 }, // Center in player's section
+    rotation: 0,
+    playerId
   };
 }
 
@@ -142,6 +157,7 @@ export function createActivePiece(type: PieceType): ActivePiece {
  */
 export function isValidPosition(grid: TetrisGrid, piece: ActivePiece): boolean {
   const { shape, position } = piece;
+  const gridWidth = grid[0]?.length || GRID_WIDTH;
   
   for (let row = 0; row < shape.length; row++) {
     for (let col = 0; col < shape[row].length; col++) {
@@ -150,7 +166,7 @@ export function isValidPosition(grid: TetrisGrid, piece: ActivePiece): boolean {
         const gridY = position.y + row;
         
         // Check boundaries
-        if (gridX < 0 || gridX >= GRID_WIDTH || gridY >= GRID_HEIGHT) {
+        if (gridX < 0 || gridX >= gridWidth || gridY >= GRID_HEIGHT) {
           return false;
         }
         
@@ -207,6 +223,7 @@ export function placePiece(grid: TetrisGrid, piece: ActivePiece): TetrisGrid {
   const newGrid = grid.map(row => [...row]);
   const { shape, position } = piece;
   const color = PIECE_COLORS[piece.type];
+  const gridWidth = grid[0]?.length || GRID_WIDTH;
   
   for (let row = 0; row < shape.length; row++) {
     for (let col = 0; col < shape[row].length; col++) {
@@ -214,7 +231,7 @@ export function placePiece(grid: TetrisGrid, piece: ActivePiece): TetrisGrid {
         const gridX = position.x + col;
         const gridY = position.y + row;
         
-        if (gridY >= 0 && gridY < GRID_HEIGHT && gridX >= 0 && gridX < GRID_WIDTH) {
+        if (gridY >= 0 && gridY < GRID_HEIGHT && gridX >= 0 && gridX < gridWidth) {
           newGrid[gridY][gridX] = color;
         }
       }
@@ -229,6 +246,7 @@ export function placePiece(grid: TetrisGrid, piece: ActivePiece): TetrisGrid {
  */
 export function clearCompletedLines(grid: TetrisGrid): { grid: TetrisGrid; linesCleared: number } {
   const newGrid: TetrisGrid = [];
+  const gridWidth = grid[0]?.length || GRID_WIDTH;
   let linesCleared = 0;
   
   // Check each row from bottom to top
@@ -244,7 +262,7 @@ export function clearCompletedLines(grid: TetrisGrid): { grid: TetrisGrid; lines
   
   // Add empty rows at the top for cleared lines
   while (newGrid.length < GRID_HEIGHT) {
-    newGrid.unshift(Array(GRID_WIDTH).fill(0));
+    newGrid.unshift(Array(gridWidth).fill(0));
   }
   
   return { grid: newGrid, linesCleared };
@@ -321,4 +339,27 @@ export function updateStats(stats: GameStats, linesCleared: number, gameStartTim
     pieces: stats.pieces + (linesCleared > 0 ? 0 : 1), // Only count piece if no lines cleared this turn
     elapsedTime
   };
+}
+
+/**
+ * Create player column assignments for multiplayer
+ */
+export function createPlayerColumns(playerCount: number): { columnStart: number; columnEnd: number }[] {
+  const assignments: { columnStart: number; columnEnd: number }[] = [];
+  
+  for (let i = 0; i < playerCount; i++) {
+    assignments.push({
+      columnStart: i * COLUMNS_PER_PLAYER,
+      columnEnd: (i + 1) * COLUMNS_PER_PLAYER
+    });
+  }
+  
+  return assignments;
+}
+
+/**
+ * Get player by ID from multiplayer state
+ */
+export function getPlayerById(multiplayer: MultiplayerGameState, playerId: string): TetrisPlayer | null {
+  return multiplayer.players.find(p => p.id === playerId) || null;
 }
