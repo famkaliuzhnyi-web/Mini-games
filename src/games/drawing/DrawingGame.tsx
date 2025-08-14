@@ -79,13 +79,13 @@ export const DrawingGame: React.FC<DrawingGameProps> = ({
     drawGrid(ctx);
   }, [gameData.grid, drawGrid]);
 
-  const getCanvasPosition = useCallback((event: React.MouseEvent<HTMLCanvasElement>): {x: number, y: number} => {
+  const getCanvasPosition = useCallback((clientX: number, clientY: number): {x: number, y: number} => {
     const canvas = canvasRef.current!;
     const rect = canvas.getBoundingClientRect();
     const scale = canvasDisplaySize / GRID_SIZE;
     
-    const x = Math.floor((event.clientX - rect.left) / scale);
-    const y = Math.floor((event.clientY - rect.top) / scale);
+    const x = Math.floor((clientX - rect.left) / scale);
+    const y = Math.floor((clientY - rect.top) / scale);
     
     return { x: Math.max(0, Math.min(x, GRID_SIZE - 1)), y: Math.max(0, Math.min(y, GRID_SIZE - 1)) };
   }, [canvasDisplaySize]);
@@ -120,7 +120,7 @@ export const DrawingGame: React.FC<DrawingGameProps> = ({
 
   const handleMouseDown = useCallback((event: React.MouseEvent<HTMLCanvasElement>) => {
     event.preventDefault();
-    const { x, y } = getCanvasPosition(event);
+    const { x, y } = getCanvasPosition(event.clientX, event.clientY);
     setIsDrawing(true);
     setLastDrawnPosition(null);
     drawPixel(x, y, gameData.selectedColor);
@@ -130,11 +130,39 @@ export const DrawingGame: React.FC<DrawingGameProps> = ({
     if (!isDrawing) return;
     event.preventDefault();
     
-    const { x, y } = getCanvasPosition(event);
+    const { x, y } = getCanvasPosition(event.clientX, event.clientY);
     drawPixel(x, y, gameData.selectedColor);
   }, [isDrawing, getCanvasPosition, drawPixel, gameData.selectedColor]);
 
   const handleMouseUp = useCallback(() => {
+    setIsDrawing(false);
+    setLastDrawnPosition(null);
+  }, []);
+
+  // Touch event handlers for mobile support
+  const handleTouchStart = useCallback((event: React.TouchEvent<HTMLCanvasElement>) => {
+    event.preventDefault();
+    const touch = event.touches[0];
+    if (!touch) return;
+    
+    const { x, y } = getCanvasPosition(touch.clientX, touch.clientY);
+    setIsDrawing(true);
+    setLastDrawnPosition(null);
+    drawPixel(x, y, gameData.selectedColor);
+  }, [getCanvasPosition, drawPixel, gameData.selectedColor]);
+
+  const handleTouchMove = useCallback((event: React.TouchEvent<HTMLCanvasElement>) => {
+    if (!isDrawing) return;
+    event.preventDefault();
+    
+    const touch = event.touches[0];
+    if (!touch) return;
+    
+    const { x, y } = getCanvasPosition(touch.clientX, touch.clientY);
+    drawPixel(x, y, gameData.selectedColor);
+  }, [isDrawing, getCanvasPosition, drawPixel, gameData.selectedColor]);
+
+  const handleTouchEnd = useCallback(() => {
     setIsDrawing(false);
     setLastDrawnPosition(null);
   }, []);
@@ -203,6 +231,10 @@ export const DrawingGame: React.FC<DrawingGameProps> = ({
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            onTouchCancel={handleTouchEnd}
           />
         </div>
 
