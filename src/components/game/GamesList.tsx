@@ -56,13 +56,14 @@ const AVAILABLE_GAMES: GameInfo[] = [
 ];
 
 export const GamesList: React.FC<GamesListProps> = ({ onGameSelect }) => {
-  const { width } = useWindowResize();
+  const { width, height } = useWindowResize();
   
-  // Determine layout mode based on window width
-  // Horizontal for wide screens (desktop/landscape), vertical for narrow screens (mobile/portrait)
+  // Determine layout mode based on screen proportions (aspect ratio)
+  // Horizontal for landscape orientation (width > height), vertical for portrait orientation (width <= height)
   const layoutMode: LayoutMode = useMemo(() => {
-    return width >= 1024 ? 'horizontal' : 'vertical';
-  }, [width]);
+    const aspectRatio = width / height;
+    return aspectRatio > 1 ? 'horizontal' : 'vertical';
+  }, [width, height]);
 
   return (
     <div className={`games-list games-list--${layoutMode}`}>

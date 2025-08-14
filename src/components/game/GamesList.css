@@ -29,12 +29,12 @@
   margin-bottom: 3rem;
 }
 
-/* Horizontal layout mode (desktop/wide screens) */
+/* Horizontal layout mode (landscape orientation) */
 .games-list--horizontal .games-grid {
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
 }
 
-/* Vertical layout mode (mobile/narrow screens) */
+/* Vertical layout mode (portrait orientation) */
 .games-list--vertical .games-grid {
   grid-template-columns: 1fr;
   max-width: 400px;
