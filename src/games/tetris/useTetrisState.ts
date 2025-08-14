@@ -168,8 +168,15 @@ export const useTetrisState = (playerId: string) => {
           data.grid = clearedGrid;
           data.stats = updateStats(data.stats, linesCleared, data.gameStartTime);
           
+          // Ensure nextPieces array is valid before using it
+          if (!data.nextPieces || !Array.isArray(data.nextPieces) || data.nextPieces.length === 0) {
+            data.nextPieces = generateNextPieces();
+          }
+          
           data.activePiece = createActivePiece(data.nextPieces[0]);
-          data.nextPieces = [...data.nextPieces.slice(1), getRandomPieceType()];
+          data.nextPieces = data.nextPieces.length > 1 
+            ? [...data.nextPieces.slice(1), getRandomPieceType()]
+            : generateNextPieces();
           
           if (isGameOver(data.grid, data.activePiece)) {
             data.gameOver = true;
@@ -235,8 +242,16 @@ export const useTetrisState = (playerId: string) => {
         if (data.holdPiece === null) {
           // First hold - store current piece and spawn next
           data.holdPiece = data.activePiece.type;
+          
+          // Ensure nextPieces array is valid before using it
+          if (!data.nextPieces || !Array.isArray(data.nextPieces) || data.nextPieces.length === 0) {
+            data.nextPieces = generateNextPieces();
+          }
+          
           data.activePiece = createActivePiece(data.nextPieces[0]);
-          data.nextPieces = [...data.nextPieces.slice(1), getRandomPieceType()];
+          data.nextPieces = data.nextPieces.length > 1 
+            ? [...data.nextPieces.slice(1), getRandomPieceType()]
+            : generateNextPieces();
         } else {
           // Swap current piece with held piece
           const currentType = data.activePiece.type;
@@ -289,8 +304,15 @@ export const useTetrisState = (playerId: string) => {
             data.grid = clearedGrid;
             data.stats = updateStats(data.stats, linesCleared, data.gameStartTime);
             
+            // Ensure nextPieces array is valid before using it
+            if (!data.nextPieces || !Array.isArray(data.nextPieces) || data.nextPieces.length === 0) {
+              data.nextPieces = generateNextPieces();
+            }
+            
             data.activePiece = createActivePiece(data.nextPieces[0]);
-            data.nextPieces = [...data.nextPieces.slice(1), getRandomPieceType()];
+            data.nextPieces = data.nextPieces.length > 1 
+              ? [...data.nextPieces.slice(1), getRandomPieceType()]
+              : generateNextPieces();
             
             if (isGameOver(data.grid, data.activePiece)) {
               data.gameOver = true;
