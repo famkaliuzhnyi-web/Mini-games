@@ -26,7 +26,18 @@ export const MultiplayerLobby: React.FC<MultiplayerLobbyProps> = ({
 }) => {
   const currentPlayer = session.players.find(p => p.id === currentPlayerId);
 
-  const getConnectionStatusColor = (state: string): string => {
+  const getConnectionStatusColor = (state: string, connectionType: string): string => {
+    // Use different colors for different connection types
+    if (connectionType === 'local-tab') {
+      switch (state) {
+        case 'connected': return '#FF9800'; // Orange for local connections
+        case 'connecting': return '#FFC107';
+        case 'reconnecting': return '#FFC107';
+        case 'failed': return '#f44336';
+        default: return '#666';
+      }
+    }
+    // WebRTC connections get green
     switch (state) {
       case 'connected': return '#4CAF50';
       case 'connecting': return '#FF9800';
@@ -36,13 +47,32 @@ export const MultiplayerLobby: React.FC<MultiplayerLobbyProps> = ({
     }
   };
 
-  const getConnectionStatusIcon = (state: string): string => {
+  const getConnectionStatusIcon = (state: string, connectionType: string): string => {
+    // Different icons for different connection types
+    if (connectionType === 'local-tab') {
+      switch (state) {
+        case 'connected': return '🟠'; // Orange for local connections
+        case 'connecting': return '🟡';
+        case 'reconnecting': return '🔄';
+        case 'failed': return '🔴';
+        default: return '⚫';
+      }
+    }
+    // WebRTC connections get green
     switch (state) {
       case 'connected': return '🟢';
       case 'connecting': return '🟡';
       case 'reconnecting': return '🔄';
       case 'failed': return '🔴';
       default: return '⚫';
+    }
+  };
+
+  const getConnectionTypeLabel = (connectionType: string): string => {
+    switch (connectionType) {
+      case 'local-tab': return 'Local Browser';
+      case 'webrtc': return 'WebRTC P2P';
+      default: return 'Unknown';
     }
   };
 
@@ -71,6 +101,23 @@ export const MultiplayerLobby: React.FC<MultiplayerLobbyProps> = ({
         }}>
           {session.players.length} / {session.maxPlayers} players
         </div>
+      </div>
+
+      {/* Connection Type Warning */}
+      <div style={{
+        backgroundColor: '#fff3cd',
+        border: '1px solid #ffc107',
+        borderRadius: '8px',
+        padding: '1rem',
+        marginBottom: '2rem',
+        textAlign: 'center'
+      }}>
+        <h3 style={{ margin: '0 0 0.5rem 0', color: '#856404' }}>⚠️ Connection Type: Local Browser Only</h3>
+        <p style={{ margin: '0', color: '#856404', fontSize: '0.9rem' }}>
+          Currently using cross-tab communication within your browser. 
+          <br />
+          <strong>Other players must open the link in the same browser</strong> to join.
+        </p>
       </div>
 
       {/* QR Code for joining (host only) */}
@@ -160,7 +207,7 @@ export const MultiplayerLobby: React.FC<MultiplayerLobbyProps> = ({
                 fontSize: '1.5rem',
                 marginRight: '1rem'
               }}>
-                {getConnectionStatusIcon(player.connectionState)}
+                {getConnectionStatusIcon(player.connectionState, player.connectionType || 'unknown')}
               </div>
               
               <div style={{ flex: 1 }}>
@@ -195,10 +242,10 @@ export const MultiplayerLobby: React.FC<MultiplayerLobbyProps> = ({
                   )}
                 </div>
                 <div style={{
-                  fontSize: '0.9rem',
-                  color: getConnectionStatusColor(player.connectionState)
+                  fontSize: '0.85rem',
+                  color: getConnectionStatusColor(player.connectionState, player.connectionType || 'unknown')
                 }}>
-                  {player.connectionState}
+                  {player.connectionState} • {getConnectionTypeLabel(player.connectionType || 'unknown')}
                 </div>
               </div>
               

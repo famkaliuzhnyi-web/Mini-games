@@ -29,10 +29,14 @@ export class WebRTCMultiplayerService implements MultiplayerService {
   private isHostRole: boolean = false;
   private localPlayerId: string = '';
   private communicationKey: string = 'multiplayer-session';
+  private connectionType: 'local-tab' | 'webrtc' = 'local-tab'; // Track actual connection type
 
   constructor() {
     this.initializeEventListeners();
     this.initializeCrossTabCommunication();
+    
+    // Log warning about current implementation
+    console.warn('⚠️ WebRTCMultiplayerService: Currently using localStorage for cross-tab communication only. Real WebRTC connections are not implemented yet.');
   }
 
   private initializeEventListeners(): void {
@@ -150,6 +154,7 @@ export class WebRTCMultiplayerService implements MultiplayerService {
       name: options.hostName,
       role: 'host',
       connectionState: 'connected',
+      connectionType: this.connectionType, // Use actual connection type
       isReady: false,
       joinedAt: new Date().toISOString()
     };
@@ -167,6 +172,8 @@ export class WebRTCMultiplayerService implements MultiplayerService {
     this.isHostRole = true;
 
     console.log(`Created multiplayer session: ${sessionId}${options.gameId ? ` for game: ${options.gameId}` : ' without game selection'}`);
+    console.log('🔗 Connection Type: Local Cross-Tab Only (localStorage events)');
+    console.log('⚠️ Note: This session only works between tabs in the same browser, not across different devices/browsers');
     this.emit('session-created', this.currentSession);
 
     return this.currentSession;
@@ -186,6 +193,7 @@ export class WebRTCMultiplayerService implements MultiplayerService {
       name: options.playerName,
       role: 'guest',
       connectionState: 'connecting',
+      connectionType: this.connectionType, // Use actual connection type
       isReady: false,
       joinedAt: new Date().toISOString()
     };
@@ -215,6 +223,8 @@ export class WebRTCMultiplayerService implements MultiplayerService {
     this.broadcastMessage(joinMessage);
 
     console.log(`Joined multiplayer session: ${options.sessionId}`);
+    console.log('🔗 Connection Type: Local Cross-Tab Only (localStorage events)');
+    console.log('⚠️ Note: This session only works between tabs in the same browser, not across different devices/browsers');
     this.emit('session-joined', this.currentSession);
 
     return this.currentSession;
@@ -314,7 +324,8 @@ export class WebRTCMultiplayerService implements MultiplayerService {
       console.error('Error broadcasting message:', error);
     }
     
-    console.log('Broadcasting message:', message);
+    console.log('📡 Broadcasting message via localStorage (cross-tab only):', message.type);
+    console.log('📊 Message details:', message);
 
     // Also process locally for same-tab scenarios with a small delay
     setTimeout(() => {
@@ -342,13 +353,14 @@ export class WebRTCMultiplayerService implements MultiplayerService {
       // Add new player to session
       const newPlayer = {
         ...player,
-        connectionState: 'connected' as const
+        connectionState: 'connected' as const,
+        connectionType: this.connectionType // Use actual connection type
       };
       this.currentSession.players.push(newPlayer);
     }
 
-    console.log(`Player joined: ${player.name} (${player.id})`);
-    this.emit('player-connected', { player: { ...player, connectionState: 'connected' } });
+    console.log(`Player joined: ${player.name} (${player.id}) via ${this.connectionType} connection`);
+    this.emit('player-connected', { player: { ...player, connectionState: 'connected', connectionType: this.connectionType } });
 
     // If we're the host, send session sync to the new player
     if (this.isHostRole) {
@@ -397,10 +409,11 @@ export class WebRTCMultiplayerService implements MultiplayerService {
   }
 
   private handleReceivedMessage(message: MultiplayerMessage): void {
-    console.log('Received multiplayer message:', message);
+    console.log('📨 Received message via localStorage:', message.type);
 
     // Only process messages for our current session
     if (!this.currentSession || message.sessionId !== this.currentSession.id) {
+      console.log('🚫 Message ignored - not for current session');
       return;
     }
 

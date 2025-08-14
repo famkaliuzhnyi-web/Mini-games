@@ -5,6 +5,9 @@
 // Player connection states
 export type ConnectionState = 'disconnected' | 'connecting' | 'connected' | 'reconnecting' | 'failed';
 
+// Connection types to distinguish between local and remote connections
+export type ConnectionType = 'local-tab' | 'webrtc' | 'unknown';
+
 // Player role in multiplayer session
 export type PlayerRole = 'host' | 'guest';
 
@@ -14,6 +17,7 @@ export interface MultiplayerPlayer {
   name: string;
   role: PlayerRole;
   connectionState: ConnectionState;
+  connectionType: ConnectionType; // Added to distinguish local vs WebRTC connections
   isReady: boolean;
   joinedAt: string;
 }
