@@ -102,7 +102,7 @@ export const SnakeGame: React.FC<SnakeGameProps> = ({ playerId }) => {
     },
     minSwipeDistance: 30,
     maxSwipeTime: 300,
-    preventDefault: true
+    preventDefault: false  // Don't prevent default to allow button clicks
   });
 
   if (isLoading) {
