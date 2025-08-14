@@ -38,12 +38,36 @@ export interface GameConfig {
   autoSaveIntervalMs: number; // Kept for compatibility, but now represents debounce time
 }
 
-// Game controller interface that all games should implement
+/**
+ * Game controller interface that all games must implement for platform integration
+ * Provides standardized methods for game initialization, state management, and save/load operations
+ */
 export interface GameController<T = Record<string, unknown>> {
+  /** Game configuration including metadata and save settings */
   config: GameConfig;
+  
+  /** 
+   * Creates the initial state when starting a new game
+   * @returns Fresh game state with default values
+   */
   getInitialState(): GameState<T>;
+  
+  /** 
+   * Validates that a game state is structurally correct and contains required fields
+   * @param state - The game state to validate
+   * @returns true if state is valid, false otherwise
+   */
   validateState(state: GameState<T>): boolean;
+  
+  /** 
+   * Optional callback invoked when a saved game is loaded
+   * @param state - The loaded game state
+   */
   onSaveLoad?(state: GameState<T>): void;
+  
+  /** 
+   * Optional callback invoked when a save is deleted/dropped
+   */
   onSaveDropped?(): void;
 }
 

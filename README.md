@@ -108,6 +108,12 @@ src/games/example-game/
 - **Testing**: (Testing framework to be added)
 - **Deployment**: GitHub Actions → GitHub Pages
 
+### Code Quality
+- **TypeScript**: Strict type checking for reliability
+- **ESLint**: Automated code quality and consistency checks
+- **JSDoc**: Comprehensive inline documentation
+- **Error Boundaries**: Graceful error handling and recovery
+
 ## 📝 Contributing
 
 We welcome contributions! Here are some ways you can help:

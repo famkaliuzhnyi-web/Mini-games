@@ -14,7 +14,7 @@ import {
   createEmptyBoard 
 } from './gameLogic';
 import { multiplayerService } from '../../services/MultiplayerService';
-import type { GameSession } from '../../types/multiplayer';
+import type { GameSession, GameMoveData, GameStateData } from '../../types/multiplayer';
 import { MultiplayerLobby } from '../../components/multiplayer';
 import './TicTacToeGame.css';
 
@@ -64,7 +64,7 @@ const useTicTacToeState = (playerId: string) => {
 
   // Initialize multiplayer event listeners
   useEffect(() => {
-    const handleGameMove = (moveData: any) => {
+    const handleGameMove = (moveData: GameMoveData) => {
       if (moveData.playerId === playerId) return; // Skip own moves
       
       console.log('Received multiplayer move:', moveData);
@@ -72,13 +72,14 @@ const useTicTacToeState = (playerId: string) => {
       // Apply the remote move to our game state
       if (moveData.move && typeof moveData.move === 'object') {
         const { row, col } = moveData.move;
-        if (isValidMove(gameState.data.board, row, col)) {
+        if (typeof row === 'number' && typeof col === 'number' && 
+            isValidMove(gameState.data.board, row, col)) {
           handleCellClickInternal(row, col, true); // Skip multiplayer broadcast
         }
       }
     };
 
-    const handleGameState = (stateData: any) => {
+    const handleGameState = (stateData: GameStateData) => {
       console.log('Received multiplayer game state:', stateData);
       // Sync with received game state
     };
@@ -90,7 +91,7 @@ const useTicTacToeState = (playerId: string) => {
       multiplayerService.off('game-move-received', handleGameMove);
       multiplayerService.off('game-state-updated', handleGameState);
     };
-  }, [gameState.data.board, playerId]);
+  }, [gameState.data.board, playerId]); // eslint-disable-line react-hooks/exhaustive-deps -- handleCellClickInternal is stable
 
   // Update multiplayer session state
   useEffect(() => {
