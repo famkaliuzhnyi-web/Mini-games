@@ -372,6 +372,8 @@ const usePingPongState = (playerId: string) => {
 // Game Field Component (the ping-pong game area)
 export const PingPongGameField: React.FC<SlotComponentProps> = ({ playerId }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [shouldRotate, setShouldRotate] = useState(false);
+  
   const {
     gameState,
     isLoading,
@@ -383,6 +385,25 @@ export const PingPongGameField: React.FC<SlotComponentProps> = ({ playerId }) =>
     resumeGame,
     setTouchState
   } = usePingPongState(playerId);
+
+  // Check orientation and decide on rotation
+  useEffect(() => {
+    const checkOrientation = () => {
+      const isPortrait = window.innerHeight > window.innerWidth;
+      const aspectRatio = window.innerWidth / window.innerHeight;
+      // Auto-rotate for portrait mode on smaller screens for better UX
+      setShouldRotate(isPortrait && aspectRatio < 0.75 && window.innerWidth < 768);
+    };
+
+    checkOrientation();
+    window.addEventListener('resize', checkOrientation);
+    window.addEventListener('orientationchange', checkOrientation);
+    
+    return () => {
+      window.removeEventListener('resize', checkOrientation);
+      window.removeEventListener('orientationchange', checkOrientation);
+    };
+  }, []);
 
   // Touch handlers
   const handleTouchStart = useCallback((event: React.TouchEvent) => {
@@ -441,7 +462,13 @@ export const PingPongGameField: React.FC<SlotComponentProps> = ({ playerId }) =>
   });
 
   if (isLoading) {
-    return <div style={{ color: `var(--color-text)` }}>Loading game...</div>;
+    return (
+      <div className="ping-pong-loading">
+        <div className="ping-pong-loading-spinner"></div>
+        <h2>Loading Game...</h2>
+        <p>Preparing the ping-pong experience...</p>
+      </div>
+    );
   }
 
   const getStatusMessage = (): string => {
@@ -462,58 +489,31 @@ export const PingPongGameField: React.FC<SlotComponentProps> = ({ playerId }) =>
   return (
     <div 
       ref={containerRef}
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        height: '100%',
-        padding: '1rem',
-        backgroundColor: `var(--color-gameBackground)`,
-        color: `var(--color-text)`
-      }}
+      className={`ping-pong-game-field ${shouldRotate ? 'ping-pong-game-field--auto-rotate' : ''}`}
     >
       {/* Game Status */}
-      <div style={{
-        fontSize: '1.2rem',
-        fontWeight: 'bold',
-        marginBottom: '1rem',
-        textAlign: 'center',
-        color: gameState.data.gameStatus === 'playing' ? `var(--color-text)` : 
-               gameState.data.gameStatus === 'paused' ? `var(--color-warning)` : `var(--color-success)`
-      }}>
+      <div className="ping-pong-status">
         {getStatusMessage()}
       </div>
 
       {/* Score Display */}
-      <div style={{
-        fontSize: '1.8rem',
-        fontWeight: 'bold',
-        marginBottom: '1rem',
-        fontFamily: `var(--font-mono)`,
-        textAlign: 'center'
-      }}>
-        Player {gameState.data.score.player} - {gameState.data.score.ai} AI
+      <div className="ping-pong-score">
+        <div className="ping-pong-score-player">
+          <div className="score-label">Player</div>
+          <div>{gameState.data.score.player}</div>
+        </div>
+        <div className="ping-pong-score-ai">
+          <div className="score-label">AI</div>
+          <div>{gameState.data.score.ai}</div>
+        </div>
       </div>
 
       {/* Game Canvas */}
-      <div style={{
-        display: 'inline-block',
-        border: `2px solid var(--color-border)`,
-        borderRadius: '8px',
-        backgroundColor: '#000',
-        position: 'relative',
-        maxWidth: '100%'
-      }}>
+      <div className="ping-pong-canvas-container">
         <svg
           width={gameDimensions.width}
           height={gameDimensions.height}
-          style={{
-            display: 'block',
-            maxWidth: '100%',
-            height: 'auto',
-            touchAction: 'none'
-          }}
+          className="ping-pong-canvas"
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
@@ -534,7 +534,7 @@ export const PingPongGameField: React.FC<SlotComponentProps> = ({ playerId }) =>
             y1={0}
             x2={gameDimensions.width / 2}
             y2={gameDimensions.height}
-            stroke="var(--color-textMuted)"
+            stroke="var(--color-textMuted, #9ca3af)"
             strokeWidth="2"
             strokeDasharray="10,10"
           />
@@ -546,8 +546,8 @@ export const PingPongGameField: React.FC<SlotComponentProps> = ({ playerId }) =>
               y={0}
               width={gameDimensions.width / 2}
               height={gameDimensions.height}
-              fill="rgba(100, 108, 255, 0.1)"
-              stroke="var(--color-accent)"
+              fill="rgba(59, 130, 246, 0.1)"
+              stroke="var(--color-accent, #3b82f6)"
               strokeWidth="2"
               strokeDasharray="5,5"
             />
@@ -559,7 +559,7 @@ export const PingPongGameField: React.FC<SlotComponentProps> = ({ playerId }) =>
             y={gameState.data.playerPaddle.y}
             width={gameState.data.playerPaddle.width}
             height={gameState.data.playerPaddle.height}
-            fill="var(--color-accent)"
+            fill="var(--color-accent, #3b82f6)"
             rx={2}
           />
           
@@ -569,7 +569,7 @@ export const PingPongGameField: React.FC<SlotComponentProps> = ({ playerId }) =>
             y={gameState.data.aiPaddle.y}
             width={gameState.data.aiPaddle.width}
             height={gameState.data.aiPaddle.height}
-            fill="var(--color-error)"
+            fill="var(--color-error, #dc2626)"
             rx={2}
           />
           
@@ -578,7 +578,7 @@ export const PingPongGameField: React.FC<SlotComponentProps> = ({ playerId }) =>
             cx={gameState.data.ball.x + gameState.data.ball.width / 2}
             cy={gameState.data.ball.y + gameState.data.ball.height / 2}
             r={gameState.data.ball.width / 2}
-            fill="var(--color-text)"
+            fill="var(--color-text, #ffffff)"
           />
         </svg>
         
@@ -590,7 +590,7 @@ export const PingPongGameField: React.FC<SlotComponentProps> = ({ playerId }) =>
             left: '8px',
             right: '8px',
             fontSize: '0.8rem',
-            color: `var(--color-textMuted)`,
+            color: 'var(--color-textMuted, #9ca3af)',
             textAlign: 'center',
             opacity: 0.7,
             pointerEvents: 'none'
@@ -599,6 +599,25 @@ export const PingPongGameField: React.FC<SlotComponentProps> = ({ playerId }) =>
           </div>
         )}
       </div>
+
+      {/* Rotation hint for portrait mode */}
+      {shouldRotate && (
+        <div style={{
+          position: 'absolute',
+          bottom: '1rem',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          padding: '0.5rem 1rem',
+          background: 'rgba(0, 0, 0, 0.8)',
+          color: 'white',
+          borderRadius: '0.5rem',
+          fontSize: '0.8rem',
+          textAlign: 'center',
+          zIndex: 100
+        }}>
+          🔄 Game rotated for better portrait experience
+        </div>
+      )}
     </div>
   );
 };
@@ -612,32 +631,51 @@ export const PingPongStats: React.FC<SlotComponentProps> = ({ playerId }) => {
   } = usePingPongState(playerId);
 
   if (isLoading) {
-    return <div style={{ color: `var(--color-text)` }}>Loading stats...</div>;
+    return (
+      <div className="ping-pong-loading">
+        <div className="ping-pong-loading-spinner"></div>
+        <div>Loading stats...</div>
+      </div>
+    );
   }
 
+  const winRate = gameState.data.gamesPlayed > 0 
+    ? Math.round((gameState.data.gamesWon / gameState.data.gamesPlayed) * 100) 
+    : 0;
+
   return (
-    <div style={{
-      padding: '0.5rem',
-      backgroundColor: `var(--color-surface)`,
-      borderRadius: '8px',
-      color: `var(--color-text)`,
-      fontSize: '0.9rem'
-    }}>
-      <div style={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Stats</div>
-      <div style={{ fontSize: '0.8rem', color: `var(--color-textSecondary)`, display: 'flex', flexDirection: 'column', gap: '0.1rem' }}>
-        <div>Score: {gameState.data.score.player}-{gameState.data.score.ai}</div>
-        <div>Games: {gameState.data.gamesPlayed}</div>
-        <div>Won: {gameState.data.gamesWon} | Lost: {gameState.data.gamesLost}</div>
-        <div>Win Rate: {gameState.data.gamesPlayed > 0 ? Math.round((gameState.data.gamesWon / gameState.data.gamesPlayed) * 100) : 0}%</div>
+    <div className="ping-pong-game-stats">
+      <div className="ping-pong-stat">
+        <div className="ping-pong-stat-label">Current</div>
+        <div className="ping-pong-stat-value">
+          {gameState.data.score.player}-{gameState.data.score.ai}
+        </div>
       </div>
+      
+      <div className="ping-pong-stat">
+        <div className="ping-pong-stat-label">Games</div>
+        <div className="ping-pong-stat-value">{gameState.data.gamesPlayed}</div>
+      </div>
+      
+      <div className="ping-pong-stat">
+        <div className="ping-pong-stat-label">Won</div>
+        <div className="ping-pong-stat-value">{gameState.data.gamesWon}</div>
+      </div>
+      
+      <div className="ping-pong-stat">
+        <div className="ping-pong-stat-label">Win Rate</div>
+        <div className="ping-pong-stat-value">{winRate}%</div>
+      </div>
+      
       {lastSaveEvent && lastSaveEvent.success && (
-        <div style={{ 
-          marginTop: '0.25rem',
-          fontSize: '0.7rem',
-          color: `var(--color-success)`,
-          textAlign: 'center'
-        }}>
-          ✅ Saved
+        <div className="ping-pong-stat">
+          <div className="ping-pong-stat-label">Status</div>
+          <div className="ping-pong-stat-value" style={{ 
+            color: 'var(--color-success, #059669)',
+            fontSize: '1rem' 
+          }}>
+            ✅ Saved
+          </div>
         </div>
       )}
     </div>
@@ -696,186 +734,160 @@ export const PingPongControls: React.FC<SlotComponentProps> = ({ playerId }) => 
   };
 
   if (isLoading) {
-    return <div style={{ color: `var(--color-text)` }}>Loading controls...</div>;
+    return (
+      <div className="ping-pong-loading">
+        <div className="ping-pong-loading-spinner"></div>
+        <div>Loading controls...</div>
+      </div>
+    );
   }
 
   return (
     <div style={{
       display: 'flex',
       flexDirection: 'column',
-      gap: '0.5rem',
-      padding: '0.5rem',
-      backgroundColor: `var(--color-surface)`,
-      borderRadius: '8px'
+      gap: '0.75rem',
+      padding: '1rem',
+      backgroundColor: 'var(--color-surface, var(--pp-surface))',
+      borderRadius: '0.5rem',
+      border: '1px solid var(--color-border, var(--pp-border))',
+      boxShadow: 'var(--pp-shadow, 0 1px 3px rgba(0, 0, 0, 0.1))'
     }}>
       {/* Game Controls */}
       <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
         <button 
           onClick={startNewGame}
-          style={{ 
-            padding: '0.5rem 1rem',
-            backgroundColor: `var(--color-accent)`,
-            color: 'white',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontSize: '0.9rem',
-            fontWeight: 'bold',
-            minHeight: '40px',
-            touchAction: 'manipulation'
-          }}
+          className="ping-pong-btn ping-pong-btn--primary"
         >
-          New Game
+          🎮 New Game
         </button>
 
         {gameState.data.gameStatus === 'playing' && (
           <button 
             onClick={pauseGame}
-            style={{ 
-              padding: '0.5rem 1rem',
-              backgroundColor: `var(--color-warning)`,
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              fontSize: '0.9rem',
-              minHeight: '40px',
-              touchAction: 'manipulation'
-            }}
+            className="ping-pong-btn ping-pong-btn--warning"
           >
-            Pause
+            ⏸️ Pause
           </button>
         )}
         
         {gameState.data.gameStatus === 'paused' && (
           <button 
             onClick={resumeGame}
-            style={{ 
-              padding: '0.5rem 1rem',
-              backgroundColor: `var(--color-success)`,
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              fontSize: '0.9rem',
-              minHeight: '40px',
-              touchAction: 'manipulation'
-            }}
+            className="ping-pong-btn ping-pong-btn--success"
           >
-            Resume
+            ▶️ Resume
           </button>
         )}
 
         <button 
           onClick={() => setShowSaveMenu(!showSaveMenu)}
-          style={{ 
-            padding: '0.5rem 1rem',
-            backgroundColor: `var(--color-secondary)`,
-            color: `var(--color-text)`,
-            border: `1px solid var(--color-border)`,
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontSize: '0.9rem',
-            minHeight: '40px',
-            touchAction: 'manipulation'
-          }}
+          className="ping-pong-btn ping-pong-btn--secondary"
         >
-          Save/Load
+          💾 Save/Load
         </button>
       </div>
 
       {/* Controls Instructions */}
-      <div style={{
-        fontSize: '0.8rem',
-        color: `var(--color-textSecondary)`,
-        textAlign: 'center'
-      }}>
+      <div className="ping-pong-controls-info">
+        <h3>🎯 Game Controls</h3>
         {isMobile ? (
           <div>
-            <div>📱 Touch & drag to move paddle</div>
-            <div>Swipe ↓ pause • ↑ resume • → new game</div>
+            <div className="ping-pong-control-item">
+              <span className="ping-pong-control-icon">📱</span>
+              <span>Touch & drag to move paddle</span>
+            </div>
+            <div className="ping-pong-control-item">
+              <span className="ping-pong-control-icon">👆</span>
+              <span>Swipe ↓ pause • ↑ resume • → new game</span>
+            </div>
           </div>
         ) : (
-          <div>🎮 W/S or ↑/↓ to move • Space to pause/resume</div>
+          <div>
+            <div className="ping-pong-control-item">
+              <span className="ping-pong-control-icon">⌨️</span>
+              <span>W/S or ↑/↓ arrows to move paddle</span>
+            </div>
+            <div className="ping-pong-control-item">
+              <span className="ping-pong-control-icon">⎵</span>
+              <span>Space bar to pause/resume</span>
+            </div>
+          </div>
         )}
       </div>
 
       {/* Save Menu */}
       {showSaveMenu && (
         <div style={{
-          padding: '0.5rem',
-          backgroundColor: `var(--color-gameBackground)`,
-          borderRadius: '6px',
-          border: `1px solid var(--color-border)`
+          padding: '0.75rem',
+          backgroundColor: 'var(--color-gameBackground, var(--pp-surface-dark))',
+          borderRadius: '0.5rem',
+          border: '1px solid var(--color-border, var(--pp-border-dark))',
+          boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 0.1)'
         }}>
-          <div style={{ marginBottom: '0.5rem' }}>
+          <div style={{ marginBottom: '0.75rem' }}>
             <label style={{ 
               display: 'flex', 
               alignItems: 'center', 
               gap: '0.5rem',
-              fontSize: '0.8rem',
-              color: `var(--color-textSecondary)`
+              fontSize: '0.9rem',
+              color: 'var(--color-textSecondary, var(--pp-text-secondary))',
+              cursor: 'pointer'
             }}>
               <input
                 type="checkbox"
                 checked={autoSaveEnabled}
                 onChange={toggleAutoSave}
-                style={{ accentColor: `var(--color-accent)` }}
+                style={{ 
+                  accentColor: 'var(--color-accent, var(--pp-primary))',
+                  width: '1rem',
+                  height: '1rem'
+                }}
               />
-              Auto-save
+              <span>🔄 Auto-save enabled</span>
             </label>
           </div>
           
-          <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
             <button 
               onClick={handleManualSave}
-              style={{ 
-                padding: '0.25rem 0.5rem',
-                backgroundColor: `var(--color-accent)`,
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontSize: '0.8rem',
-                minHeight: '32px'
-              }}
+              className="ping-pong-btn ping-pong-btn--primary"
+              style={{ fontSize: '0.8rem', padding: '0.5rem 0.75rem' }}
             >
-              Save
+              💾 Save
             </button>
             
             <button 
               onClick={handleManualLoad}
               disabled={!hasSave}
-              style={{ 
-                padding: '0.25rem 0.5rem',
-                backgroundColor: hasSave ? `var(--color-success)` : `var(--color-surface)`,
-                color: hasSave ? 'white' : `var(--color-textMuted)`,
-                border: 'none',
-                borderRadius: '4px',
-                cursor: hasSave ? 'pointer' : 'not-allowed',
-                fontSize: '0.8rem',
-                minHeight: '32px'
-              }}
+              className={`ping-pong-btn ${hasSave ? 'ping-pong-btn--success' : 'ping-pong-btn--secondary'}`}
+              style={{ fontSize: '0.8rem', padding: '0.5rem 0.75rem' }}
             >
-              Load
+              📂 Load
             </button>
             
             <button 
               onClick={handleDropSave}
               disabled={!hasSave}
+              className="ping-pong-btn"
               style={{ 
-                padding: '0.25rem 0.5rem',
-                backgroundColor: hasSave ? `var(--color-error)` : `var(--color-surface)`,
-                color: hasSave ? 'white' : `var(--color-textMuted)`,
-                border: 'none',
-                borderRadius: '4px',
-                cursor: hasSave ? 'pointer' : 'not-allowed',
-                fontSize: '0.8rem',
-                minHeight: '32px'
+                fontSize: '0.8rem', 
+                padding: '0.5rem 0.75rem',
+                backgroundColor: hasSave ? 'var(--color-error, #dc2626)' : 'var(--color-surface)',
+                color: hasSave ? 'white' : 'var(--color-textMuted)'
               }}
             >
-              Delete
+              🗑️ Delete
             </button>
+          </div>
+
+          <div style={{ 
+            marginTop: '0.5rem', 
+            fontSize: '0.8rem', 
+            color: 'var(--color-textSecondary, var(--pp-text-secondary))',
+            textAlign: 'center'
+          }}>
+            {hasSave ? '✅ Save data available' : '❌ No saved game'}
           </div>
         </div>
       )}
