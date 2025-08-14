@@ -1,6 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import './GamesList.css';
 import packageJson from '../../../package.json';
+import { useWindowResize } from '../../hooks/useWindowResize';
+
+export type LayoutMode = 'vertical' | 'horizontal';
 
 export interface GameInfo {
   id: string;
@@ -53,8 +56,16 @@ const AVAILABLE_GAMES: GameInfo[] = [
 ];
 
 export const GamesList: React.FC<GamesListProps> = ({ onGameSelect }) => {
+  const { width } = useWindowResize();
+  
+  // Determine layout mode based on window width
+  // Horizontal for wide screens (desktop/landscape), vertical for narrow screens (mobile/portrait)
+  const layoutMode: LayoutMode = useMemo(() => {
+    return width >= 1024 ? 'horizontal' : 'vertical';
+  }, [width]);
+
   return (
-    <div className="games-list">
+    <div className={`games-list games-list--${layoutMode}`}>
       <div className="games-list-header">
         <h1>🎮 Choose Your Game</h1>
         <p>Select a game to start playing!</p>
