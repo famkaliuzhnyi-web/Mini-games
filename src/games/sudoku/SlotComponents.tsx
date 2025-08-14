@@ -4,6 +4,7 @@
 import React, { useCallback, useState, useMemo, useEffect } from 'react';
 import { useGameSave } from '../../hooks/useGameSave';
 import { useTheme } from '../../hooks/useTheme';
+import { useCoinService } from '../../hooks/useCoinService';
 import type { GameController, GameState, GameConfig } from '../../types/game';
 import type { SudokuGameData, Difficulty, CellValue, SudokuGrid } from './types';
 import {
@@ -99,6 +100,7 @@ interface SlotComponentProps {
 const useSudokuState = (playerId: string) => {
   const controller = useMemo(() => new SudokuGameController(), []);
   const { currentTheme } = useTheme();
+  const { earnCoins, awardGameCompletion } = useCoinService();
   
   const [solutionGrid, setSolutionGrid] = useState<SudokuGrid>(createEmptyGrid());
   const [selectedCell, setSelectedCell] = useState<{ row: number; col: number } | null>(null);
@@ -191,8 +193,12 @@ const useSudokuState = (playerId: string) => {
     newGrid[row][col] = number;
 
     let newMistakes = gameState.data.mistakes;
+    
     if (number !== 0 && solutionGrid[row][col] !== number) {
       newMistakes++;
+    } else if (number !== 0 && solutionGrid[row][col] === number) {
+      // Award coins for correct number placement
+      earnCoins(2, 'game_play', 'sudoku', 'Sudoku: correct number placement');
     }
 
     const newUIGrid = updateValidation(gameState.data.uiGrid, newGrid);
@@ -205,6 +211,10 @@ const useSudokuState = (playerId: string) => {
       const hintPenalty = gameState.data.hintsUsed * 50;
       const mistakePenalty = newMistakes * 25;
       score = Math.max(0, difficultyMultiplier + timeBonus - hintPenalty - mistakePenalty);
+      
+      // Award coins for game completion based on difficulty and performance
+      const baseCoinReward = { easy: 30, medium: 50, hard: 80, expert: 120 }[gameState.data.difficulty];
+      awardGameCompletion('sudoku', baseCoinReward, score);
     }
 
     setGameState({
@@ -241,7 +251,7 @@ const useSudokuState = (playerId: string) => {
       });
       await triggerAutoSave();
     }
-  }, [selectedCell, gameState, solutionGrid, setGameState, triggerAutoSave]);
+  }, [selectedCell, gameState, solutionGrid, setGameState, triggerAutoSave, earnCoins, awardGameCompletion]);
 
   const handleHint = useCallback(async () => {
     if (gameState.data.hintsUsed >= gameState.data.maxHints || gameState.data.isComplete) return;

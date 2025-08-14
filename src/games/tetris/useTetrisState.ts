@@ -3,6 +3,7 @@
  */
 import { useCallback, useEffect, useRef, useMemo } from 'react';
 import { useGameSave } from '../../hooks/useGameSave';
+import { useCoinService } from '../../hooks/useCoinService';
 import type { GameController, GameState, GameConfig } from '../../types/game';
 import type { TetrisGameData, TetrisAction, PieceType } from './types';
 import {
@@ -120,6 +121,16 @@ export const nextPieceEmojis: Record<PieceType, string> = {
 export const useTetrisState = (playerId: string) => {
   const controller = useMemo(() => new TetrisGameController(), []);
   const gameLoopRef = useRef<number | null>(null);
+  const { earnCoins, awardGameCompletion } = useCoinService();
+
+  // Helper function to calculate coin rewards for line clears
+  const getLineClearCoins = useCallback((linesCleared: number): number => {
+    if (linesCleared === 0) return 0;
+    
+    // Coin rewards: 1 line = 5 coins, 2 lines = 15 coins, 3 lines = 30 coins, 4 lines = 50 coins
+    const coinRewards = [0, 5, 15, 30, 50];
+    return coinRewards[linesCleared] || 50;
+  }, []);
   
   const {
     gameState,
@@ -168,12 +179,26 @@ export const useTetrisState = (playerId: string) => {
           data.grid = clearedGrid;
           data.stats = updateStats(data.stats, linesCleared, data.gameStartTime);
           
+          // Award coins for line clears
+          if (linesCleared > 0) {
+            const coins = getLineClearCoins(linesCleared);
+            earnCoins(
+              coins,
+              'game_play',
+              'tetris',
+              `Tetris: cleared ${linesCleared} line${linesCleared > 1 ? 's' : ''}`
+            );
+          }
+          
           data.activePiece = createActivePiece(data.nextPieces[0]);
           data.nextPieces = [...data.nextPieces.slice(1), getRandomPieceType()];
           
           if (isGameOver(data.grid, data.activePiece)) {
             data.gameOver = true;
             newState.isComplete = true;
+            
+            // Award coins for game completion based on final score
+            awardGameCompletion('tetris', 25, data.stats.score);
           }
           
           data.dropSpeed = calculateDropSpeed(data.stats.level);
@@ -289,12 +314,26 @@ export const useTetrisState = (playerId: string) => {
             data.grid = clearedGrid;
             data.stats = updateStats(data.stats, linesCleared, data.gameStartTime);
             
+            // Award coins for line clears
+            if (linesCleared > 0) {
+              const coins = getLineClearCoins(linesCleared);
+              earnCoins(
+                coins,
+                'game_play',
+                'tetris',
+                `Tetris: cleared ${linesCleared} line${linesCleared > 1 ? 's' : ''}`
+              );
+            }
+            
             data.activePiece = createActivePiece(data.nextPieces[0]);
             data.nextPieces = [...data.nextPieces.slice(1), getRandomPieceType()];
             
             if (isGameOver(data.grid, data.activePiece)) {
               data.gameOver = true;
               newState.isComplete = true;
+              
+              // Award coins for game completion based on final score
+              awardGameCompletion('tetris', 25, data.stats.score);
             }
             
             data.dropSpeed = calculateDropSpeed(data.stats.level);
@@ -317,7 +356,7 @@ export const useTetrisState = (playerId: string) => {
     newState.score = data.stats.score;
     newState.lastModified = new Date().toISOString();
     setGameState(newState);
-  }, [gameState, setGameState, controller]);
+  }, [gameState, setGameState, controller, getLineClearCoins, earnCoins, awardGameCompletion]);
 
   // Control handlers
   const handlePause = useCallback(() => {
