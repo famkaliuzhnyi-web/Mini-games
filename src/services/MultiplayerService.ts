@@ -12,14 +12,18 @@ import type {
   MultiplayerMessage,
   MultiplayerEvent,
   MultiplayerEventCallback,
-  MessageType
+  MessageType,
+  ConnectionState
 } from '../types/multiplayer';
 
-// Default STUN servers for WebRTC (commented out for now as not used)
-// const DEFAULT_ICE_SERVERS: RTCIceServer[] = [
-//   { urls: 'stun:stun.l.google.com:19302' },
-//   { urls: 'stun:stun1.l.google.com:19302' }
-// ];
+// Default STUN servers for WebRTC NAT traversal
+const DEFAULT_ICE_SERVERS: RTCIceServer[] = [
+  { urls: 'stun:stun.l.google.com:19302' },
+  { urls: 'stun:stun1.l.google.com:19302' },
+  { urls: 'stun:stun2.l.google.com:19302' },
+  { urls: 'stun:stun3.l.google.com:19302' },
+  { urls: 'stun:stun4.l.google.com:19302' }
+];
 
 export class WebRTCMultiplayerService implements MultiplayerService {
   private currentSession: GameSession | null = null;
@@ -29,14 +33,23 @@ export class WebRTCMultiplayerService implements MultiplayerService {
   private isHostRole: boolean = false;
   private localPlayerId: string = '';
   private communicationKey: string = 'multiplayer-session';
-  private connectionType: 'local-tab' | 'webrtc' = 'local-tab'; // Track actual connection type
+  private connectionType: 'local-tab' | 'webrtc' = 'webrtc'; // Now defaulting to WebRTC
+  private signalingKey: string = 'webrtc-signaling';
+  private useWebRTC: boolean = true; // Flag to control WebRTC usage
 
   constructor() {
     this.initializeEventListeners();
-    this.initializeCrossTabCommunication();
     
-    // Log warning about current implementation
-    console.warn('⚠️ WebRTCMultiplayerService: Currently using localStorage for cross-tab communication only. Real WebRTC connections are not implemented yet.');
+    // Check if WebRTC is supported
+    if (!this.checkWebRTCSupport()) {
+      console.warn('⚠️ WebRTC not supported, falling back to localStorage communication');
+      this.useWebRTC = false;
+      this.connectionType = 'local-tab';
+      this.initializeCrossTabCommunication();
+    } else {
+      console.log('✅ WebRTC supported, initializing peer-to-peer connections');
+      this.initializeWebRTCSignaling();
+    }
   }
 
   private initializeEventListeners(): void {
@@ -52,8 +65,45 @@ export class WebRTCMultiplayerService implements MultiplayerService {
     });
   }
 
+  private checkWebRTCSupport(): boolean {
+    return !!(window.RTCPeerConnection && window.RTCSessionDescription && window.RTCIceCandidate);
+  }
+
+  private initializeWebRTCSignaling(): void {
+    // Listen for WebRTC signaling messages via localStorage
+    window.addEventListener('storage', (event) => {
+      if (event.key === this.signalingKey && event.newValue) {
+        try {
+          const signalingMessage = JSON.parse(event.newValue);
+          // Only process messages not sent by ourselves
+          if (signalingMessage.from !== this.localPlayerId) {
+            this.handleSignalingMessage(signalingMessage);
+          }
+        } catch (error) {
+          console.error('Error parsing WebRTC signaling message:', error);
+        }
+      }
+    });
+
+    // Also listen for regular multiplayer messages via WebRTC or localStorage fallback
+    window.addEventListener('storage', (event) => {
+      if (event.key === this.communicationKey && event.newValue) {
+        try {
+          const message: MultiplayerMessage = JSON.parse(event.newValue);
+          // Only process messages not sent by ourselves
+          if (message.playerId !== this.localPlayerId) {
+            this.handleReceivedMessage(message);
+          }
+        } catch (error) {
+          console.error('Error parsing multiplayer message:', error);
+        }
+      }
+    });
+  }
+
   private initializeCrossTabCommunication(): void {
     // Listen for storage events to simulate WebRTC communication across tabs/windows
+    // This is only used as fallback when WebRTC is not supported
     window.addEventListener('storage', (event) => {
       if (event.key === this.communicationKey && event.newValue) {
         try {
@@ -67,6 +117,218 @@ export class WebRTCMultiplayerService implements MultiplayerService {
         }
       }
     });
+  }
+
+  private sendSignalingMessage(to: string, type: string, data: unknown): void {
+    const signalingMessage = {
+      from: this.localPlayerId,
+      to,
+      type,
+      data,
+      timestamp: new Date().toISOString()
+    };
+
+    try {
+      localStorage.setItem(this.signalingKey, JSON.stringify(signalingMessage));
+      localStorage.removeItem(this.signalingKey);
+      console.log(`📡 Sent ${type} signaling message to ${to}`);
+    } catch (error) {
+      console.error('Error sending signaling message:', error);
+    }
+  }
+
+  private handleSignalingMessage(message: { from: string; to: string; type: string; data: unknown }): void {
+    console.log(`📨 Received ${message.type} signaling message from ${message.from}`);
+    
+    // Only process messages intended for us
+    if (message.to !== this.localPlayerId && message.to !== 'all') {
+      return;
+    }
+
+    switch (message.type) {
+      case 'offer':
+        this.handleWebRTCOffer(message.from, message.data as RTCSessionDescriptionInit);
+        break;
+      case 'answer':
+        this.handleWebRTCAnswer(message.from, message.data as RTCSessionDescriptionInit);
+        break;
+      case 'ice-candidate':
+        this.handleICECandidate(message.from, message.data as RTCIceCandidateInit);
+        break;
+      case 'peer-discovery':
+        this.handlePeerDiscovery(message.from, message.data);
+        break;
+    }
+  }
+
+  private async createPeerConnection(peerId: string): Promise<RTCPeerConnection> {
+    const peerConnection = new RTCPeerConnection({
+      iceServers: DEFAULT_ICE_SERVERS
+    });
+
+    // Handle ICE candidates
+    peerConnection.onicecandidate = (event) => {
+      if (event.candidate) {
+        this.sendSignalingMessage(peerId, 'ice-candidate', event.candidate);
+      }
+    };
+
+    // Handle connection state changes
+    peerConnection.onconnectionstatechange = () => {
+      console.log(`🔗 Connection state with ${peerId}: ${peerConnection.connectionState}`);
+      
+      if (peerConnection.connectionState === 'connected') {
+        this.updatePlayerConnectionState(peerId, 'connected');
+      } else if (peerConnection.connectionState === 'failed' || peerConnection.connectionState === 'disconnected') {
+        this.updatePlayerConnectionState(peerId, 'disconnected');
+        this.handlePeerDisconnection(peerId);
+      }
+    };
+
+    // Handle data channel from remote peer
+    peerConnection.ondatachannel = (event) => {
+      const dataChannel = event.channel;
+      this.setupDataChannel(dataChannel, peerId);
+    };
+
+    this.peerConnections.set(peerId, peerConnection);
+    return peerConnection;
+  }
+
+  private setupDataChannel(dataChannel: RTCDataChannel, peerId: string): void {
+    dataChannel.onopen = () => {
+      console.log(`✅ Data channel opened with ${peerId}`);
+      this.updatePlayerConnectionState(peerId, 'connected');
+    };
+
+    dataChannel.onclose = () => {
+      console.log(`❌ Data channel closed with ${peerId}`);
+      this.updatePlayerConnectionState(peerId, 'disconnected');
+    };
+
+    dataChannel.onerror = (error) => {
+      console.error(`💥 Data channel error with ${peerId}:`, error);
+      this.updatePlayerConnectionState(peerId, 'failed');
+    };
+
+    dataChannel.onmessage = (event) => {
+      try {
+        const message: MultiplayerMessage = JSON.parse(event.data);
+        this.handleReceivedMessage(message);
+      } catch (error) {
+        console.error('Error parsing WebRTC message:', error);
+      }
+    };
+
+    this.dataChannels.set(peerId, dataChannel);
+  }
+
+  private async handleWebRTCOffer(fromPeerId: string, offer: RTCSessionDescriptionInit): Promise<void> {
+    try {
+      const peerConnection = await this.createPeerConnection(fromPeerId);
+      
+      await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+      const answer = await peerConnection.createAnswer();
+      await peerConnection.setLocalDescription(answer);
+      
+      this.sendSignalingMessage(fromPeerId, 'answer', answer);
+      
+      console.log(`📤 Sent WebRTC answer to ${fromPeerId}`);
+    } catch (error) {
+      console.error('Error handling WebRTC offer:', error);
+      this.emit('connection-error', { error: 'Failed to handle WebRTC offer' });
+    }
+  }
+
+  private async handleWebRTCAnswer(fromPeerId: string, answer: RTCSessionDescriptionInit): Promise<void> {
+    try {
+      const peerConnection = this.peerConnections.get(fromPeerId);
+      if (peerConnection) {
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+        console.log(`📥 Processed WebRTC answer from ${fromPeerId}`);
+      }
+    } catch (error) {
+      console.error('Error handling WebRTC answer:', error);
+      this.emit('connection-error', { error: 'Failed to handle WebRTC answer' });
+    }
+  }
+
+  private async handleICECandidate(fromPeerId: string, candidate: RTCIceCandidateInit): Promise<void> {
+    try {
+      const peerConnection = this.peerConnections.get(fromPeerId);
+      if (peerConnection) {
+        await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+        console.log(`🧊 Added ICE candidate from ${fromPeerId}`);
+      }
+    } catch (error) {
+      console.error('Error handling ICE candidate:', error);
+    }
+  }
+
+  private handlePeerDiscovery(fromPeerId: string, _data: unknown): void {
+    console.log(`👋 Peer discovery from ${fromPeerId}`);
+    
+    // If we're the host, respond to peer discovery
+    if (this.isHostRole && fromPeerId !== this.localPlayerId) {
+      this.initiatePeerConnection(fromPeerId);
+    }
+  }
+
+  private async initiatePeerConnection(peerId: string): Promise<void> {
+    try {
+      const peerConnection = await this.createPeerConnection(peerId);
+      
+      // Create data channel for communication
+      const dataChannel = peerConnection.createDataChannel('gameData', {
+        ordered: true,
+        maxRetransmits: 3
+      });
+      
+      this.setupDataChannel(dataChannel, peerId);
+      
+      // Create and send offer
+      const offer = await peerConnection.createOffer();
+      await peerConnection.setLocalDescription(offer);
+      
+      this.sendSignalingMessage(peerId, 'offer', offer);
+      
+      console.log(`📤 Sent WebRTC offer to ${peerId}`);
+    } catch (error) {
+      console.error('Error initiating peer connection:', error);
+      this.emit('connection-error', { error: 'Failed to initiate peer connection' });
+    }
+  }
+
+  private updatePlayerConnectionState(peerId: string, state: ConnectionState): void {
+    if (!this.currentSession) return;
+
+    const playerIndex = this.currentSession.players.findIndex(p => p.id === peerId);
+    if (playerIndex >= 0) {
+      this.currentSession.players[playerIndex].connectionState = state;
+      this.currentSession.players[playerIndex].connectionType = this.connectionType;
+    }
+  }
+
+  private handlePeerDisconnection(peerId: string): void {
+    // Clean up peer connection
+    const peerConnection = this.peerConnections.get(peerId);
+    if (peerConnection) {
+      peerConnection.close();
+      this.peerConnections.delete(peerId);
+    }
+
+    // Clean up data channel
+    const dataChannel = this.dataChannels.get(peerId);
+    if (dataChannel) {
+      dataChannel.close();
+      this.dataChannels.delete(peerId);
+    }
+
+    // Update player state and emit disconnect event
+    this.updatePlayerConnectionState(peerId, 'disconnected');
+    this.emit('player-disconnected', { playerId: peerId });
+
+    console.log(`🔌 Peer ${peerId} disconnected and cleaned up`);
   }
 
   private generateId(): string {
@@ -154,7 +416,7 @@ export class WebRTCMultiplayerService implements MultiplayerService {
       name: options.hostName,
       role: 'host',
       connectionState: 'connected',
-      connectionType: this.connectionType, // Use actual connection type
+      connectionType: this.connectionType,
       isReady: false,
       joinedAt: new Date().toISOString()
     };
@@ -171,9 +433,16 @@ export class WebRTCMultiplayerService implements MultiplayerService {
 
     this.isHostRole = true;
 
-    console.log(`Created multiplayer session: ${sessionId}${options.gameId ? ` for game: ${options.gameId}` : ' without game selection'}`);
-    console.log('🔗 Connection Type: Local Cross-Tab Only (localStorage events)');
-    console.log('⚠️ Note: This session only works between tabs in the same browser, not across different devices/browsers');
+    if (this.useWebRTC) {
+      console.log(`Created WebRTC multiplayer session: ${sessionId}${options.gameId ? ` for game: ${options.gameId}` : ' without game selection'}`);
+      console.log('🔗 Connection Type: WebRTC Peer-to-Peer');
+      console.log('🌍 Note: This session works across different devices and browsers');
+    } else {
+      console.log(`Created fallback multiplayer session: ${sessionId}${options.gameId ? ` for game: ${options.gameId}` : ' without game selection'}`);
+      console.log('🔗 Connection Type: Local Cross-Tab Only (localStorage events)');
+      console.log('⚠️ Note: This session only works between tabs in the same browser');
+    }
+    
     this.emit('session-created', this.currentSession);
 
     return this.currentSession;
@@ -193,7 +462,7 @@ export class WebRTCMultiplayerService implements MultiplayerService {
       name: options.playerName,
       role: 'guest',
       connectionState: 'connecting',
-      connectionType: this.connectionType, // Use actual connection type
+      connectionType: this.connectionType,
       isReady: false,
       joinedAt: new Date().toISOString()
     };
@@ -209,6 +478,15 @@ export class WebRTCMultiplayerService implements MultiplayerService {
       createdAt: new Date().toISOString()
     };
 
+    // Send peer discovery if using WebRTC
+    if (this.useWebRTC) {
+      this.sendSignalingMessage('all', 'peer-discovery', {
+        sessionId: options.sessionId,
+        playerId: this.localPlayerId,
+        playerName: options.playerName
+      });
+    }
+
     // Send player-join message to notify host
     const joinMessage: MultiplayerMessage = {
       type: 'player-join',
@@ -222,9 +500,16 @@ export class WebRTCMultiplayerService implements MultiplayerService {
 
     this.broadcastMessage(joinMessage);
 
-    console.log(`Joined multiplayer session: ${options.sessionId}`);
-    console.log('🔗 Connection Type: Local Cross-Tab Only (localStorage events)');
-    console.log('⚠️ Note: This session only works between tabs in the same browser, not across different devices/browsers');
+    if (this.useWebRTC) {
+      console.log(`Joined WebRTC multiplayer session: ${options.sessionId}`);
+      console.log('🔗 Connection Type: WebRTC Peer-to-Peer');
+      console.log('🌍 Note: This session works across different devices and browsers');
+    } else {
+      console.log(`Joined fallback multiplayer session: ${options.sessionId}`);
+      console.log('🔗 Connection Type: Local Cross-Tab Only (localStorage events)');
+      console.log('⚠️ Note: This session only works between tabs in the same browser');
+    }
+    
     this.emit('session-joined', this.currentSession);
 
     return this.currentSession;
@@ -235,10 +520,16 @@ export class WebRTCMultiplayerService implements MultiplayerService {
       return;
     }
 
-    // Close all peer connections
-    this.peerConnections.forEach(pc => pc.close());
-    this.peerConnections.clear();
+    // Close all WebRTC connections
+    this.dataChannels.forEach((dataChannel) => {
+      dataChannel.close();
+    });
     this.dataChannels.clear();
+
+    this.peerConnections.forEach((peerConnection) => {
+      peerConnection.close();
+    });
+    this.peerConnections.clear();
 
     const sessionId = this.currentSession.id;
     this.currentSession = null;
@@ -246,6 +537,7 @@ export class WebRTCMultiplayerService implements MultiplayerService {
     this.localPlayerId = '';
 
     console.log(`Left multiplayer session: ${sessionId}`);
+    console.log('🔌 All WebRTC connections cleaned up');
   }
 
   // Game Communication
@@ -315,22 +607,49 @@ export class WebRTCMultiplayerService implements MultiplayerService {
   }
 
   private broadcastMessage(message: MultiplayerMessage): void {
-    // Use localStorage for cross-tab communication to simulate WebRTC
+    if (this.useWebRTC && this.dataChannels.size > 0) {
+      // Send via WebRTC data channels
+      let sentCount = 0;
+      this.dataChannels.forEach((dataChannel, peerId) => {
+        if (dataChannel.readyState === 'open') {
+          try {
+            dataChannel.send(JSON.stringify(message));
+            sentCount++;
+          } catch (error) {
+            console.error(`Error sending WebRTC message to ${peerId}:`, error);
+          }
+        }
+      });
+      
+      if (sentCount > 0) {
+        console.log(`📡 Broadcasted message via WebRTC to ${sentCount} peers:`, message.type);
+        console.log('📊 Message details:', message);
+      } else {
+        console.warn('⚠️ No open WebRTC data channels, falling back to localStorage');
+        this.broadcastViaLocalStorage(message);
+      }
+    } else {
+      // Fallback to localStorage communication
+      this.broadcastViaLocalStorage(message);
+    }
+
+    // Also process locally for same-client scenarios with a small delay
+    setTimeout(() => {
+      this.handleReceivedMessage(message);
+    }, 50);
+  }
+
+  private broadcastViaLocalStorage(message: MultiplayerMessage): void {
     try {
       localStorage.setItem(this.communicationKey, JSON.stringify(message));
       // Remove the item immediately to trigger storage event for other tabs
       localStorage.removeItem(this.communicationKey);
     } catch (error) {
-      console.error('Error broadcasting message:', error);
+      console.error('Error broadcasting message via localStorage:', error);
     }
     
-    console.log('📡 Broadcasting message via localStorage (cross-tab only):', message.type);
+    console.log('📡 Broadcasted message via localStorage (fallback):', message.type);
     console.log('📊 Message details:', message);
-
-    // Also process locally for same-tab scenarios with a small delay
-    setTimeout(() => {
-      this.handleReceivedMessage(message);
-    }, 50);
   }
 
   private handlePlayerJoinMessage(data: { player: MultiplayerPlayer }): void {
@@ -347,20 +666,26 @@ export class WebRTCMultiplayerService implements MultiplayerService {
       this.currentSession.players[existingPlayerIndex] = {
         ...this.currentSession.players[existingPlayerIndex],
         ...player,
-        connectionState: 'connected'
+        connectionState: 'connecting' // Will be updated to 'connected' once WebRTC connects
       };
     } else {
       // Add new player to session
       const newPlayer = {
         ...player,
-        connectionState: 'connected' as const,
-        connectionType: this.connectionType // Use actual connection type
+        connectionState: 'connecting' as const,
+        connectionType: this.connectionType
       };
       this.currentSession.players.push(newPlayer);
     }
 
-    console.log(`Player joined: ${player.name} (${player.id}) via ${this.connectionType} connection`);
-    this.emit('player-connected', { player: { ...player, connectionState: 'connected', connectionType: this.connectionType } });
+    console.log(`Player joining: ${player.name} (${player.id}) via ${this.connectionType} connection`);
+    this.emit('player-connected', { player: { ...player, connectionState: 'connecting', connectionType: this.connectionType } });
+
+    // If we're the host and using WebRTC, initiate connection to the new player
+    if (this.isHostRole && this.useWebRTC && player.id !== this.localPlayerId) {
+      console.log(`🤝 Host initiating WebRTC connection to ${player.id}`);
+      this.initiatePeerConnection(player.id);
+    }
 
     // If we're the host, send session sync to the new player
     if (this.isHostRole) {

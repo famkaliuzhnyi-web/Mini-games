@@ -103,22 +103,40 @@ export const MultiplayerLobby: React.FC<MultiplayerLobbyProps> = ({
         </div>
       </div>
 
-      {/* Connection Type Warning */}
-      <div style={{
-        backgroundColor: '#fff3cd',
-        border: '1px solid #ffc107',
-        borderRadius: '8px',
-        padding: '1rem',
-        marginBottom: '2rem',
-        textAlign: 'center'
-      }}>
-        <h3 style={{ margin: '0 0 0.5rem 0', color: '#856404' }}>⚠️ Connection Type: Local Browser Only</h3>
-        <p style={{ margin: '0', color: '#856404', fontSize: '0.9rem' }}>
-          Currently using cross-tab communication within your browser. 
-          <br />
-          <strong>Other players must open the link in the same browser</strong> to join.
-        </p>
-      </div>
+      {/* Connection Type Information */}
+      {session.players.some(p => p.connectionType === 'webrtc') ? (
+        <div style={{
+          backgroundColor: '#e8f5e8',
+          border: '1px solid #4CAF50',
+          borderRadius: '8px',
+          padding: '1rem',
+          marginBottom: '2rem',
+          textAlign: 'center'
+        }}>
+          <h3 style={{ margin: '0 0 0.5rem 0', color: '#2E7D32' }}>🌍 WebRTC Peer-to-Peer Connection</h3>
+          <p style={{ margin: '0', color: '#2E7D32', fontSize: '0.9rem' }}>
+            Using real-time peer-to-peer connections. 
+            <br />
+            <strong>Players can join from any device or browser!</strong>
+          </p>
+        </div>
+      ) : (
+        <div style={{
+          backgroundColor: '#fff3cd',
+          border: '1px solid #ffc107',
+          borderRadius: '8px',
+          padding: '1rem',
+          marginBottom: '2rem',
+          textAlign: 'center'
+        }}>
+          <h3 style={{ margin: '0 0 0.5rem 0', color: '#856404' }}>⚠️ Connection Type: Local Browser Only</h3>
+          <p style={{ margin: '0', color: '#856404', fontSize: '0.9rem' }}>
+            Using fallback cross-tab communication within your browser. 
+            <br />
+            <strong>Other players must open the link in the same browser</strong> to join.
+          </p>
+        </div>
+      )}
 
       {/* QR Code for joining (host only) */}
       {isHost && sessionUrl && (
