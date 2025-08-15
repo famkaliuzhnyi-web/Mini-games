@@ -36,6 +36,8 @@ export class WebRTCMultiplayerService implements MultiplayerService {
   private connectionType: 'local-tab' | 'webrtc' = 'webrtc'; // Now defaulting to WebRTC
   private signalingKey: string = 'webrtc-signaling';
   private useWebRTC: boolean = true; // Flag to control WebRTC usage
+  // Queue for ICE candidates that arrive before remote description is set
+  private pendingICECandidates: Map<string, RTCIceCandidateInit[]> = new Map();
 
   constructor() {
     this.initializeEventListeners();
@@ -72,7 +74,7 @@ export class WebRTCMultiplayerService implements MultiplayerService {
   private initializeWebRTCSignaling(): void {
     // Listen for WebRTC signaling messages via localStorage
     window.addEventListener('storage', (event) => {
-      if (event.key === this.signalingKey && event.newValue) {
+      if (event.key && event.key.startsWith(this.signalingKey) && event.newValue) {
         try {
           const signalingMessage = JSON.parse(event.newValue);
           // Only process messages not sent by ourselves
@@ -129,8 +131,13 @@ export class WebRTCMultiplayerService implements MultiplayerService {
     };
 
     try {
-      localStorage.setItem(this.signalingKey, JSON.stringify(signalingMessage));
-      localStorage.removeItem(this.signalingKey);
+      // Use a unique key with timestamp to avoid collisions
+      const signalingKeyWithId = `${this.signalingKey}-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
+      localStorage.setItem(signalingKeyWithId, JSON.stringify(signalingMessage));
+      // Clean up immediately to trigger the storage event
+      setTimeout(() => {
+        localStorage.removeItem(signalingKeyWithId);
+      }, 100);
       console.log(`📡 Sent ${type} signaling message to ${to}`);
     } catch (error) {
       console.error('Error sending signaling message:', error);
@@ -169,7 +176,10 @@ export class WebRTCMultiplayerService implements MultiplayerService {
     // Handle ICE candidates
     peerConnection.onicecandidate = (event) => {
       if (event.candidate) {
+        console.log(`🧊 Sending ICE candidate to ${peerId}:`, event.candidate.type);
         this.sendSignalingMessage(peerId, 'ice-candidate', event.candidate);
+      } else {
+        console.log(`🧊 ICE gathering completed for ${peerId}`);
       }
     };
 
@@ -182,12 +192,20 @@ export class WebRTCMultiplayerService implements MultiplayerService {
       } else if (peerConnection.connectionState === 'failed' || peerConnection.connectionState === 'disconnected') {
         this.updatePlayerConnectionState(peerId, 'disconnected');
         this.handlePeerDisconnection(peerId);
+      } else if (peerConnection.connectionState === 'connecting') {
+        this.updatePlayerConnectionState(peerId, 'connecting');
       }
+    };
+
+    // Handle ICE connection state changes for more detailed logging
+    peerConnection.oniceconnectionstatechange = () => {
+      console.log(`🧊 ICE connection state with ${peerId}: ${peerConnection.iceConnectionState}`);
     };
 
     // Handle data channel from remote peer
     peerConnection.ondatachannel = (event) => {
       const dataChannel = event.channel;
+      console.log(`📡 Received data channel from ${peerId}:`, dataChannel.label);
       this.setupDataChannel(dataChannel, peerId);
     };
 
@@ -196,6 +214,8 @@ export class WebRTCMultiplayerService implements MultiplayerService {
   }
 
   private setupDataChannel(dataChannel: RTCDataChannel, peerId: string): void {
+    console.log(`🔧 Setting up data channel with ${peerId}, readyState: ${dataChannel.readyState}`);
+    
     dataChannel.onopen = () => {
       console.log(`✅ Data channel opened with ${peerId}`);
       this.updatePlayerConnectionState(peerId, 'connected');
@@ -213,6 +233,7 @@ export class WebRTCMultiplayerService implements MultiplayerService {
 
     dataChannel.onmessage = (event) => {
       try {
+        console.log(`📨 Received WebRTC message from ${peerId}:`, event.data.substring(0, 100));
         const message: MultiplayerMessage = JSON.parse(event.data);
         this.handleReceivedMessage(message);
       } catch (error) {
@@ -228,6 +249,10 @@ export class WebRTCMultiplayerService implements MultiplayerService {
       const peerConnection = await this.createPeerConnection(fromPeerId);
       
       await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+      
+      // Process any queued ICE candidates now that remote description is set
+      await this.processQueuedICECandidates(fromPeerId);
+      
       const answer = await peerConnection.createAnswer();
       await peerConnection.setLocalDescription(answer);
       
@@ -245,6 +270,10 @@ export class WebRTCMultiplayerService implements MultiplayerService {
       const peerConnection = this.peerConnections.get(fromPeerId);
       if (peerConnection) {
         await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+        
+        // Process any queued ICE candidates now that remote description is set
+        await this.processQueuedICECandidates(fromPeerId);
+        
         console.log(`📥 Processed WebRTC answer from ${fromPeerId}`);
       }
     } catch (error) {
@@ -257,11 +286,40 @@ export class WebRTCMultiplayerService implements MultiplayerService {
     try {
       const peerConnection = this.peerConnections.get(fromPeerId);
       if (peerConnection) {
-        await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
-        console.log(`🧊 Added ICE candidate from ${fromPeerId}`);
+        // Check if remote description is set
+        if (peerConnection.remoteDescription) {
+          await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+          console.log(`🧊 Added ICE candidate from ${fromPeerId}`);
+        } else {
+          // Queue the candidate until remote description is set
+          console.log(`🧊 Queueing ICE candidate from ${fromPeerId} (no remote description yet)`);
+          if (!this.pendingICECandidates.has(fromPeerId)) {
+            this.pendingICECandidates.set(fromPeerId, []);
+          }
+          this.pendingICECandidates.get(fromPeerId)!.push(candidate);
+        }
       }
     } catch (error) {
       console.error('Error handling ICE candidate:', error);
+    }
+  }
+
+  private async processQueuedICECandidates(peerId: string): Promise<void> {
+    const queuedCandidates = this.pendingICECandidates.get(peerId);
+    if (queuedCandidates && queuedCandidates.length > 0) {
+      console.log(`🧊 Processing ${queuedCandidates.length} queued ICE candidates for ${peerId}`);
+      const peerConnection = this.peerConnections.get(peerId);
+      if (peerConnection) {
+        for (const candidate of queuedCandidates) {
+          try {
+            await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+          } catch (error) {
+            console.error(`Error adding queued ICE candidate for ${peerId}:`, error);
+          }
+        }
+      }
+      // Clear the queue
+      this.pendingICECandidates.delete(peerId);
     }
   }
 
@@ -276,6 +334,7 @@ export class WebRTCMultiplayerService implements MultiplayerService {
 
   private async initiatePeerConnection(peerId: string): Promise<void> {
     try {
+      console.log(`🤝 Initiating WebRTC connection to ${peerId}`);
       const peerConnection = await this.createPeerConnection(peerId);
       
       // Create data channel for communication
@@ -284,9 +343,11 @@ export class WebRTCMultiplayerService implements MultiplayerService {
         maxRetransmits: 3
       });
       
+      console.log(`📡 Created data channel for ${peerId}`);
       this.setupDataChannel(dataChannel, peerId);
       
       // Create and send offer
+      console.log(`📤 Creating offer for ${peerId}`);
       const offer = await peerConnection.createOffer();
       await peerConnection.setLocalDescription(offer);
       
@@ -323,6 +384,9 @@ export class WebRTCMultiplayerService implements MultiplayerService {
       dataChannel.close();
       this.dataChannels.delete(peerId);
     }
+
+    // Clean up queued ICE candidates
+    this.pendingICECandidates.delete(peerId);
 
     // Update player state and emit disconnect event
     this.updatePlayerConnectionState(peerId, 'disconnected');
@@ -530,6 +594,9 @@ export class WebRTCMultiplayerService implements MultiplayerService {
       peerConnection.close();
     });
     this.peerConnections.clear();
+
+    // Clear pending ICE candidates
+    this.pendingICECandidates.clear();
 
     const sessionId = this.currentSession.id;
     this.currentSession = null;
