@@ -186,8 +186,30 @@ const GameBoard: React.FC<GameBoardProps> = ({
 ### Testing Tools
 - **Vitest**: Unit and integration testing
 - **React Testing Library**: Component testing
-- **Playwright**: End-to-end testing (future)
+- **Playwright**: End-to-end testing ✅ **IMPLEMENTED**
 - **Lighthouse**: Performance and accessibility audits
+
+### E2E Testing
+End-to-end tests are now available for multiplayer functionality:
+
+```bash
+# Run all e2e tests
+npm run test:e2e
+
+# Run with visible browser (debugging)
+npm run test:e2e:headed
+
+# Run in debug mode
+npm run test:e2e:debug
+```
+
+**Current E2E Coverage**:
+- ✅ **Tic-Tac-Toe Multiplayer**: WebRTC peer-to-peer connections
+- ✅ **Session Management**: Creating and joining multiplayer sessions
+- ✅ **Real-time Sync**: Game move synchronization between players
+- ✅ **Connection Handling**: Player disconnection scenarios
+
+See `e2e/README.md` and `e2e/SETUP.md` for detailed setup instructions.
 
 ### Example Tests
 ```typescript
