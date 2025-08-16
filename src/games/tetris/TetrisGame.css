@@ -107,19 +107,22 @@
   background: #0a0a0a;
   border-radius: 8px;
   overflow: hidden;
+  width: 100%;
+  height: 100%;
 }
 
 .tetris-row {
   display: flex;
+  flex: 1; /* Each row takes equal height */
 }
 
 .tetris-cell {
-  width: 24px;
-  height: 24px;
+  flex: 1; /* Each cell takes equal width */
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-sizing: border-box;
   position: relative;
   transition: all 0.15s ease;
+  aspect-ratio: 1; /* Keep cells square */
 }
 
 .tetris-cell.empty {
@@ -766,10 +769,7 @@
     flex-shrink: 0;
   }
   
-  .tetris-grid {
-    overflow-x: auto;
-    max-width: 100vw;
-  }
+  /* Grid scaling now handled by Playfield component */
 }
 
 /* === ANIMATIONS === */
