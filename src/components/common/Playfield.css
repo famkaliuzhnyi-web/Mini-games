@@ -1,0 +1,108 @@
+/**
+ * Playfield Component Styles
+ * Universal scaling component for games with fixed aspect ratios
+ */
+
+.playfield-container {
+  /* Ensure container takes full available space */
+  min-width: 0; /* Important for flex shrinking */
+  min-height: 0; /* Important for flex shrinking */
+  box-sizing: border-box;
+  position: relative;
+  
+  /* Center content both horizontally and vertically */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  /* Smooth transitions for responsive changes */
+  transition: all 0.2s ease-out;
+}
+
+.playfield-content {
+  /* Ensure content maintains its calculated dimensions */
+  flex-shrink: 0;
+  position: relative;
+  
+  /* Smooth scaling transitions */
+  transition: width 0.2s ease-out, height 0.2s ease-out;
+  
+  /* Ensure content doesn't overflow its container */
+  overflow: hidden;
+  
+  /* Box sizing for predictable dimensions */
+  box-sizing: border-box;
+}
+
+/* Utility classes for common aspect ratios */
+.playfield-container.aspect-16-9 {
+  /* 16:9 aspect ratio (1.777...) */
+  --aspect-ratio: 1.7777777778;
+}
+
+.playfield-container.aspect-4-3 {
+  /* 4:3 aspect ratio (1.333...) */
+  --aspect-ratio: 1.3333333333;
+}
+
+.playfield-container.aspect-1-1 {
+  /* 1:1 aspect ratio (square) */
+  --aspect-ratio: 1;
+}
+
+.playfield-container.aspect-2-1 {
+  /* 2:1 aspect ratio */
+  --aspect-ratio: 2;
+}
+
+.playfield-container.aspect-3-2 {
+  /* 3:2 aspect ratio (1.5) */
+  --aspect-ratio: 1.5;
+}
+
+/* Responsive behavior adjustments */
+@media (max-width: 768px) {
+  .playfield-container {
+    /* Reduce padding on mobile for more space */
+    padding: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .playfield-container {
+    /* Minimal padding on very small screens */
+    padding: 5px;
+  }
+}
+
+/* High DPI display optimizations */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 2dppx) {
+  .playfield-content {
+    /* Ensure crisp rendering on high DPI displays */
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+  }
+}
+
+/* Accessibility: Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .playfield-container,
+  .playfield-content {
+    transition: none;
+  }
+}
+
+/* Print styles */
+@media print {
+  .playfield-container {
+    /* Remove padding and transitions for print */
+    padding: 0;
+    transition: none;
+  }
+  
+  .playfield-content {
+    transition: none;
+  }
+}
