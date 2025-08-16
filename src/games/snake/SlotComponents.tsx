@@ -3,6 +3,8 @@
  */
 import React, { useCallback, useEffect, useRef } from 'react';
 import { useSwipeGestures } from '../../hooks/useSwipeGestures';
+import { Playfield } from '../../components/common';
+import type { PlayfieldDimensions } from '../../components/common';
 import { SnakeGameBoard } from './components/SnakeGameBoard';
 import { useSnakeState } from './useSnakeState';
 
@@ -85,7 +87,31 @@ export const SnakeGameField: React.FC<{ playerId: string }> = ({ playerId }) => 
 
   return (
     <div className="snake-game-field" ref={gameContainerRef}>
-      <SnakeGameBoard gameData={gameState.data} />
+      {/* Game Board with Playfield scaling */}
+      <Playfield
+        aspectRatio={gameState.data.config.gridWidth / gameState.data.config.gridHeight} // Dynamic aspect ratio based on grid
+        baseWidth={400}
+        baseHeight={400}
+        minConstraints={{
+          minWidth: 280,
+          minHeight: 280,
+          minScale: 0.6
+        }}
+        maxConstraints={{
+          maxWidth: 600,
+          maxHeight: 600,
+          maxScale: 1.4
+        }}
+        padding={10}
+        responsive={true}
+      >
+        {(dimensions: PlayfieldDimensions) => (
+          <SnakeGameBoard 
+            gameData={gameState.data}
+            playfieldDimensions={dimensions}
+          />
+        )}
+      </Playfield>
     </div>
   );
 };
