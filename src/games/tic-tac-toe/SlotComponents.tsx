@@ -4,6 +4,8 @@
 import React, { useCallback, useState, useRef, useMemo, useEffect } from 'react';
 import { useGameSave } from '../../hooks/useGameSave';
 import { useTheme } from '../../hooks/useTheme';
+import { Playfield } from '../../components/common';
+import type { PlayfieldDimensions } from '../../components/common';
 import { TicTacToeGameController } from './controller';
 import type { TicTacToeGameData } from './types';
 import { 
@@ -374,25 +376,55 @@ export const TicTacToeGameField: React.FC<SlotComponentProps> = ({ playerId }) =
         {gameState.data.gameStatus === 'playing' && `${gameState.data.currentPlayer}'s Turn`}
       </div>
 
-      {/* Game Board */}
-      <div className="tic-tac-toe-board-wrapper">
-        <div className="tic-tac-toe-board-slot">
-          {gameState.data.board.map((row, rowIndex) =>
-            row.map((cell, colIndex) => (
-              <button
-                key={`${rowIndex}-${colIndex}`}
-                onClick={() => handleCellClick(rowIndex, colIndex)}
-                className={`tic-tac-toe-cell-slot ${
-                  cell === 'X' ? 'x-mark' : cell === 'O' ? 'o-mark' : ''
-                } ${isPartOfWinningCombination(rowIndex, colIndex) ? 'winning-cell' : ''}`}
-                disabled={gameState.data.gameStatus !== 'playing' || cell !== null}
-              >
-                {getCellContent(rowIndex, colIndex)}
-              </button>
-            ))
-          )}
-        </div>
-      </div>
+      {/* Game Board with Playfield scaling */}
+      <Playfield
+        aspectRatio={1} // Square aspect ratio for tic-tac-toe
+        baseWidth={360}
+        baseHeight={360}
+        minConstraints={{
+          minWidth: 240,
+          minHeight: 240,
+          minScale: 0.5
+        }}
+        maxConstraints={{
+          maxWidth: 500,
+          maxHeight: 500,
+          maxScale: 1.5
+        }}
+        padding={10}
+        responsive={true}
+      >
+        {(dimensions: PlayfieldDimensions) => (
+          <div className="tic-tac-toe-board-wrapper">
+            <div 
+              className="tic-tac-toe-board-slot"
+              style={{
+                width: `${dimensions.width}px`,
+                height: `${dimensions.height}px`,
+                fontSize: `${Math.max(1, dimensions.scale * 2)}rem`
+              }}
+            >
+              {gameState.data.board.map((row, rowIndex) =>
+                row.map((cell, colIndex) => (
+                  <button
+                    key={`${rowIndex}-${colIndex}`}
+                    onClick={() => handleCellClick(rowIndex, colIndex)}
+                    className={`tic-tac-toe-cell-slot ${
+                      cell === 'X' ? 'x-mark' : cell === 'O' ? 'o-mark' : ''
+                    } ${isPartOfWinningCombination(rowIndex, colIndex) ? 'winning-cell' : ''}`}
+                    disabled={gameState.data.gameStatus !== 'playing' || cell !== null}
+                    style={{
+                      fontSize: `${Math.max(1, dimensions.scale * 2)}rem`
+                    }}
+                  >
+                    {getCellContent(rowIndex, colIndex)}
+                  </button>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+      </Playfield>
     </div>
   );
 };

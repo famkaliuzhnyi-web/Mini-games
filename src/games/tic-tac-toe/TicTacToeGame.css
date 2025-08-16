@@ -60,17 +60,16 @@
   grid-template-rows: repeat(3, 1fr);
   gap: clamp(2px, 0.5vw, 4px);
   
-  /* Improved responsive sizing for slot components */
-  width: clamp(240px, min(65vw, 65vh), 360px);
-  height: clamp(240px, min(65vw, 65vh), 360px);
+  /* Let Playfield component control the dimensions */
+  width: 100%;
+  height: 100%;
 }
 
 .tic-tac-toe-cell-slot {
   background-color: var(--color-gameSurface, #fff);
   border: none;
   
-  /* Responsive font sizing for slot components */
-  font-size: clamp(1.25rem, calc(1rem + 2vw), 3rem);
+  /* Font size will be controlled by Playfield scaling */
   font-weight: bold;
   cursor: pointer;
   display: flex;
@@ -80,9 +79,9 @@
   transition: all 0.3s ease;
   aspect-ratio: 1;
   
-  /* Touch-friendly sizing */
-  min-height: clamp(50px, 10vw, 100px);
-  min-width: clamp(50px, 10vw, 100px);
+  /* Touch-friendly sizing - let Playfield handle this */
+  min-height: 40px;
+  min-width: 40px;
   
   /* Responsive border radius */
   border-radius: clamp(4px, 1vw, 8px);
