@@ -3,6 +3,8 @@
  */
 import React, { useCallback, useEffect, useRef } from 'react';
 import { useSwipeGestures } from '../../hooks/useSwipeGestures';
+import { Playfield } from '../../components/common';
+import type { PlayfieldDimensions } from '../../components/common';
 import { TetrisBoard } from './components/TetrisBoard';
 import { useTetrisState, nextPieceEmojis } from './useTetrisState';
 
@@ -87,13 +89,35 @@ export const TetrisGameField: React.FC<{ playerId: string }> = ({ playerId }) =>
 
   return (
     <div className="tetris-game-field" ref={gameContainerRef}>
-      <TetrisBoard
-        grid={gameState.data.grid}
-        activePiece={gameState.data.activePiece}
-        ghostPiece={gameState.data.ghostPiece}
-        gameOver={gameState.data.gameOver}
-        dangerZoneActive={gameState.data.dangerZoneActive}
-      />
+      {/* Game Board with Playfield scaling */}
+      <Playfield
+        aspectRatio={0.5} // Tetris board aspect ratio (10 columns : 20 rows = 0.5)
+        baseWidth={280}
+        baseHeight={560}
+        minConstraints={{
+          minWidth: 200,
+          minHeight: 400,
+          minScale: 0.6
+        }}
+        maxConstraints={{
+          maxWidth: 400,
+          maxHeight: 800,
+          maxScale: 1.4
+        }}
+        padding={10}
+        responsive={true}
+      >
+        {(dimensions: PlayfieldDimensions) => (
+          <TetrisBoard
+            grid={gameState.data.grid}
+            activePiece={gameState.data.activePiece}
+            ghostPiece={gameState.data.ghostPiece}
+            gameOver={gameState.data.gameOver}
+            dangerZoneActive={gameState.data.dangerZoneActive}
+            playfieldDimensions={dimensions}
+          />
+        )}
+      </Playfield>
       
       {/* Game Status Messages */}
       {gameState.data.paused && !gameState.data.gameOver && (

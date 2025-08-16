@@ -3,6 +3,7 @@
  */
 import React from 'react';
 import type { TetrisGrid, ActivePiece, CellValue, MultiplayerGameState } from '../types';
+import type { PlayfieldDimensions } from '../../../components/common';
 import { placePiece } from '../logic';
 
 interface TetrisBoardProps {
@@ -12,6 +13,7 @@ interface TetrisBoardProps {
   gameOver: boolean;
   dangerZoneActive: boolean;
   multiplayer?: MultiplayerGameState;
+  playfieldDimensions?: PlayfieldDimensions;
 }
 
 export const TetrisBoard: React.FC<TetrisBoardProps> = ({
@@ -20,7 +22,8 @@ export const TetrisBoard: React.FC<TetrisBoardProps> = ({
   ghostPiece,
   gameOver,
   dangerZoneActive,
-  multiplayer
+  multiplayer,
+  playfieldDimensions
 }) => {
   // Create display grid with active piece(s) and ghost piece(s) overlaid
   const displayGrid = React.useMemo(() => {
@@ -147,9 +150,14 @@ export const TetrisBoard: React.FC<TetrisBoardProps> = ({
         </div>
       )}
       
-      <div className="tetris-grid" style={{
-        maxWidth: multiplayer?.isMultiplayer ? `${multiplayer.gridWidth * 25}px` : '250px'
-      }}>
+      <div 
+        className="tetris-grid" 
+        style={{
+          width: `${playfieldDimensions?.width || 250}px`,
+          height: `${playfieldDimensions?.height || 500}px`,
+          fontSize: `${Math.max(0.8, (playfieldDimensions?.scale || 1) * 1)}rem`
+        }}
+      >
         {displayGrid.map((row, rowIndex) => (
           <div key={rowIndex} className="tetris-row">
             {row.map((cell, colIndex) => (

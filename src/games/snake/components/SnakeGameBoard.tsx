@@ -4,15 +4,18 @@
 
 import React from 'react';
 import type { SnakeGameData, Snake } from '../types';
+import type { PlayfieldDimensions } from '../../../components/common';
 
 interface SnakeGameBoardProps {
   gameData: SnakeGameData;
   className?: string;
+  playfieldDimensions?: PlayfieldDimensions;
 }
 
 export const SnakeGameBoard: React.FC<SnakeGameBoardProps> = ({
   gameData,
-  className = ''
+  className = '',
+  playfieldDimensions
 }) => {
   const { grid, snakes, config } = gameData;
 
@@ -73,7 +76,10 @@ export const SnakeGameBoard: React.FC<SnakeGameBoardProps> = ({
         className="snake-grid"
         style={{
           '--grid-width': config.gridWidth,
-          '--grid-height': config.gridHeight
+          '--grid-height': config.gridHeight,
+          width: `${playfieldDimensions?.width || 400}px`,
+          height: `${playfieldDimensions?.height || 400}px`,
+          fontSize: `${Math.max(0.6, (playfieldDimensions?.scale || 1) * 0.8)}rem`
         } as React.CSSProperties}
       >
         {Array.from({ length: config.gridHeight }, (_, row) =>

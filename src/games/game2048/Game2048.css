@@ -173,11 +173,12 @@
 
 .game2048-grid {
   display: grid;
-  grid-template-columns: repeat(4, 78px);
-  grid-template-rows: repeat(4, 78px);
-  gap: 10px;
-  width: 340px;
-  height: 340px;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: 2.8%;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 1;
 }
 
 .game2048-cell {
@@ -186,10 +187,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2.2rem;
+  font-size: inherit; /* Will be controlled by Playfield scaling */
   font-weight: 800;
-  width: 78px;
-  height: 78px;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 1;
   transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.1),
@@ -409,29 +411,25 @@
     font-size: 3rem;
   }
   
+  /* Grid scaling is now handled by Playfield component */
   .game2048-grid {
-    grid-template-columns: repeat(4, 70px);
-    grid-template-rows: repeat(4, 70px);
-    width: 312px;
-    height: 312px;
-    gap: 8px;
+    /* Remove fixed dimensions - Playfield handles responsive scaling */
   }
   
   .game2048-cell {
-    width: 70px;
-    height: 70px;
-    font-size: 1.9rem;
+    /* Remove fixed dimensions - use relative sizing with Playfield */
   }
   
+  /* Font scaling for different tile values - use relative sizing */
   .game2048-tile-128,
   .game2048-tile-256,
   .game2048-tile-512 {
-    font-size: 1.7rem;
+    font-size: 0.85em; /* Relative to parent font size */
   }
   
   .game2048-tile-1024,
   .game2048-tile-2048 {
-    font-size: 1.4rem;
+    font-size: 0.7em; /* Relative to parent font size */
   }
   
   .game2048-controls {

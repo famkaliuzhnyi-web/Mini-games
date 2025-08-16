@@ -6,6 +6,8 @@ import { useGameSave } from '../../hooks/useGameSave';
 import { useSwipeGestures } from '../../hooks/useSwipeGestures';
 import { useTheme } from '../../hooks/useTheme';
 import { useCoinService } from '../../hooks/useCoinService';
+import { Playfield } from '../../components/common';
+import type { PlayfieldDimensions } from '../../components/common';
 import { PingPongGameController } from './controller';
 import type { PingPongGameData, KeyState, TouchState, Paddle, Size } from './types';
 import type { GameState } from '../../types/game';
@@ -16,8 +18,6 @@ import {
   resetBall,
   isGameOver,
   getWinner,
-  LEGACY_GAME_CONFIG,
-  calculateGameDimensions,
   createInitialGameData
 } from './gameLogic';
 import './PingPongGame.css';
@@ -49,9 +49,7 @@ const usePingPongState = (playerId: string) => {
     paddleStartY: 0
   });
 
-  const [gameDimensions] = useState(() => 
-    calculateGameDimensions(LEGACY_GAME_CONFIG.GAME_WIDTH, LEGACY_GAME_CONFIG.GAME_HEIGHT)
-  );
+  // Remove custom gameDimensions - will be provided by Playfield
   const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 768);
   const [keyState, setKeyState] = useState<KeyState>(keyStateRef.current);
   const [touchState, setTouchState] = useState<TouchState>(touchStateRef.current);
@@ -316,16 +314,8 @@ const usePingPongState = (playerId: string) => {
   const startNewGame = useCallback(() => {
     const currentStats = gameState.data;
     
-    const newGameData = createInitialGameData({
-      width: gameDimensions.width,
-      height: gameDimensions.height,
-      paddleWidth: gameDimensions.paddleWidth,
-      paddleHeight: gameDimensions.paddleHeight,
-      paddleSpeed: gameDimensions.paddleSpeed,
-      ballSize: gameDimensions.ballSize,
-      ballInitialSpeed: gameDimensions.ballInitialSpeed,
-      paddleMargin: gameDimensions.paddleMargin
-    });
+    // Use default dimensions - Playfield will provide scaling
+    const newGameData = createInitialGameData();
     
     setGameState({
       ...gameState,
@@ -340,7 +330,7 @@ const usePingPongState = (playerId: string) => {
       isComplete: false,
       lastModified: new Date().toISOString()
     });
-  }, [gameState, setGameState, gameDimensions]);
+  }, [gameState, setGameState]);
 
   // Set up keyboard event listeners
   useEffect(() => {
@@ -382,7 +372,7 @@ const usePingPongState = (playerId: string) => {
     shouldRotate,
     currentTheme,
     touchState,
-    gameDimensions,
+    // Remove gameDimensions - will be provided by Playfield
     startNewGame,
     pauseGame,
     resumeGame,
@@ -407,7 +397,7 @@ export const PingPongGameField: React.FC<SlotComponentProps> = ({ playerId }) =>
     isMobile,
     shouldRotate,
     touchState,
-    gameDimensions,
+    // gameDimensions removed - will be provided by Playfield
     startNewGame,
     pauseGame,
     resumeGame,
@@ -525,97 +515,117 @@ export const PingPongGameField: React.FC<SlotComponentProps> = ({ playerId }) =>
         </div>
       </div>
 
-      {/* Game Canvas */}
-      <div className="ping-pong-canvas-container">
-        <svg
-          width={gameDimensions.width}
-          height={gameDimensions.height}
-          className="ping-pong-canvas"
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-          onTouchCancel={handleTouchEnd}
-        >
-          {/* Game field background */}
-          <rect
-            x={0}
-            y={0}
-            width={gameDimensions.width}
-            height={gameDimensions.height}
-            fill="#000"
-          />
-          
-          {/* Center line */}
-          <line
-            x1={gameDimensions.width / 2}
-            y1={0}
-            x2={gameDimensions.width / 2}
-            y2={gameDimensions.height}
-            stroke="var(--color-textMuted, #9ca3af)"
-            strokeWidth="2"
-            strokeDasharray="10,10"
-          />
-          
-          {/* Touch area indicator for mobile */}
-          {touchState.isActive && (
-            <rect
-              x={0}
-              y={0}
-              width={gameDimensions.width / 2}
-              height={gameDimensions.height}
-              fill="rgba(59, 130, 246, 0.1)"
-              stroke="var(--color-accent, #3b82f6)"
-              strokeWidth="2"
-              strokeDasharray="5,5"
-            />
-          )}
-          
-          {/* Player paddle */}
-          <rect
-            x={gameState.data.playerPaddle.x}
-            y={gameState.data.playerPaddle.y}
-            width={gameState.data.playerPaddle.width}
-            height={gameState.data.playerPaddle.height}
-            fill="var(--color-accent, #3b82f6)"
-            rx={2}
-          />
-          
-          {/* AI paddle */}
-          <rect
-            x={gameState.data.aiPaddle.x}
-            y={gameState.data.aiPaddle.y}
-            width={gameState.data.aiPaddle.width}
-            height={gameState.data.aiPaddle.height}
-            fill="var(--color-error, #dc2626)"
-            rx={2}
-          />
-          
-          {/* Ball */}
-          <circle
-            cx={gameState.data.ball.x + gameState.data.ball.width / 2}
-            cy={gameState.data.ball.y + gameState.data.ball.height / 2}
-            r={gameState.data.ball.width / 2}
-            fill="var(--color-text, #ffffff)"
-          />
-        </svg>
-        
-        {/* Mobile instructions overlay */}
-        {isMobile && (
-          <div style={{
-            position: 'absolute',
-            bottom: '8px',
-            left: '8px',
-            right: '8px',
-            fontSize: '0.8rem',
-            color: 'var(--color-textMuted, #9ca3af)',
-            textAlign: 'center',
-            opacity: 0.7,
-            pointerEvents: 'none'
-          }}>
-            Touch & drag to move paddle • Swipe for actions
+      {/* Game Canvas with Playfield scaling */}
+      <Playfield
+        aspectRatio={2} // Ping Pong 2:1 aspect ratio (800:400)
+        baseWidth={800}
+        baseHeight={400}
+        minConstraints={{
+          minWidth: 400,
+          minHeight: 200,
+          minScale: 0.5
+        }}
+        maxConstraints={{
+          maxWidth: 1000,
+          maxHeight: 500,
+          maxScale: 1.3
+        }}
+        padding={10}
+        responsive={true}
+      >
+        {(dimensions: PlayfieldDimensions) => (
+          <div className="ping-pong-canvas-container">
+            <svg
+              width={dimensions.width}
+              height={dimensions.height}
+              className="ping-pong-canvas"
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+              onTouchCancel={handleTouchEnd}
+            >
+              {/* Game field background */}
+              <rect
+                x={0}
+                y={0}
+                width={dimensions.width}
+                height={dimensions.height}
+                fill="#000"
+              />
+              
+              {/* Center line */}
+              <line
+                x1={dimensions.width / 2}
+                y1={0}
+                x2={dimensions.width / 2}
+                y2={dimensions.height}
+                stroke="var(--color-textMuted, #9ca3af)"
+                strokeWidth="2"
+                strokeDasharray="10,10"
+              />
+              
+              {/* Touch area indicator for mobile */}
+              {touchState.isActive && (
+                <rect
+                  x={0}
+                  y={0}
+                  width={dimensions.width / 2}
+                  height={dimensions.height}
+                  fill="rgba(59, 130, 246, 0.1)"
+                  stroke="var(--color-accent, #3b82f6)"
+                  strokeWidth="2"
+                  strokeDasharray="5,5"
+                />
+              )}
+              
+              {/* Player paddle */}
+              <rect
+                x={(gameState.data.playerPaddle.x / 800) * dimensions.width}
+                y={(gameState.data.playerPaddle.y / 400) * dimensions.height}
+                width={(gameState.data.playerPaddle.width / 800) * dimensions.width}
+                height={(gameState.data.playerPaddle.height / 400) * dimensions.height}
+                fill="var(--color-accent, #3b82f6)"
+                rx={2}
+              />
+              
+              {/* AI paddle */}
+              <rect
+                x={(gameState.data.aiPaddle.x / 800) * dimensions.width}
+                y={(gameState.data.aiPaddle.y / 400) * dimensions.height}
+                width={(gameState.data.aiPaddle.width / 800) * dimensions.width}
+                height={(gameState.data.aiPaddle.height / 400) * dimensions.height}
+                fill="var(--color-error, #dc2626)"
+                rx={2}
+              />
+              
+              {/* Ball */}
+              <circle
+                cx={(gameState.data.ball.x + gameState.data.ball.width / 2) / 800 * dimensions.width}
+                cy={(gameState.data.ball.y + gameState.data.ball.height / 2) / 400 * dimensions.height}
+                r={(gameState.data.ball.width / 2) / 800 * dimensions.width}
+                fill="var(--color-text, #ffffff)"
+              />
+            </svg>
+            
+            {/* Mobile instructions overlay */}
+            {isMobile && (
+              <div style={{
+                position: 'absolute',
+                bottom: '8px',
+                left: '8px',
+                right: '8px',
+                fontSize: '0.8rem',
+                color: 'var(--color-textMuted, #9ca3af)',
+                textAlign: 'center',
+                opacity: 0.7,
+                pointerEvents: 'none'
+              }}>
+                Touch & drag to move paddle • Swipe for actions
+              </div>
+            )}
           </div>
         )}
-      </div>
+      </Playfield>
 
       {/* Rotation hint for portrait mode */}
       {shouldRotate && (

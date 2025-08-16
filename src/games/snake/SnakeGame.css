@@ -104,9 +104,9 @@
   gap: 1px;
   background: #ddd;
   border: 1px solid #ccc;
-  max-width: 90vw;
-  max-height: 70vh;
-  aspect-ratio: var(--grid-width) / var(--grid-height);
+  width: 100%;
+  height: 100%;
+  /* Aspect ratio preserved by Playfield component */
 }
 
 .snake-cell {
@@ -114,12 +114,11 @@
   align-items: center;
   justify-content: center;
   background: #fff;
-  font-size: 0.8rem;
-  min-width: 20px;
-  min-height: 20px;
+  font-size: inherit; /* Controlled by Playfield scaling */
   width: 100%;
   height: 100%;
   position: relative;
+  aspect-ratio: 1; /* Keep cells square */
 }
 
 .snake-cell--empty {
@@ -408,15 +407,10 @@
     justify-content: center;
   }
   
-  .snake-grid {
-    max-width: 95vw;
-    max-height: 60vh;
-  }
+  /* Grid scaling now handled by Playfield component */
   
   .snake-cell {
-    min-width: 15px;
-    min-height: 15px;
-    font-size: 0.7rem;
+    /* Cell sizing now handled by Playfield component */
   }
   
   .action-buttons {
@@ -434,14 +428,10 @@
 }
 
 @media (max-width: 480px) {
-  .snake-grid {
-    max-height: 50vh;
-  }
+  /* Grid scaling now handled by Playfield component */
   
   .snake-cell {
-    min-width: 12px;
-    min-height: 12px;
-    font-size: 0.6rem;
+    /* Cell sizing now handled by Playfield component */
   }
   
   .mobile-control-btn {
