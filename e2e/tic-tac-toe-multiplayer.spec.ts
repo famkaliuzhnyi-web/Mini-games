@@ -176,7 +176,8 @@ test.describe('Tic-Tac-Toe Multiplayer WebRTC', () => {
     
     console.log('WebRTC multiplayer test completed successfully');
   });
-});
+
+  test('should synchronize game moves and completion', async () => {
     await setupPlayer(hostPage, 'Host Player');
     await setupPlayer(guestPage, 'Guest Player');
     
@@ -189,7 +190,7 @@ test.describe('Tic-Tac-Toe Multiplayer WebRTC', () => {
     await guestPage.click('button:has-text("Ready")');
     
     // Wait for game to start
-    await expect(hostPage.locator('text*="X\'s Turn", text*="O\'s Turn"')).toBeVisible({ timeout: 10000 });
+    await expect(hostPage.locator('text*="\'s Turn"')).toBeVisible({ timeout: 10000 });
     
     // Play moves to create a winning scenario
     // X wins with top row: X-X-X
