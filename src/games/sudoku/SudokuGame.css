@@ -33,34 +33,31 @@
   min-height: 100dvh; /* Dynamic viewport height for mobile */
 }
 
-/* Modern Sudoku Board - Responsive Container-based Design */
+/* Modern Sudoku Board - Playfield Responsive Design */
 .modern-sudoku-board {
   display: grid;
   grid-template-columns: repeat(9, 1fr);
   grid-template-rows: repeat(9, 1fr);
   background-color: var(--color-border, #2c3e50);
-  border: min(3px, 0.5vw) solid var(--color-border, #2c3e50);
-  border-radius: min(12px, 2vw);
-  padding: min(3px, 0.5vw);
-  margin: clamp(0.5rem, 2vw, 1rem) 0;
+  border: 3px solid var(--color-border, #2c3e50);
+  border-radius: 12px;
+  padding: 3px;
   
-  /* Dynamic sizing - uses full available width while maintaining square aspect ratio */
-  width: min(95vw, min(95vh, 600px));
-  height: min(95vw, min(95vh, 600px));
+  /* Use full available space from Playfield */
+  width: 100%;
+  height: 100%;
   aspect-ratio: 1;
   
   /* Dynamic gap based on container size */
-  gap: max(0.5px, min(2px, 0.3vw));
+  gap: 2px;
   
-  box-shadow: 0 min(8px, 1vw) min(32px, 4vw) rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   
   /* Ensure proper positioning */
-  margin-left: auto;
-  margin-right: auto;
   position: relative;
 }
 
-/* Modern Sudoku Cell - Responsive Design */
+/* Modern Sudoku Cell - Playfield Responsive Design */
 .modern-sudoku-cell {
   background-color: var(--color-surface, #ffffff);
   border: none;
@@ -70,14 +67,17 @@
   position: relative;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  border-radius: min(2px, 0.3vw);
+  border-radius: 2px;
   outline: none;
   
-  /* Responsive cell sizing - minimum touch target while maximizing space usage */
-  min-height: max(32px, min(10vw, 6vh));
-  min-width: max(32px, min(10vw, 6vh));
+  /* Use full grid cell space - sizing controlled by Playfield */
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 1;
   
-  /* Aspect ratio is maintained by grid container */
+  /* Minimum touch target for accessibility */
+  min-height: 32px;
+  min-width: 32px;
 }
 
 .modern-sudoku-cell:hover:not(.given) {
@@ -91,10 +91,10 @@
   z-index: 1;
 }
 
-/* Cell Value Styling - Responsive Typography */
+/* Cell Value Styling - Playfield Responsive Typography */
 .cell-value {
-  /* Dynamic font sizing based on container size */
-  font-size: clamp(0.8rem, min(4vw, 4vh), 2.2rem);
+  /* Font size controlled by Playfield scaling */
+  font-size: inherit;
   font-weight: 600;
   font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
   line-height: 1;
@@ -498,61 +498,7 @@
   50% { transform: translate(-50%, -50%) scale(1.1); }
 }
 
-/* Responsive optimizations for all screen sizes */
-
-/* Extra small mobile devices (< 400px) */
-@media (max-width: 400px) {
-  .modern-sudoku-board {
-    /* Use even more available space on very small screens */
-    width: min(98vw, 98vh);
-    height: min(98vw, 98vh);
-    border-width: max(1px, min(2px, 0.4vw));
-    padding: max(1px, min(2px, 0.4vw));
-    margin: clamp(0.25rem, 1vw, 0.5rem) 0;
-  }
-  
-  .cell-value {
-    /* Ensure text remains readable on very small screens */
-    font-size: clamp(0.7rem, min(3.8vw, 3.8vh), 1.8rem);
-  }
-  
-  .note {
-    font-size: clamp(0.3rem, min(1vw, 1vh), 0.6rem);
-  }
-  
-  .modern-sudoku-cell {
-    /* Reduce minimum size slightly for very small screens while maintaining usability */
-    min-height: max(30px, min(9vw, 5.5vh));
-    min-width: max(30px, min(9vw, 5.5vh));
-  }
-}
-
-/* Large screens (> 1024px) - optimize for desktop */
-@media (min-width: 1024px) {
-  .modern-sudoku-board {
-    /* Prevent board from becoming too large on big screens */
-    width: min(70vw, min(70vh, 500px));
-    height: min(70vw, min(70vh, 500px));
-  }
-  
-  .cell-value {
-    /* Better typography sizing for desktop */
-    font-size: clamp(1.2rem, min(3.5vw, 3.5vh), 2rem);
-  }
-}
-
-/* Landscape orientation optimizations */
-@media (orientation: landscape) and (max-height: 500px) {
-  .modern-sudoku-board {
-    /* Use height-based sizing in landscape on short screens */
-    width: min(85vh, 95vw);
-    height: min(85vh, 95vw);
-  }
-  
-  .sudoku-game-field {
-    gap: clamp(0.25rem, 1vh, 0.75rem);
-  }
-}
+/* Responsive optimizations now handled by Playfield component */
 
 /* High contrast mode support */
 @media (prefers-contrast: high) {

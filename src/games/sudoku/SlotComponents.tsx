@@ -5,6 +5,8 @@ import React, { useCallback, useState, useMemo, useEffect } from 'react';
 import { useGameSave } from '../../hooks/useGameSave';
 import { useTheme } from '../../hooks/useTheme';
 import { useCoinService } from '../../hooks/useCoinService';
+import { Playfield } from '../../components/common';
+import type { PlayfieldDimensions } from '../../components/common';
 import type { GameController, GameState, GameConfig } from '../../types/game';
 import type { SudokuGameData, Difficulty, CellValue, SudokuGrid } from './types';
 import {
@@ -334,53 +336,83 @@ export const SudokuGameField: React.FC<SlotComponentProps> = ({ playerId }) => {
         )}
       </div>
 
-      {/* Modern Sudoku Board */}
-      <div className="modern-sudoku-board">
-        {gameState.data.uiGrid.map((row, rowIndex) =>
-          row.map((cell, colIndex) => {
-            const isSelected = selectedCell && selectedCell.row === rowIndex && selectedCell.col === colIndex;
-            const isRelated = selectedCell && (
-              selectedCell.row === rowIndex || 
-              selectedCell.col === colIndex || 
-              (Math.floor(selectedCell.row / 3) === Math.floor(rowIndex / 3) && 
-               Math.floor(selectedCell.col / 3) === Math.floor(colIndex / 3))
-            );
-            const isSameNumber = selectedCell && cell.value !== 0 && 
-              gameState.data.uiGrid[selectedCell.row][selectedCell.col].value === cell.value;
-            
-            return (
-              <button
-                key={`${rowIndex}-${colIndex}`}
-                onClick={() => handleCellClick(rowIndex, colIndex)}
-                className={`
-                  modern-sudoku-cell
-                  ${cell.isInitial ? 'given' : 'user-entry'}
-                  ${isSelected ? 'selected' : ''}
-                  ${isRelated && !isSelected ? 'related' : ''}
-                  ${isSameNumber && !isSelected ? 'same-number' : ''}
-                  ${cell.isInvalid ? 'invalid' : ''}
-                  ${rowIndex % 3 === 2 && rowIndex < 8 ? 'bottom-box-border' : ''}
-                  ${colIndex % 3 === 2 && colIndex < 8 ? 'right-box-border' : ''}
-                `}
-                aria-label={`Row ${rowIndex + 1}, Column ${colIndex + 1}, ${cell.value === 0 ? 'empty' : `value ${cell.value}`}`}
-                tabIndex={0}
-              >
-                <span className="cell-value">
-                  {cell.value === 0 ? '' : cell.value}
-                </span>
-                {/* Notes placeholder for future implementation */}
-                {cell.value === 0 && cell.notes && cell.notes.length > 0 && (
-                  <div className="cell-notes">
-                    {cell.notes.slice(0, 9).map(note => (
-                      <span key={note} className="note">{note}</span>
-                    ))}
-                  </div>
-                )}
-              </button>
-            );
-          })
+      {/* Modern Sudoku Board with Playfield scaling */}
+      <Playfield
+        aspectRatio={1} // Square aspect ratio for Sudoku 9x9 grid
+        baseWidth={450}
+        baseHeight={450}
+        minConstraints={{
+          minWidth: 320,
+          minHeight: 320,
+          minScale: 0.6
+        }}
+        maxConstraints={{
+          maxWidth: 600,
+          maxHeight: 600,
+          maxScale: 1.3
+        }}
+        padding={15}
+        responsive={true}
+      >
+        {(dimensions: PlayfieldDimensions) => (
+          <div 
+            className="modern-sudoku-board"
+            style={{
+              width: `${dimensions.width}px`,
+              height: `${dimensions.height}px`,
+              fontSize: `${Math.max(0.8, dimensions.scale * 1.1)}rem`
+            }}
+          >
+            {gameState.data.uiGrid.map((row, rowIndex) =>
+              row.map((cell, colIndex) => {
+                const isSelected = selectedCell && selectedCell.row === rowIndex && selectedCell.col === colIndex;
+                const isRelated = selectedCell && (
+                  selectedCell.row === rowIndex || 
+                  selectedCell.col === colIndex || 
+                  (Math.floor(selectedCell.row / 3) === Math.floor(rowIndex / 3) && 
+                   Math.floor(selectedCell.col / 3) === Math.floor(colIndex / 3))
+                );
+                const isSameNumber = selectedCell && cell.value !== 0 && 
+                  gameState.data.uiGrid[selectedCell.row][selectedCell.col].value === cell.value;
+                
+                return (
+                  <button
+                    key={`${rowIndex}-${colIndex}`}
+                    onClick={() => handleCellClick(rowIndex, colIndex)}
+                    className={`
+                      modern-sudoku-cell
+                      ${cell.isInitial ? 'given' : 'user-entry'}
+                      ${isSelected ? 'selected' : ''}
+                      ${isRelated && !isSelected ? 'related' : ''}
+                      ${isSameNumber && !isSelected ? 'same-number' : ''}
+                      ${cell.isInvalid ? 'invalid' : ''}
+                      ${rowIndex % 3 === 2 && rowIndex < 8 ? 'bottom-box-border' : ''}
+                      ${colIndex % 3 === 2 && colIndex < 8 ? 'right-box-border' : ''}
+                    `}
+                    aria-label={`Row ${rowIndex + 1}, Column ${colIndex + 1}, ${cell.value === 0 ? 'empty' : `value ${cell.value}`}`}
+                    tabIndex={0}
+                    style={{
+                      fontSize: `${Math.max(0.8, dimensions.scale * 1.1)}rem`
+                    }}
+                  >
+                    <span className="cell-value">
+                      {cell.value === 0 ? '' : cell.value}
+                    </span>
+                    {/* Notes placeholder for future implementation */}
+                    {cell.value === 0 && cell.notes && cell.notes.length > 0 && (
+                      <div className="cell-notes">
+                        {cell.notes.slice(0, 9).map(note => (
+                          <span key={note} className="note">{note}</span>
+                        ))}
+                      </div>
+                    )}
+                  </button>
+                );
+              })
+            )}
+          </div>
         )}
-      </div>
+      </Playfield>
     </div>
   );
 };
