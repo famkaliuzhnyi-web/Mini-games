@@ -3,6 +3,8 @@
  */
 import React, { useCallback, useEffect, useRef } from 'react';
 import { useSwipeGestures } from '../../hooks/useSwipeGestures';
+import { Playfield } from '../../components/common';
+import type { PlayfieldDimensions } from '../../components/common';
 import type { Direction } from './types';
 import { useGame2048State } from './useGame2048State';
 
@@ -90,20 +92,51 @@ export const Game2048GameField: React.FC<{ playerId: string }> = ({ playerId }) 
         </div>
       )}
 
-      <div className="game2048-grid-container">
-        <div className="game2048-grid">
-          {gameState.data.grid.map((row, rowIndex) =>
-            row.map((tile, colIndex) => (
-              <div 
-                key={`${rowIndex}-${colIndex}`}
-                className={getTileClass(tile, rowIndex, colIndex)}
-              >
-                {tile > 0 ? tile : ''}
-              </div>
-            ))
-          )}
-        </div>
-      </div>
+      {/* Game Board with Playfield scaling */}
+      <Playfield
+        aspectRatio={1} // Square aspect ratio for 2048
+        baseWidth={360}
+        baseHeight={360}
+        minConstraints={{
+          minWidth: 280,
+          minHeight: 280,
+          minScale: 0.6
+        }}
+        maxConstraints={{
+          maxWidth: 500,
+          maxHeight: 500,
+          maxScale: 1.4
+        }}
+        padding={10}
+        responsive={true}
+      >
+        {(dimensions: PlayfieldDimensions) => (
+          <div className="game2048-grid-container">
+            <div 
+              className="game2048-grid"
+              style={{
+                width: `${dimensions.width}px`,
+                height: `${dimensions.height}px`,
+                fontSize: `${Math.max(1, dimensions.scale * 2.2)}rem`
+              }}
+            >
+              {gameState.data.grid.map((row, rowIndex) =>
+                row.map((tile, colIndex) => (
+                  <div 
+                    key={`${rowIndex}-${colIndex}`}
+                    className={getTileClass(tile, rowIndex, colIndex)}
+                    style={{
+                      fontSize: `${Math.max(1, dimensions.scale * 2.2)}rem`
+                    }}
+                  >
+                    {tile > 0 ? tile : ''}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+      </Playfield>
     </div>
   );
 };
