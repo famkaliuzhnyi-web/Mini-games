@@ -63,7 +63,7 @@ const AVAILABLE_GAMES: GameInfo[] = [
   {
     id: 'drawing',
     name: 'Drawing',
-    description: 'Draw on 32x32 pixel canvas with multiplayer support!',
+    description: 'Draw on 32x32 pixel canvas - multiplayer coming soon!',
     emoji: '🎨',
     category: 'Creative'
   }

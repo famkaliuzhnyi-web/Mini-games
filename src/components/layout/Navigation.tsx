@@ -47,19 +47,23 @@ export const Navigation: React.FC<NavigationProps> = ({
             </div>
             <div className="nav-user">
               {isConnected && players.length > 0 ? (
-                // Show all multiplayer players
-                players.map((player) => (
-                  <button
-                    key={player.id}
-                    className={`nav-profile-btn ${player.name === playerName ? 'nav-profile-btn-current' : 'nav-profile-btn-other'}`}
-                    onClick={player.name === playerName ? onProfileClick : undefined}
-                    aria-label={player.name === playerName ? `Open profile for ${player.name}` : `Player ${player.name}`}
-                    title={player.name === playerName ? `${player.name} - Click to edit profile` : `${player.name} (${player.role})`}
-                    disabled={player.name !== playerName}
-                  >
-                    {getProfileInitials(player.name)}
-                  </button>
-                ))
+                // Show all multiplayer players (remove duplicates based on player name)
+                players
+                  .filter((player, index, array) => 
+                    array.findIndex(p => p.name === player.name) === index
+                  )
+                  .map((player) => (
+                    <button
+                      key={player.id}
+                      className={`nav-profile-btn ${player.name === playerName ? 'nav-profile-btn-current' : 'nav-profile-btn-other'}`}
+                      onClick={player.name === playerName ? onProfileClick : undefined}
+                      aria-label={player.name === playerName ? `Open profile for ${player.name}` : `Player ${player.name}`}
+                      title={player.name === playerName ? `${player.name} - Click to edit profile` : `${player.name} (${player.role})`}
+                      disabled={player.name !== playerName}
+                    >
+                      {getProfileInitials(player.name)}
+                    </button>
+                  ))
               ) : (
                 // Show only current player when not in multiplayer
                 <button 
