@@ -19,8 +19,8 @@ export const GAME_INFO: Record<string, GameInfo> = {
   'ping-pong': {
     id: 'ping-pong', 
     name: 'Ping Pong',
-    hasMultiplayerSupport: true,
-    multiplayerStatus: 'full'
+    hasMultiplayerSupport: false, // Documentation claims full support but implementation is missing
+    multiplayerStatus: 'wip'
   },
   'snake': {
     id: 'snake',
