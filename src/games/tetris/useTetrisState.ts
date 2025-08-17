@@ -197,7 +197,7 @@ export const useTetrisState = (playerId: string) => {
           }
           
           data.activePiece = createActivePiece(data.nextPieces[0]);
-          data.nextPieces = (data.nextPieces && data.nextPieces.length > 1)
+          data.nextPieces = (Array.isArray(data.nextPieces) && data.nextPieces.length > 1)
             ? [...data.nextPieces.slice(1), getRandomPieceType()]
             : generateNextPieces();
           
@@ -275,7 +275,7 @@ export const useTetrisState = (playerId: string) => {
           }
           
           data.activePiece = createActivePiece(data.nextPieces[0]);
-          data.nextPieces = (data.nextPieces && data.nextPieces.length > 1)
+          data.nextPieces = (Array.isArray(data.nextPieces) && data.nextPieces.length > 1)
             ? [...data.nextPieces.slice(1), getRandomPieceType()]
             : generateNextPieces();
         } else {
@@ -347,7 +347,7 @@ export const useTetrisState = (playerId: string) => {
             }
             
             data.activePiece = createActivePiece(data.nextPieces[0]);
-            data.nextPieces = (data.nextPieces && data.nextPieces.length > 1)
+            data.nextPieces = (Array.isArray(data.nextPieces) && data.nextPieces.length > 1)
               ? [...data.nextPieces.slice(1), getRandomPieceType()]
               : generateNextPieces();
             

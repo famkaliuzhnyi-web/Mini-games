@@ -199,7 +199,7 @@ export const TetrisGame: React.FC<TetrisGameProps> = ({ playerId }) => {
                 player.columnStart,
                 data.multiplayer.gridWidth
               );
-              player.nextPieces = (player.nextPieces && player.nextPieces.length > 1) 
+              player.nextPieces = (Array.isArray(player.nextPieces) && player.nextPieces.length > 1) 
                 ? [...player.nextPieces.slice(1), getRandomPieceType()]
                 : generateNextPieces();
               player.canHold = true;
@@ -250,7 +250,7 @@ export const TetrisGame: React.FC<TetrisGameProps> = ({ playerId }) => {
               data.nextPieces = generateNextPieces();
             }
             data.activePiece = createActivePiece(data.nextPieces[0]);
-            data.nextPieces = (data.nextPieces && data.nextPieces.length > 1) 
+            data.nextPieces = (Array.isArray(data.nextPieces) && data.nextPieces.length > 1) 
               ? [...data.nextPieces.slice(1), getRandomPieceType()]
               : generateNextPieces();
             
@@ -298,7 +298,7 @@ export const TetrisGame: React.FC<TetrisGameProps> = ({ playerId }) => {
                 player.columnStart,
                 data.multiplayer.gridWidth
               );
-              player.nextPieces = (player.nextPieces && player.nextPieces.length > 1) 
+              player.nextPieces = (Array.isArray(player.nextPieces) && player.nextPieces.length > 1) 
                 ? [...player.nextPieces.slice(1), getRandomPieceType()]
                 : generateNextPieces();
             } else if (player.activePiece) {
@@ -332,7 +332,7 @@ export const TetrisGame: React.FC<TetrisGameProps> = ({ playerId }) => {
               data.nextPieces = generateNextPieces();
             }
             data.activePiece = createActivePiece(data.nextPieces[0]);
-            data.nextPieces = (data.nextPieces && data.nextPieces.length > 1) 
+            data.nextPieces = (Array.isArray(data.nextPieces) && data.nextPieces.length > 1) 
               ? [...data.nextPieces.slice(1), getRandomPieceType()]
               : generateNextPieces();
           } else {
@@ -492,7 +492,7 @@ export const TetrisGame: React.FC<TetrisGameProps> = ({ playerId }) => {
               data.nextPieces = generateNextPieces();
             }
             data.activePiece = createActivePiece(data.nextPieces[0]);
-            data.nextPieces = (data.nextPieces && data.nextPieces.length > 1) 
+            data.nextPieces = (Array.isArray(data.nextPieces) && data.nextPieces.length > 1) 
               ? [...data.nextPieces.slice(1), getRandomPieceType()]
               : generateNextPieces();
             
