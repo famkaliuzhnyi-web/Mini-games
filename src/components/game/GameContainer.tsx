@@ -6,6 +6,9 @@ import { SudokuGame } from '../../games/sudoku';
 import { PingPongGame } from '../../games/ping-pong';
 import { SnakeGame } from '../../games/snake';
 import { DrawingGame } from '../../games/drawing';
+import { MultiplayerWIP } from '../multiplayer/MultiplayerWIP';
+import { multiplayerService } from '../../services/MultiplayerService';
+import { GAME_INFO } from '../../constants/gameInfo';
 import './GameContainer.css';
 
 interface GameContainerProps {
@@ -18,8 +21,20 @@ export const GameContainer: React.FC<GameContainerProps> = ({
   gameId,
   playerId
 }) => {
+  // Check if we're in a multiplayer session
+  const currentSession = multiplayerService.getCurrentSession();
+  const isInMultiplayerSession = currentSession !== null;
+  
+  // Get game info
+  const gameInfo = GAME_INFO[gameId];
+  
   // Render the original integrated game components instead of slots system
   const renderGame = () => {
+    // If in multiplayer session and game doesn't support multiplayer, show WIP message
+    if (isInMultiplayerSession && gameInfo && !gameInfo.hasMultiplayerSupport) {
+      return <MultiplayerWIP gameId={gameId} gameName={gameInfo.name} />;
+    }
+    
     switch (gameId) {
       case 'game2048':
         return <Game2048 playerId={playerId} />;
