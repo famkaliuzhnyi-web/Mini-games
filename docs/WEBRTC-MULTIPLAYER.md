@@ -22,7 +22,7 @@ The Mini-games platform features a sophisticated WebRTC-based multiplayer system
 6. Real-time peer-to-peer connections established via WebRTC
 
 ### 3. Game Selection & Auto-Navigation
-1. Host selects any game from their lobby interface
+1. Host selects any game naturally from their main menu interface
 2. All connected clients are automatically navigated to the selected game
 3. Game state is synchronized across all participants
 4. Players can connect/disconnect at any time
@@ -94,7 +94,7 @@ interface MultiplayerLobbyProps {
 **Features:**
 - Real-time player list with connection states
 - Ready state management
-- Host controls for game selection
+- Session management and QR code display
 - Connection type indicators (WebRTC vs local-tab)
 
 ### Type Definitions (`src/types/multiplayer.ts`)
@@ -148,7 +148,7 @@ export type MessageType =
   | 'player-leave'     // Player leaves session  
   | 'player-ready'     // Player ready state change
   | 'session-sync'     // Session state synchronization
-  | 'game-select'      // Host selects game
+  | 'game-select'      // Host selects game from main menu
   | 'game-start'       // Game start signal
   | 'game-move'        // Game move/action
   | 'game-state'       // Full game state sync
