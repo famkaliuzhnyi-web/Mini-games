@@ -7,8 +7,8 @@ The Mini-games platform features a sophisticated WebRTC-based multiplayer system
 ## 🎮 User Flow
 
 ### 1. Host Creates Session
-1. Host player navigates to a supported game
-2. Clicks "Create Multiplayer Session" button
+1. Host player clicks the "+" button in the header (available from any page - main menu or within any game)
+2. Multiplayer modal opens with session creation options
 3. System generates unique session ID and creates WebRTC session
 4. QR code is automatically generated with session URL
 5. Host sees multiplayer lobby with QR code display
@@ -17,9 +17,10 @@ The Mini-games platform features a sophisticated WebRTC-based multiplayer system
 1. Host shares QR code (displayed on screen)
 2. Clients scan QR code with their mobile devices
 3. Clients are automatically navigated to the game website
-4. Session URL contains session ID for automatic joining
-5. Clients automatically join the multiplayer session
-6. Real-time peer-to-peer connections established via WebRTC
+4. If this is the first time the client opens the site, they are asked for a name (modal appears on whatever page was opened if no saved name found)
+5. Session URL contains session ID for automatic joining
+6. Clients automatically join the multiplayer session
+7. Real-time peer-to-peer connections established via WebRTC
 
 ### 3. Game Selection & Auto-Navigation
 1. Host selects any game naturally from their main menu interface
@@ -208,6 +209,44 @@ useEffect(() => {
 }, []);
 ```
 
+#### Ping Pong (`src/games/ping-pong/`)
+**Status**: ✅ Fully Implemented
+
+**Features**:
+- Real-time paddle synchronization
+- Ball position and velocity sync
+- Score tracking across all clients
+- Physics simulation consistency
+
+**Integration Example**:
+```typescript
+// Real-time paddle movement
+const handlePaddleMove = async (paddleY: number) => {
+  if (multiplayerSession) {
+    await multiplayerService.sendGameMove({
+      gameId: 'ping-pong',
+      playerId: playerId,
+      move: { type: 'paddle-move', y: paddleY }
+    });
+  }
+};
+
+// Listen for opponent moves
+useEffect(() => {
+  const handleGameMove = (data: GameMoveData) => {
+    if (data.gameId === 'ping-pong') {
+      const { type, y } = data.move;
+      if (type === 'paddle-move') {
+        updateOpponentPaddle(y);
+      }
+    }
+  };
+  
+  multiplayerService.on('game-move', handleGameMove);
+  return () => multiplayerService.off('game-move', handleGameMove);
+}, []);
+```
+
 ### Partially Supported Games
 
 #### Snake (`src/games/snake/`)
@@ -231,7 +270,6 @@ Games without multiplayer support show the standard message:
 - 2048 (`src/games/game2048/`)
 - Tetris (`src/games/tetris/`)
 - Sudoku (`src/games/sudoku/`)
-- Ping Pong (`src/games/ping-pong/`)
 
 ## 🛠️ Implementation Guide
 

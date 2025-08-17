@@ -67,12 +67,12 @@ export const UnsupportedMultiplayerSlot: React.FC = () => (
 | Game | Status | Features |
 |------|--------|----------|
 | Tic-Tac-Toe | ✅ Complete | Real-time moves, turn validation, winner detection |
+| Ping Pong | ✅ Complete | Real-time paddle sync, ball physics, score tracking |
 | Snake | 🚧 Partial | Multi-snake logic, needs WebRTC integration |
 | Drawing | 🚧 Partial | Multiplayer types, needs message handling |
 | 2048 | ❌ None | Shows "WIP" message |
 | Tetris | ❌ None | Shows "WIP" message |
 | Sudoku | ❌ None | Shows "WIP" message |
-| Ping Pong | ❌ None | Shows "WIP" message |
 
 ## 🛠️ Key Components
 
