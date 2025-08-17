@@ -19,19 +19,19 @@ export const GAME_INFO: Record<string, GameInfo> = {
   'ping-pong': {
     id: 'ping-pong', 
     name: 'Ping Pong',
-    hasMultiplayerSupport: false, // Documentation claims full support but implementation is missing
-    multiplayerStatus: 'wip'
+    hasMultiplayerSupport: true, // Full multiplayer support implemented
+    multiplayerStatus: 'full'
   },
   'snake': {
     id: 'snake',
     name: 'Snake',
-    hasMultiplayerSupport: false, // Partial implementation not complete
+    hasMultiplayerSupport: true, // Enable to test partial implementation
     multiplayerStatus: 'partial'
   },
   'drawing': {
     id: 'drawing',
     name: 'Drawing',
-    hasMultiplayerSupport: false, // Partial implementation not complete
+    hasMultiplayerSupport: true, // Enable to test partial implementation
     multiplayerStatus: 'partial'
   },
   'game2048': {
