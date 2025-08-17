@@ -22,12 +22,15 @@ src/
 
 ### Platform Services
 
-#### WebSocket Service
-Handles real-time multiplayer communication with features:
-- Automatic reconnection with exponential backoff
-- Message queuing during offline periods
-- Connection state management
-- Event-based message handling
+#### WebRTC Multiplayer Service
+Provides real-time peer-to-peer multiplayer functionality:
+- Session creation and management with QR code sharing
+- WebRTC data channels for low-latency communication
+- Automatic connection recovery and reconnection
+- Cross-tab communication fallback for local testing
+- Real-time game state synchronization
+
+📖 **[WebRTC Multiplayer Documentation](docs/WEBRTC-MULTIPLAYER.md)**
 
 #### Offline Service  
 Manages offline functionality using Web Workers:
@@ -186,10 +189,70 @@ export default GameBoard;
 - [ ] **Error Handling**: Graceful error management
 
 #### Platform Integration
-- [ ] **WebSocket Support**: Real-time multiplayer functionality
+- [ ] **Multiplayer Support**: WebRTC integration for real-time play
 - [ ] **Offline Support**: Works without internet connection
 - [ ] **State Synchronization**: Consistent state across devices
 - [ ] **Player Management**: Multi-player game support
+
+### 🌐 Adding Multiplayer Support
+
+To add multiplayer functionality to your game:
+
+#### 1. Import Multiplayer Service
+```typescript
+import { multiplayerService } from '../../../services/MultiplayerService';
+import { MultiplayerLobby } from '../../../components/multiplayer';
+```
+
+#### 2. Add Multiplayer Event Handling
+```typescript
+// In your game component
+useEffect(() => {
+  const handleGameMove = (data: GameMoveData) => {
+    if (data.gameId === 'your-game-id') {
+      applyMoveToGameState(data.move);
+    }
+  };
+  
+  multiplayerService.on('game-move', handleGameMove);
+  return () => multiplayerService.off('game-move', handleGameMove);
+}, []);
+```
+
+#### 3. Send Game Moves
+```typescript
+const makeMove = async (moveData: YourMoveData) => {
+  // Update local state immediately
+  updateLocalGameState(moveData);
+  
+  // Broadcast to other players
+  if (multiplayerService.getCurrentSession()) {
+    await multiplayerService.sendGameMove({
+      gameId: 'your-game-id',
+      playerId: currentPlayerId,
+      move: moveData
+    });
+  }
+};
+```
+
+#### 4. Add Lobby Component
+```typescript
+{multiplayerSession && (
+  <MultiplayerLobby
+    session={multiplayerSession}
+    isHost={multiplayerService.isHost()}
+    currentPlayerId={playerId}
+    sessionUrl={sessionUrl}
+    onPlayerReady={handlePlayerReady}
+    onLeaveSession={handleLeaveSession}
+  />
+)}
+```
+
+See **[tic-tac-toe implementation](src/games/tic-tac-toe/SlotComponents.tsx)** for a complete working example.
+
+📖 **[Full Multiplayer Documentation](docs/WEBRTC-MULTIPLAYER.md)** | **[Quick Reference](docs/MULTIPLAYER-QUICK-REFERENCE.md)**
 
 #### Quality Assurance
 - [ ] **Unit Tests**: Game logic testing
