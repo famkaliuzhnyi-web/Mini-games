@@ -33,12 +33,21 @@ A collection of classic and modern mini-games built with React + TypeScript, fea
 
 ## ✨ Platform Features
 
-✅ **Real-time Multiplayer**: Play with friends using WebSocket connections  
+✅ **WebRTC Multiplayer**: Real-time peer-to-peer gaming with QR code joining  
 ✅ **Offline Support**: Play anytime, anywhere with offline mode  
 ✅ **Cross-platform**: Works on desktop, tablet, and mobile devices  
 ✅ **No Installation**: Play directly in your browser  
 ✅ **Progress Sync**: Your achievements and progress saved across devices  
 ✅ **Auto-reconnect**: Seamless reconnection if connection is lost  
+
+### 🌐 Multiplayer Features
+- **QR Code Joining**: Host creates session, guests scan QR code to join instantly
+- **Real-time Sync**: All game moves synchronized across players via WebRTC
+- **Auto-navigation**: Host selects game, all players navigate automatically
+- **Drop-in/Drop-out**: Players can connect and disconnect at any time
+- **Cross-device**: Play on different devices seamlessly
+
+📖 **[Full Multiplayer Documentation](docs/WEBRTC-MULTIPLAYER.md)** | **[Quick Reference](docs/MULTIPLAYER-QUICK-REFERENCE.md)**  
 
 ## 🚀 Getting Started
 
