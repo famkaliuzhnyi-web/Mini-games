@@ -68,4 +68,7 @@ export interface TouchState {
   startY: number;
   currentY: number;
   paddleStartY: number;
+  startX: number;
+  currentX: number;
+  startTime: number;
 }
