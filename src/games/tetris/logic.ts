@@ -1,5 +1,6 @@
 /**
- * Tetris game logic - pure functions for game mechanics
+ * Tetris game logic - completely rewritten to eliminate TypeErrors
+ * This implementation includes comprehensive error handling and type safety
  */
 import type { 
   TetrisGrid, 
@@ -25,6 +26,9 @@ export const COLUMNS_PER_PLAYER = 10; // Each player gets 10 columns
  * Calculate grid width based on number of players
  */
 export function calculateGridWidth(playerCount: number): number {
+  if (typeof playerCount !== 'number' || playerCount < 1) {
+    return GRID_WIDTH;
+  }
   return Math.max(GRID_WIDTH, playerCount * COLUMNS_PER_PLAYER);
 }
 
@@ -86,149 +90,263 @@ export const PIECE_COLORS: Record<PieceType, CellValue> = {
 };
 
 /**
- * Create an empty game grid
+ * Safely get grid dimensions
  */
-export function createEmptyGrid(width: number = GRID_WIDTH): TetrisGrid {
-  return Array(GRID_HEIGHT).fill(null).map(() => Array(width).fill(0));
+function getGridDimensions(grid: TetrisGrid): { width: number; height: number } {
+  if (!Array.isArray(grid) || grid.length === 0) {
+    return { width: GRID_WIDTH, height: GRID_HEIGHT };
+  }
+  
+  const height = grid.length;
+  const width = Array.isArray(grid[0]) ? grid[0].length : GRID_WIDTH;
+  
+  return { width, height };
 }
 
 /**
- * Get random piece type
+ * Safely check if grid position is within bounds
+ */
+function isWithinBounds(x: number, y: number, gridWidth: number, gridHeight: number): boolean {
+  return x >= 0 && x < gridWidth && y >= 0 && y < gridHeight;
+}
+
+/**
+ * Safely access grid cell
+ */
+function getGridCell(grid: TetrisGrid, x: number, y: number): CellValue {
+  if (!Array.isArray(grid) || !Array.isArray(grid[y]) || x < 0 || y < 0) {
+    return 0; // Default to empty
+  }
+  
+  const cell = grid[y]?.[x];
+  return typeof cell === 'number' ? cell as CellValue : 0;
+}
+
+/**
+ * Safely set grid cell
+ */
+function setGridCell(grid: TetrisGrid, x: number, y: number, value: CellValue): void {
+  if (!Array.isArray(grid) || !Array.isArray(grid[y]) || x < 0 || y < 0) {
+    return; // Silently ignore invalid coordinates
+  }
+  
+  if (grid[y] && typeof grid[y][x] !== 'undefined') {
+    grid[y][x] = value;
+  }
+}
+
+/**
+ * Create an empty game grid with error checking
+ */
+export function createEmptyGrid(width: number = GRID_WIDTH): TetrisGrid {
+  const safeWidth = Math.max(1, Math.min(width || GRID_WIDTH, 100)); // Constrain width
+  const safeHeight = GRID_HEIGHT;
+  
+  const grid: TetrisGrid = [];
+  for (let row = 0; row < safeHeight; row++) {
+    const gridRow: CellValue[] = [];
+    for (let col = 0; col < safeWidth; col++) {
+      gridRow.push(0);
+    }
+    grid.push(gridRow);
+  }
+  
+  return grid;
+}
+
+/**
+ * Get random piece type with error handling
  */
 export function getRandomPieceType(): PieceType {
   const pieces: PieceType[] = ['I', 'O', 'T', 'S', 'Z', 'J', 'L'];
-  return pieces[Math.floor(Math.random() * pieces.length)];
+  const randomIndex = Math.floor(Math.random() * pieces.length);
+  return pieces[randomIndex] || 'I'; // Fallback to 'I' if something goes wrong
 }
 
 /**
  * Generate initial queue of next pieces (7-bag randomization for fairness)
+ * Completely rewritten to avoid array mutation issues
  */
 export function generateNextPieces(): PieceType[] {
   const pieces: PieceType[] = ['I', 'O', 'T', 'S', 'Z', 'J', 'L'];
   const queue: PieceType[] = [];
   
   // Generate two full bags to ensure we have enough pieces
-  for (let i = 0; i < 2; i++) {
-    const bag = [...pieces];
-    while (bag.length > 0) {
-      const randomIndex = Math.floor(Math.random() * bag.length);
-      queue.push(bag.splice(randomIndex, 1)[0]);
+  for (let bagCount = 0; bagCount < 2; bagCount++) {
+    // Create a copy of pieces array for each bag
+    const bagPieces = [...pieces];
+    
+    // Shuffle the bag using Fisher-Yates algorithm
+    for (let i = bagPieces.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [bagPieces[i], bagPieces[j]] = [bagPieces[j], bagPieces[i]];
     }
+    
+    // Add shuffled pieces to queue
+    queue.push(...bagPieces);
   }
   
-  // Return first 6 pieces without using slice
-  return queue.length > 6 ? queue.splice(0, 6) : queue;
+  // Return first 6 pieces
+  return queue.slice(0, 6);
 }
 
 /**
- * Advance the next pieces queue by removing the first piece and adding a new random piece
- * This replaces the pattern: [...nextPieces.slice(1), getRandomPieceType()]
+ * Advance the next pieces queue safely
  */
 export function advanceNextPieces(nextPieces: PieceType[]): PieceType[] {
-  // Ensure we have a valid array
   if (!Array.isArray(nextPieces) || nextPieces.length === 0) {
     return generateNextPieces();
   }
   
-  // Create a copy to avoid mutating the original
+  // Create a safe copy
   const newQueue = [...nextPieces];
   
-  // Remove first piece and add a new random piece to the end
-  if (newQueue.length > 1) {
-    newQueue.shift(); // Remove first element
-    newQueue.push(getRandomPieceType()); // Add new piece to end
-    return newQueue;
-  } else {
-    // If only one piece left, regenerate entire queue
-    return generateNextPieces();
+  // Remove first piece if possible
+  if (newQueue.length > 0) {
+    newQueue.shift();
   }
+  
+  // Add a new random piece to the end
+  newQueue.push(getRandomPieceType());
+  
+  // Ensure we always have at least 5 pieces
+  while (newQueue.length < 5) {
+    newQueue.push(getRandomPieceType());
+  }
+  
+  return newQueue;
 }
 
 /**
- * Get the next piece from the queue and advance it
- * Returns both the next piece and the updated queue
+ * Get the next piece from the queue and advance it safely
  */
 export function consumeNextPiece(nextPieces: PieceType[]): { piece: PieceType; newQueue: PieceType[] } {
-  // Ensure we have a valid array
   if (!Array.isArray(nextPieces) || nextPieces.length === 0) {
     const newQueue = generateNextPieces();
     return {
-      piece: newQueue[0],
+      piece: newQueue[0] || 'I',
       newQueue: advanceNextPieces(newQueue)
     };
   }
   
-  const piece = nextPieces[0];
+  const piece = nextPieces[0] || getRandomPieceType();
   const newQueue = advanceNextPieces(nextPieces);
   
   return { piece, newQueue };
 }
 
 /**
- * Create a ghost piece showing where the active piece will land
+ * Create a ghost piece showing where the active piece will land with bounds checking
  */
 export function createGhostPiece(grid: TetrisGrid, activePiece: ActivePiece): ActivePiece | null {
-  if (!activePiece) return null;
+  if (!activePiece || !activePiece.shape || !activePiece.position) {
+    return null;
+  }
   
   let ghostPiece = { ...activePiece };
+  let iterations = 0;
+  const maxIterations = GRID_HEIGHT + 5; // Prevent infinite loops
   
   // Drop the piece as far as possible
-  while (isValidPosition(grid, movePiece(ghostPiece, 'down'))) {
-    ghostPiece = movePiece(ghostPiece, 'down');
+  while (iterations < maxIterations) {
+    const nextPiece = movePiece(ghostPiece, 'down');
+    if (isValidPosition(grid, nextPiece)) {
+      ghostPiece = nextPiece;
+      iterations++;
+    } else {
+      break;
+    }
   }
   
   return ghostPiece;
 }
 
 /**
- * Create a new active piece for a specific player
+ * Create a new active piece with comprehensive error checking
  */
-export function createActivePiece(type: PieceType, playerId?: string, columnStart: number = 0, gridWidth: number = GRID_WIDTH): ActivePiece {
+export function createActivePiece(
+  type: PieceType, 
+  playerId?: string, 
+  columnStart: number = 0, 
+  gridWidth: number = GRID_WIDTH
+): ActivePiece {
+  // Validate piece type
+  if (!type || !PIECE_SHAPES[type]) {
+    type = 'I'; // Fallback to I piece
+  }
+  
+  // Validate parameters
+  const safeColumnStart = Math.max(0, columnStart || 0);
+  const safeGridWidth = Math.max(GRID_WIDTH, gridWidth || GRID_WIDTH);
+  
   // Calculate spawn position within player's section
-  const sectionCenter = columnStart + Math.floor(COLUMNS_PER_PLAYER / 2);
-  const spawnX = Math.max(0, Math.min(sectionCenter - 2, gridWidth - 4)); // Ensure piece fits
+  const sectionCenter = safeColumnStart + Math.floor(COLUMNS_PER_PLAYER / 2);
+  const spawnX = Math.max(0, Math.min(sectionCenter - 2, safeGridWidth - 4));
+  
+  // Get the piece shape safely
+  const shapes = PIECE_SHAPES[type];
+  const shape = (shapes && shapes[0]) ? shapes[0] : PIECE_SHAPES.I[0];
   
   return {
     type,
-    shape: PIECE_SHAPES[type][0], // Start with 0° rotation
-    position: { x: spawnX, y: 0 }, // Center in player's section
+    shape,
+    position: { x: spawnX, y: 0 },
     rotation: 0,
     playerId
   };
 }
 
 /**
- * Check if a piece position is valid (no collision)
+ * Check if a piece position is valid with comprehensive bounds checking
  */
 export function isValidPosition(grid: TetrisGrid, piece: ActivePiece): boolean {
+  if (!piece || !piece.shape || !piece.position) {
+    return false;
+  }
+  
   const { shape, position } = piece;
-  const gridWidth = grid[0]?.length || GRID_WIDTH;
+  const { width: gridWidth, height: gridHeight } = getGridDimensions(grid);
+  
+  // Check if shape is valid
+  if (!Array.isArray(shape)) {
+    return false;
+  }
   
   for (let row = 0; row < shape.length; row++) {
-    for (let col = 0; col < shape[row].length; col++) {
-      if (shape[row][col] !== 0) {
+    const shapeRow = shape[row];
+    if (!Array.isArray(shapeRow)) {
+      continue; // Skip invalid rows
+    }
+    
+    for (let col = 0; col < shapeRow.length; col++) {
+      if (shapeRow[col] !== 0) {
         const gridX = position.x + col;
         const gridY = position.y + row;
         
         // Check boundaries
-        if (gridX < 0 || gridX >= gridWidth || gridY >= GRID_HEIGHT) {
+        if (gridX < 0 || gridX >= gridWidth || gridY >= gridHeight) {
           return false;
         }
         
         // Check collision with existing pieces (but allow negative Y for pieces entering)
-        if (gridY >= 0 && grid[gridY][gridX] !== 0) {
+        if (gridY >= 0 && getGridCell(grid, gridX, gridY) !== 0) {
           return false;
         }
       }
     }
   }
+  
   return true;
 }
 
 /**
- * Move a piece in the specified direction
+ * Move a piece in the specified direction with error checking
  */
 export function movePiece(piece: ActivePiece, direction: MoveDirection): ActivePiece {
+  if (!piece || !piece.position) {
+    return piece; // Return unchanged if invalid
+  }
+  
   const newPosition = { ...piece.position };
   
   switch (direction) {
@@ -241,43 +359,74 @@ export function movePiece(piece: ActivePiece, direction: MoveDirection): ActiveP
     case 'down':
       newPosition.y += 1;
       break;
+    default:
+      // Invalid direction, return unchanged
+      return piece;
   }
   
   return { ...piece, position: newPosition };
 }
 
 /**
- * Rotate a piece
+ * Rotate a piece with comprehensive error checking
  */
 export function rotatePiece(piece: ActivePiece, direction: RotationDirection): ActivePiece {
+  if (!piece || !piece.type || typeof piece.rotation !== 'number') {
+    return piece; // Return unchanged if invalid
+  }
+  
+  const shapes = PIECE_SHAPES[piece.type];
+  if (!shapes || !Array.isArray(shapes)) {
+    return piece; // Return unchanged if no shapes available
+  }
+  
   const newRotation = direction === 'clockwise' 
     ? (piece.rotation + 1) % 4
     : (piece.rotation + 3) % 4; // +3 is same as -1 mod 4
   
+  const newShape = shapes[newRotation];
+  if (!newShape) {
+    return piece; // Return unchanged if shape doesn't exist
+  }
+  
   return {
     ...piece,
     rotation: newRotation,
-    shape: PIECE_SHAPES[piece.type][newRotation]
+    shape: newShape
   };
 }
 
 /**
- * Place a piece onto the grid
+ * Place a piece onto the grid with comprehensive error checking
  */
 export function placePiece(grid: TetrisGrid, piece: ActivePiece): TetrisGrid {
-  const newGrid = grid.map(row => [...row]);
+  if (!piece || !piece.shape || !piece.position || !Array.isArray(grid)) {
+    return grid; // Return unchanged if invalid
+  }
+  
+  // Create a deep copy of the grid
+  const newGrid: TetrisGrid = grid.map(row => Array.isArray(row) ? [...row] : []);
   const { shape, position } = piece;
-  const color = PIECE_COLORS[piece.type];
-  const gridWidth = grid[0]?.length || GRID_WIDTH;
+  const color = PIECE_COLORS[piece.type] || 1; // Fallback color
+  const { width: gridWidth, height: gridHeight } = getGridDimensions(newGrid);
+  
+  if (!Array.isArray(shape)) {
+    return newGrid; // Return unchanged if shape is invalid
+  }
   
   for (let row = 0; row < shape.length; row++) {
-    for (let col = 0; col < shape[row].length; col++) {
-      if (shape[row][col] !== 0) {
+    const shapeRow = shape[row];
+    if (!Array.isArray(shapeRow)) {
+      continue; // Skip invalid rows
+    }
+    
+    for (let col = 0; col < shapeRow.length; col++) {
+      if (shapeRow[col] !== 0) {
         const gridX = position.x + col;
         const gridY = position.y + row;
         
-        if (gridY >= 0 && gridY < GRID_HEIGHT && gridX >= 0 && gridX < gridWidth) {
-          newGrid[gridY][gridX] = color;
+        if (isWithinBounds(gridX, gridY, gridWidth, gridHeight)) {
+          setGridCell(newGrid, gridX, gridY, color);
         }
       }
     }
@@ -287,26 +436,52 @@ export function placePiece(grid: TetrisGrid, piece: ActivePiece): TetrisGrid {
 }
 
 /**
- * Check for and clear completed lines
+ * Check for and clear completed lines with robust error handling
  */
 export function clearCompletedLines(grid: TetrisGrid): { grid: TetrisGrid; linesCleared: number } {
+  if (!Array.isArray(grid) || grid.length === 0) {
+    return { grid: createEmptyGrid(), linesCleared: 0 };
+  }
+  
+  const { width: gridWidth, height: gridHeight } = getGridDimensions(grid);
   const newGrid: TetrisGrid = [];
-  const gridWidth = grid[0]?.length || GRID_WIDTH;
   let linesCleared = 0;
   
   // Check each row from bottom to top
-  for (let row = GRID_HEIGHT - 1; row >= 0; row--) {
-    if (grid[row].every(cell => cell !== 0)) {
-      // Line is complete, don't add it to new grid
+  for (let row = gridHeight - 1; row >= 0; row--) {
+    const gridRow = grid[row];
+    if (!Array.isArray(gridRow)) {
+      // If row is invalid, create empty row
+      newGrid.unshift(Array(gridWidth).fill(0));
+      continue;
+    }
+    
+    // Check if line is complete
+    let isComplete = true;
+    for (let col = 0; col < gridWidth; col++) {
+      const cell = gridRow[col];
+      if (typeof cell !== 'number' || cell === 0) {
+        isComplete = false;
+        break;
+      }
+    }
+    
+    if (isComplete) {
       linesCleared++;
+      // Don't add this row to new grid (it's cleared)
     } else {
-      // Line is not complete, add it to new grid
-      newGrid.unshift([...grid[row]]);
+      // Add the row to new grid, ensuring it has correct width
+      const newRow: CellValue[] = [];
+      for (let col = 0; col < gridWidth; col++) {
+        const cell = gridRow[col];
+        newRow.push(typeof cell === 'number' ? cell as CellValue : 0);
+      }
+      newGrid.unshift(newRow);
     }
   }
   
   // Add empty rows at the top for cleared lines
-  while (newGrid.length < GRID_HEIGHT) {
+  while (newGrid.length < gridHeight) {
     newGrid.unshift(Array(gridWidth).fill(0));
   }
   
@@ -314,9 +489,13 @@ export function clearCompletedLines(grid: TetrisGrid): { grid: TetrisGrid; lines
 }
 
 /**
- * Check if game is over (piece can't be placed at spawn)
+ * Check if game is over with error handling
  */
 export function isGameOver(grid: TetrisGrid, piece: ActivePiece): boolean {
+  if (!piece) {
+    return true; // No piece means game over
+  }
+  
   return !isValidPosition(grid, piece);
 }
 
@@ -324,14 +503,25 @@ export function isGameOver(grid: TetrisGrid, piece: ActivePiece): boolean {
  * Calculate score based on lines cleared and level
  */
 export function calculateScore(linesCleared: number, level: number): number {
+  if (typeof linesCleared !== 'number' || typeof level !== 'number') {
+    return 0;
+  }
+  
   const baseScores = [0, 40, 100, 300, 1200]; // 0, 1, 2, 3, 4 lines
-  return (baseScores[linesCleared] || 0) * (level + 1);
+  const safeIndex = Math.max(0, Math.min(linesCleared, baseScores.length - 1));
+  const safeLevel = Math.max(0, level);
+  
+  return baseScores[safeIndex] * (safeLevel + 1);
 }
 
 /**
  * Calculate level based on total lines cleared
  */
 export function calculateLevel(totalLines: number): number {
+  if (typeof totalLines !== 'number' || totalLines < 0) {
+    return 0;
+  }
+  
   return Math.floor(totalLines / 10); // Level up every 10 lines
 }
 
@@ -339,6 +529,10 @@ export function calculateLevel(totalLines: number): number {
  * Calculate drop speed based on level
  */
 export function calculateDropSpeed(level: number): number {
+  if (typeof level !== 'number' || level < 0) {
+    return INITIAL_DROP_SPEED;
+  }
+  
   return Math.max(50, Math.floor(INITIAL_DROP_SPEED * Math.pow(SPEED_INCREASE_FACTOR, level)));
 }
 
@@ -346,12 +540,23 @@ export function calculateDropSpeed(level: number): number {
  * Check if the danger zone is active (pieces in top few rows)
  */
 export function isDangerZoneActive(grid: TetrisGrid): boolean {
+  if (!Array.isArray(grid)) {
+    return false;
+  }
+  
   // Check top 4 rows for any placed pieces
-  for (let row = 0; row < 4; row++) {
-    if (grid[row].some(cell => cell !== 0)) {
-      return true;
+  for (let row = 0; row < Math.min(4, grid.length); row++) {
+    const gridRow = grid[row];
+    if (Array.isArray(gridRow)) {
+      for (let col = 0; col < gridRow.length; col++) {
+        const cell = gridRow[col];
+        if (typeof cell === 'number' && cell !== 0) {
+          return true;
+        }
+      }
     }
   }
+  
   return false;
 }
 
@@ -369,20 +574,27 @@ export function createInitialStats(): GameStats {
 }
 
 /**
- * Update game statistics after clearing lines
+ * Update game statistics after clearing lines with error checking
  */
 export function updateStats(stats: GameStats, linesCleared: number, gameStartTime: number): GameStats {
-  const newLines = stats.lines + linesCleared;
+  if (!stats || typeof stats !== 'object') {
+    stats = createInitialStats();
+  }
+  
+  const safeLinesCleared = typeof linesCleared === 'number' ? Math.max(0, linesCleared) : 0;
+  const safeGameStartTime = typeof gameStartTime === 'number' ? gameStartTime : Date.now();
+  
+  const newLines = (stats.lines || 0) + safeLinesCleared;
   const newLevel = calculateLevel(newLines);
-  const scoreGain = calculateScore(linesCleared, newLevel);
-  const elapsedTime = Math.floor((Date.now() - gameStartTime) / 1000);
+  const scoreGain = calculateScore(safeLinesCleared, newLevel);
+  const elapsedTime = Math.floor((Date.now() - safeGameStartTime) / 1000);
   
   return {
-    score: stats.score + scoreGain,
+    score: (stats.score || 0) + scoreGain,
     level: newLevel,
     lines: newLines,
-    pieces: stats.pieces + (linesCleared > 0 ? 0 : 1), // Only count piece if no lines cleared this turn
-    elapsedTime
+    pieces: (stats.pieces || 0) + (safeLinesCleared > 0 ? 0 : 1),
+    elapsedTime: Math.max(0, elapsedTime)
   };
 }
 
@@ -390,9 +602,10 @@ export function updateStats(stats: GameStats, linesCleared: number, gameStartTim
  * Create player column assignments for multiplayer
  */
 export function createPlayerColumns(playerCount: number): { columnStart: number; columnEnd: number }[] {
+  const safePlayerCount = Math.max(1, Math.min(playerCount || 1, 10)); // Limit to reasonable number
   const assignments: { columnStart: number; columnEnd: number }[] = [];
   
-  for (let i = 0; i < playerCount; i++) {
+  for (let i = 0; i < safePlayerCount; i++) {
     assignments.push({
       columnStart: i * COLUMNS_PER_PLAYER,
       columnEnd: (i + 1) * COLUMNS_PER_PLAYER
@@ -403,8 +616,12 @@ export function createPlayerColumns(playerCount: number): { columnStart: number;
 }
 
 /**
- * Get player by ID from multiplayer state
+ * Get player by ID from multiplayer state with error checking
  */
 export function getPlayerById(multiplayer: MultiplayerGameState, playerId: string): TetrisPlayer | null {
-  return multiplayer.players.find(p => p.id === playerId) || null;
+  if (!multiplayer || !Array.isArray(multiplayer.players) || !playerId) {
+    return null;
+  }
+  
+  return multiplayer.players.find(p => p && p.id === playerId) || null;
 }
