@@ -524,3 +524,45 @@
 .ping-pong-canvas:active .ping-pong-touch-area {
   opacity: 1;
 }
+
+/* Playfield Integration Styles */
+.ping-pong-playfield {
+  /* Make the playfield take up most of the available space in the game field */
+  flex: 1;
+  min-height: 400px;
+  max-height: 80vh;
+  width: 100%;
+}
+
+/* Ensure canvas container works well within Playfield */
+.ping-pong-playfield .ping-pong-canvas-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  background: var(--pp-surface-dark);
+  border-radius: var(--pp-radius);
+  box-shadow: var(--pp-shadow-lg);
+  border: 1px solid var(--color-border, var(--pp-border-dark));
+  overflow: hidden;
+}
+
+/* Canvas should fill the container */
+.ping-pong-playfield .ping-pong-canvas {
+  display: block;
+  background: transparent;
+}
+
+/* Mobile adjustments for Playfield */
+@media (max-width: 768px) {
+  .ping-pong-playfield {
+    min-height: 300px;
+    max-height: 70vh;
+  }
+}
+
+/* Portrait mode adjustments */
+@media (orientation: portrait) and (max-aspect-ratio: 3/4) {
+  .ping-pong-playfield {
+    max-height: 50vh;
+  }
+}
