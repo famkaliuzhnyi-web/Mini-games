@@ -3,7 +3,7 @@
  */
 import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { useGameSave } from '../../hooks/useGameSave';
-import { useSwipeGestures } from '../../hooks/useSwipeGestures';
+
 import { PingPongGameController } from './controller';
 import type { PingPongGameData, KeyState, TouchState, Paddle, Size } from './types';
 import type { GameState } from '../../types/game';
@@ -40,7 +40,10 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
     isActive: false,
     startY: 0,
     currentY: 0,
-    paddleStartY: 0
+    paddleStartY: 0,
+    startX: 0,
+    currentX: 0,
+    startTime: 0
   });
   const containerRef = useRef<HTMLDivElement>(null);
   const [gameDimensions, setGameDimensions] = useState(() => 
@@ -75,7 +78,15 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
 
   // Key state for paddle control
   const [keyState, setKeyState] = useState<KeyState>(keyStateRef.current);
-  const [touchState, setTouchState] = useState<TouchState>(touchStateRef.current);
+  const [touchState, setTouchState] = useState<TouchState>({
+    isActive: false,
+    startY: 0,
+    currentY: 0,
+    paddleStartY: 0,
+    startX: 0,
+    currentX: 0,
+    startTime: 0
+  });
 
   const {
     gameState,
@@ -158,7 +169,10 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
       isActive: true,
       startY: touch.clientY,
       currentY: touch.clientY,
-      paddleStartY: currentGameState.data.playerPaddle.y
+      paddleStartY: currentGameState.data.playerPaddle.y,
+      startX: touch.clientX,
+      currentX: touch.clientX,
+      startTime: Date.now()
     });
   }, []);
 
@@ -172,65 +186,136 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
     const touch = event.touches[0];
     setTouchState(prev => ({
       ...prev,
-      currentY: touch.clientY
+      currentY: touch.clientY,
+      currentX: touch.clientX
     }));
   }, []);
 
   /**
-   * Handle touch end
+   * Handle touch end with swipe detection
    */
   const handleTouchEnd = useCallback((event: React.TouchEvent) => {
     event.preventDefault();
+    const currentTouchState = touchStateRef.current;
+    const currentGameState = gameStateRef.current;
+    
+    if (!currentTouchState.isActive || !currentGameState) return;
+    
+    const endTime = Date.now();
+    const touchDuration = endTime - currentTouchState.startTime;
+    const deltaX = currentTouchState.currentX - currentTouchState.startX;
+    const deltaY = currentTouchState.currentY - currentTouchState.startY;
+    const absDeltaX = Math.abs(deltaX);
+    const absDeltaY = Math.abs(deltaY);
+    const maxDelta = Math.max(absDeltaX, absDeltaY);
+    
+    // Check for swipe gestures (must be fast and have significant movement)
+    const isSwipe = touchDuration < 400 && maxDelta > 40;
+    
+    if (isSwipe) {
+      // Determine swipe direction
+      if (absDeltaX > absDeltaY) {
+        // Horizontal swipe
+        if (deltaX > 0) {
+          // Swipe right - start new game when game is over
+          if (currentGameState.data.gameStatus === 'game-over') {
+            // Use setGameState directly for start new game
+            const currentStats = currentGameState.data;
+            const newGameData = createInitialGameData({
+              width: gameDimensions.width,
+              height: gameDimensions.height,
+              paddleWidth: gameDimensions.paddleWidth,
+              paddleHeight: gameDimensions.paddleHeight,
+              paddleSpeed: gameDimensions.paddleSpeed,
+              ballSize: gameDimensions.ballSize,
+              ballInitialSpeed: gameDimensions.ballInitialSpeed,
+              paddleMargin: gameDimensions.paddleMargin
+            });
+            
+            setGameState({
+              ...currentGameState,
+              data: {
+                ...newGameData,
+                gamesPlayed: currentStats.gamesPlayed,
+                gamesWon: currentStats.gamesWon,
+                gamesLost: currentStats.gamesLost,
+                totalPlayTime: currentStats.totalPlayTime
+              },
+              score: 0,
+              isComplete: false,
+              lastModified: new Date().toISOString()
+            });
+          }
+        }
+      } else {
+        // Vertical swipe
+        if (deltaY > 0) {
+          // Swipe down - pause game when playing
+          if (currentGameState.data.gameStatus === 'playing') {
+            setGameState({
+              ...currentGameState,
+              data: {
+                ...currentGameState.data,
+                gameStatus: 'paused'
+              },
+              lastModified: new Date().toISOString()
+            });
+          }
+        } else {
+          // Swipe up - resume game when paused
+          if (currentGameState.data.gameStatus === 'paused') {
+            setGameState({
+              ...currentGameState,
+              data: {
+                ...currentGameState.data,
+                gameStatus: 'playing'
+              },
+              lastModified: new Date().toISOString()
+            });
+          }
+        }
+      }
+    } else {
+      // Not a swipe - check for tap to pause/resume
+      const touchDistance = Math.abs(currentTouchState.currentY - currentTouchState.startY);
+      
+      if (touchDuration < 200 && touchDistance < 10) {
+        if (currentGameState.data.gameStatus === 'paused') {
+          setGameState({
+            ...currentGameState,
+            data: {
+              ...currentGameState.data,
+              gameStatus: 'playing'
+            },
+            lastModified: new Date().toISOString()
+          });
+        } else if (currentGameState.data.gameStatus === 'playing') {
+          setGameState({
+            ...currentGameState,
+            data: {
+              ...currentGameState.data,
+              gameStatus: 'paused'
+            },
+            lastModified: new Date().toISOString()
+          });
+        }
+      }
+    }
+    
     setTouchState({
       isActive: false,
       startY: 0,
       currentY: 0,
-      paddleStartY: 0
+      paddleStartY: 0,
+      startX: 0,
+      currentX: 0,
+      startTime: 0
     });
-  }, []);
+  }, [gameDimensions, setGameState]); // Only include stable dependencies
 
-  /**
-   * Handle touch tap for pause/resume
-   */
-  const handleTouchTap = useCallback((event: React.TouchEvent) => {
-    // Only handle tap if it was a short touch (not a drag)
-    const touch = event.changedTouches[0];
-    const touchDuration = Date.now() - (event.timeStamp || 0);
-    const touchDistance = Math.abs(touch.clientY - touchStateRef.current.startY);
-    
-    if (touchDuration < 200 && touchDistance < 10) {
-      if (gameState.data.gameStatus === 'paused') {
-        resumeGame();
-      } else if (gameState.data.gameStatus === 'playing') {
-        pauseGame();
-      }
-    }
-  }, [gameState.data.gameStatus]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Swipe gesture support - Add swipe gestures for game actions  
-  useSwipeGestures(containerRef, {
-    onSwipeRight: () => {
-      // Swipe right to start new game when game is over
-      if (gameState.data.gameStatus === 'game-over') {
-        startNewGame();
-      }
-    },
-    onSwipeUp: () => {
-      // Swipe up to resume game when paused
-      if (gameState.data.gameStatus === 'paused') {
-        resumeGame();
-      }
-    },
-    onSwipeDown: () => {
-      // Swipe down to pause game when playing
-      if (gameState.data.gameStatus === 'playing') {
-        pauseGame();
-      }
-    },
-    minSwipeDistance: 40,
-    maxSwipeTime: 400,
-    preventDefault: true // Prevent page scrolling during swipe gestures
-  });
+
+
 
   /**
    * Update player paddle position based on touch input
@@ -614,10 +699,7 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
           className="ping-pong-canvas"
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
-          onTouchEnd={(e) => {
-            handleTouchEnd(e);
-            handleTouchTap(e);
-          }}
+          onTouchEnd={handleTouchEnd}
           onTouchCancel={handleTouchEnd}
         >
           {/* Game field background */}

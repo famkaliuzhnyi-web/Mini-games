@@ -46,7 +46,10 @@ const usePingPongState = (playerId: string) => {
     isActive: false,
     startY: 0,
     currentY: 0,
-    paddleStartY: 0
+    paddleStartY: 0,
+    startX: 0,
+    currentX: 0,
+    startTime: 0
   });
 
   const [gameDimensions] = useState(() => 
@@ -427,7 +430,10 @@ export const PingPongGameField: React.FC<SlotComponentProps> = ({ playerId }) =>
       isActive: true,
       startY: touchCoordinate,
       currentY: touchCoordinate,
-      paddleStartY: gameState.data.playerPaddle.y
+      paddleStartY: gameState.data.playerPaddle.y,
+      startX: shouldRotate ? touch.clientY : touch.clientX,
+      currentX: shouldRotate ? touch.clientY : touch.clientX,
+      startTime: Date.now()
     });
   }, [gameState.data.playerPaddle.y, setTouchState, shouldRotate]);
 
@@ -452,7 +458,10 @@ export const PingPongGameField: React.FC<SlotComponentProps> = ({ playerId }) =>
       isActive: false,
       startY: 0,
       currentY: 0,
-      paddleStartY: 0
+      paddleStartY: 0,
+      startX: 0,
+      currentX: 0,
+      startTime: 0
     });
   }, [setTouchState]);
 
