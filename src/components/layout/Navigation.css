@@ -41,6 +41,18 @@
   transform: translateY(1px);
 }
 
+.nav-home-btn-current {
+  background: var(--color-surface, #f0f0f0);
+  color: var(--color-text, #666);
+  cursor: default;
+  opacity: 0.7;
+}
+
+.nav-home-btn-current:hover {
+  background: var(--color-surface, #f0f0f0);
+  transform: none;
+}
+
 .nav-user {
   display: flex;
   align-items: center;
