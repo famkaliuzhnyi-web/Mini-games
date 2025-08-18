@@ -116,7 +116,52 @@ export function generateNextPieces(): PieceType[] {
     }
   }
   
-  return queue.slice(0, 6); // Return first 6 pieces
+  // Return first 6 pieces without using slice
+  return queue.length > 6 ? queue.splice(0, 6) : queue;
+}
+
+/**
+ * Advance the next pieces queue by removing the first piece and adding a new random piece
+ * This replaces the pattern: [...nextPieces.slice(1), getRandomPieceType()]
+ */
+export function advanceNextPieces(nextPieces: PieceType[]): PieceType[] {
+  // Ensure we have a valid array
+  if (!Array.isArray(nextPieces) || nextPieces.length === 0) {
+    return generateNextPieces();
+  }
+  
+  // Create a copy to avoid mutating the original
+  const newQueue = [...nextPieces];
+  
+  // Remove first piece and add a new random piece to the end
+  if (newQueue.length > 1) {
+    newQueue.shift(); // Remove first element
+    newQueue.push(getRandomPieceType()); // Add new piece to end
+    return newQueue;
+  } else {
+    // If only one piece left, regenerate entire queue
+    return generateNextPieces();
+  }
+}
+
+/**
+ * Get the next piece from the queue and advance it
+ * Returns both the next piece and the updated queue
+ */
+export function consumeNextPiece(nextPieces: PieceType[]): { piece: PieceType; newQueue: PieceType[] } {
+  // Ensure we have a valid array
+  if (!Array.isArray(nextPieces) || nextPieces.length === 0) {
+    const newQueue = generateNextPieces();
+    return {
+      piece: newQueue[0],
+      newQueue: advanceNextPieces(newQueue)
+    };
+  }
+  
+  const piece = nextPieces[0];
+  const newQueue = advanceNextPieces(nextPieces);
+  
+  return { piece, newQueue };
 }
 
 /**

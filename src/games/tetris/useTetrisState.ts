@@ -10,8 +10,8 @@ import {
   createEmptyGrid,
   createActivePiece,
   createInitialStats,
-  getRandomPieceType,
   generateNextPieces,
+  advanceNextPieces,
   createGhostPiece,
   isDangerZoneActive,
   isValidPosition,
@@ -56,7 +56,7 @@ class TetrisGameController implements GameController<TetrisGameData> {
         activePiece: createActivePiece(firstPieceType),
         ghostPiece: null,
         holdPiece: null,
-        nextPieces: nextPieces.slice(1),
+        nextPieces: advanceNextPieces(nextPieces),
         stats: createInitialStats(),
         gameOver: false,
         paused: false,
@@ -197,9 +197,7 @@ export const useTetrisState = (playerId: string) => {
           }
           
           data.activePiece = createActivePiece(data.nextPieces[0]);
-          data.nextPieces = (Array.isArray(data.nextPieces) && data.nextPieces.length > 1)
-            ? [...data.nextPieces.slice(1), getRandomPieceType()]
-            : generateNextPieces();
+          data.nextPieces = advanceNextPieces(data.nextPieces);
           
           if (isGameOver(data.grid, data.activePiece)) {
             data.gameOver = true;
@@ -275,9 +273,7 @@ export const useTetrisState = (playerId: string) => {
           }
           
           data.activePiece = createActivePiece(data.nextPieces[0]);
-          data.nextPieces = (Array.isArray(data.nextPieces) && data.nextPieces.length > 1)
-            ? [...data.nextPieces.slice(1), getRandomPieceType()]
-            : generateNextPieces();
+          data.nextPieces = advanceNextPieces(data.nextPieces);
         } else {
           // Swap current piece with held piece
           const currentType = data.activePiece.type;
@@ -347,9 +343,7 @@ export const useTetrisState = (playerId: string) => {
             }
             
             data.activePiece = createActivePiece(data.nextPieces[0]);
-            data.nextPieces = (Array.isArray(data.nextPieces) && data.nextPieces.length > 1)
-              ? [...data.nextPieces.slice(1), getRandomPieceType()]
-              : generateNextPieces();
+            data.nextPieces = advanceNextPieces(data.nextPieces);
             
             if (isGameOver(data.grid, data.activePiece)) {
               data.gameOver = true;
