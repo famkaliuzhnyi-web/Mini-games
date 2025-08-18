@@ -36,11 +36,14 @@ export const Navigation: React.FC<NavigationProps> = ({
     <>
       <nav className="navigation">
         <div className="nav-content">
-          {showHomeButton && (
-            <button className="nav-home-btn" onClick={onHomeClick} aria-label="Go home">
-              🏠 Games
-            </button>
-          )}
+          <button 
+            className={`nav-home-btn ${!showHomeButton ? 'nav-home-btn-current' : ''}`}
+            onClick={showHomeButton ? onHomeClick : undefined}
+            aria-label={showHomeButton ? "Go home" : "Games (current page)"}
+            disabled={!showHomeButton}
+          >
+            🏠 Games
+          </button>
           <div className="nav-right">
             <div className="nav-coins" title="Your coin balance">
               🪙 {balance.toLocaleString()}
