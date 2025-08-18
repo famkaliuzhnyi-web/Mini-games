@@ -6,6 +6,8 @@ import { useGameSave } from '../../hooks/useGameSave';
 import { useSwipeGestures } from '../../hooks/useSwipeGestures';
 import { useTheme } from '../../hooks/useTheme';
 import { useCoinService } from '../../hooks/useCoinService';
+import { Playfield } from '../../components/common/Playfield';
+import type { PlayfieldDimensions } from '../../components/common/Playfield.types';
 import { PingPongGameController } from './controller';
 import type { PingPongGameData, KeyState, TouchState, Paddle, Size } from './types';
 import type { GameState } from '../../types/game';
@@ -52,7 +54,7 @@ const usePingPongState = (playerId: string) => {
     startTime: 0
   });
 
-  const [gameDimensions] = useState(() => 
+  const [gameDimensions, setGameDimensions] = useState(() => 
     calculateGameDimensions(LEGACY_GAME_CONFIG.GAME_WIDTH, LEGACY_GAME_CONFIG.GAME_HEIGHT)
   );
   const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 768);
@@ -316,18 +318,20 @@ const usePingPongState = (playerId: string) => {
     });
   }, [gameState, setGameState]);
 
-  const startNewGame = useCallback(() => {
+  const startNewGame = useCallback((dimensions?: { width: number; height: number; paddleWidth: number; paddleHeight: number; paddleSpeed: number; ballSize: number; ballInitialSpeed: number; paddleMargin: number; }) => {
     const currentStats = gameState.data;
     
+    const dimsToUse = dimensions || gameDimensions;
+    
     const newGameData = createInitialGameData({
-      width: gameDimensions.width,
-      height: gameDimensions.height,
-      paddleWidth: gameDimensions.paddleWidth,
-      paddleHeight: gameDimensions.paddleHeight,
-      paddleSpeed: gameDimensions.paddleSpeed,
-      ballSize: gameDimensions.ballSize,
-      ballInitialSpeed: gameDimensions.ballInitialSpeed,
-      paddleMargin: gameDimensions.paddleMargin
+      width: dimsToUse.width,
+      height: dimsToUse.height,
+      paddleWidth: dimsToUse.paddleWidth,
+      paddleHeight: dimsToUse.paddleHeight,
+      paddleSpeed: dimsToUse.paddleSpeed,
+      ballSize: dimsToUse.ballSize,
+      ballInitialSpeed: dimsToUse.ballInitialSpeed,
+      paddleMargin: dimsToUse.paddleMargin
     });
     
     setGameState({
@@ -378,6 +382,22 @@ const usePingPongState = (playerId: string) => {
     };
   }, [gameState.data.gameStatus, gameLoop]);
 
+  // Function to update game dimensions (used by Playfield)
+  const updateGameDimensions = useCallback((playfieldDims: PlayfieldDimensions) => {
+    const newDimensions = calculateGameDimensions(playfieldDims.width, playfieldDims.height);
+    setGameDimensions(newDimensions);
+    
+    // If this is a new game or the dimensions are significantly different, restart
+    if (gameState.data.gameStatus === 'playing') {
+      const widthDiff = Math.abs(gameState.data.gameArea.width - newDimensions.width);
+      const heightDiff = Math.abs(gameState.data.gameArea.height - newDimensions.height);
+      
+      if (widthDiff > 50 || heightDiff > 25) {
+        startNewGame(newDimensions);
+      }
+    }
+  }, [gameState.data.gameStatus, gameState.data.gameArea.width, gameState.data.gameArea.height, startNewGame]);
+
   return {
     gameState,
     isLoading,
@@ -386,6 +406,7 @@ const usePingPongState = (playerId: string) => {
     currentTheme,
     touchState,
     gameDimensions,
+    updateGameDimensions,
     startNewGame,
     pauseGame,
     resumeGame,
@@ -403,6 +424,7 @@ const usePingPongState = (playerId: string) => {
 // Game Field Component (the ping-pong game area)
 export const PingPongGameField: React.FC<SlotComponentProps> = ({ playerId }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [playfieldDimensions, setPlayfieldDimensions] = useState<PlayfieldDimensions | null>(null);
   
   const {
     gameState,
@@ -410,12 +432,19 @@ export const PingPongGameField: React.FC<SlotComponentProps> = ({ playerId }) =>
     isMobile,
     shouldRotate,
     touchState,
-    gameDimensions,
+    updateGameDimensions,
     startNewGame,
     pauseGame,
     resumeGame,
     setTouchState
   } = usePingPongState(playerId);
+
+  // Update game dimensions when Playfield dimensions change
+  useEffect(() => {
+    if (playfieldDimensions) {
+      updateGameDimensions(playfieldDimensions);
+    }
+  }, [playfieldDimensions, updateGameDimensions]);
 
   // Touch handlers
   const handleTouchStart = useCallback((event: React.TouchEvent) => {
@@ -534,97 +563,126 @@ export const PingPongGameField: React.FC<SlotComponentProps> = ({ playerId }) =>
         </div>
       </div>
 
-      {/* Game Canvas */}
-      <div className="ping-pong-canvas-container">
-        <svg
-          width={gameDimensions.width}
-          height={gameDimensions.height}
-          className="ping-pong-canvas"
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-          onTouchCancel={handleTouchEnd}
-        >
-          {/* Game field background */}
-          <rect
-            x={0}
-            y={0}
-            width={gameDimensions.width}
-            height={gameDimensions.height}
-            fill="#000"
-          />
-          
-          {/* Center line */}
-          <line
-            x1={gameDimensions.width / 2}
-            y1={0}
-            x2={gameDimensions.width / 2}
-            y2={gameDimensions.height}
-            stroke="var(--color-textMuted, #9ca3af)"
-            strokeWidth="2"
-            strokeDasharray="10,10"
-          />
-          
-          {/* Touch area indicator for mobile */}
-          {touchState.isActive && (
-            <rect
-              x={0}
-              y={0}
-              width={gameDimensions.width / 2}
-              height={gameDimensions.height}
-              fill="rgba(59, 130, 246, 0.1)"
-              stroke="var(--color-accent, #3b82f6)"
-              strokeWidth="2"
-              strokeDasharray="5,5"
-            />
-          )}
-          
-          {/* Player paddle */}
-          <rect
-            x={gameState.data.playerPaddle.x}
-            y={gameState.data.playerPaddle.y}
-            width={gameState.data.playerPaddle.width}
-            height={gameState.data.playerPaddle.height}
-            fill="var(--color-accent, #3b82f6)"
-            rx={2}
-          />
-          
-          {/* AI paddle */}
-          <rect
-            x={gameState.data.aiPaddle.x}
-            y={gameState.data.aiPaddle.y}
-            width={gameState.data.aiPaddle.width}
-            height={gameState.data.aiPaddle.height}
-            fill="var(--color-error, #dc2626)"
-            rx={2}
-          />
-          
-          {/* Ball */}
-          <circle
-            cx={gameState.data.ball.x + gameState.data.ball.width / 2}
-            cy={gameState.data.ball.y + gameState.data.ball.height / 2}
-            r={gameState.data.ball.width / 2}
-            fill="var(--color-text, #ffffff)"
-          />
-        </svg>
-        
-        {/* Mobile instructions overlay */}
-        {isMobile && (
-          <div style={{
-            position: 'absolute',
-            bottom: '8px',
-            left: '8px',
-            right: '8px',
-            fontSize: '0.8rem',
-            color: 'var(--color-textMuted, #9ca3af)',
-            textAlign: 'center',
-            opacity: 0.7,
-            pointerEvents: 'none'
-          }}>
-            Touch & drag to move paddle • Swipe for actions
-          </div>
-        )}
-      </div>
+      {/* Game Canvas - Now wrapped with Playfield for proper responsive scaling */}
+      <Playfield
+        aspectRatio={2} // 2:1 aspect ratio perfect for Ping Pong as documented
+        baseWidth={800}
+        baseHeight={400}
+        minConstraints={{
+          minWidth: 400,
+          minHeight: 200,
+          minScale: 0.5
+        }}
+        maxConstraints={{
+          maxScale: 2.0
+        }}
+        padding={20}
+        className="ping-pong-playfield"
+      >
+        {(dimensions: PlayfieldDimensions) => {
+          // Update dimensions state when Playfield dimensions change
+          if (playfieldDimensions?.width !== dimensions.width || playfieldDimensions?.height !== dimensions.height) {
+            setPlayfieldDimensions(dimensions);
+          }
+
+          return (
+            <div className="ping-pong-canvas-container">
+              <svg
+                width={dimensions.width}
+                height={dimensions.height}
+                className="ping-pong-canvas"
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+                onTouchCancel={handleTouchEnd}
+                style={{
+                  width: '100%',
+                  height: '100%'
+                }}
+              >
+                {/* Game field background */}
+                <rect
+                  x={0}
+                  y={0}
+                  width={dimensions.width}
+                  height={dimensions.height}
+                  fill="#000"
+                />
+                
+                {/* Center line */}
+                <line
+                  x1={dimensions.width / 2}
+                  y1={0}
+                  x2={dimensions.width / 2}
+                  y2={dimensions.height}
+                  stroke="var(--color-textMuted, #9ca3af)"
+                  strokeWidth={Math.max(1, dimensions.scale * 2)}
+                  strokeDasharray={`${dimensions.scale * 10},${dimensions.scale * 10}`}
+                />
+                
+                {/* Touch area indicator for mobile */}
+                {touchState.isActive && (
+                  <rect
+                    x={0}
+                    y={0}
+                    width={dimensions.width / 2}
+                    height={dimensions.height}
+                    fill="rgba(59, 130, 246, 0.1)"
+                    stroke="var(--color-accent, #3b82f6)"
+                    strokeWidth={Math.max(1, dimensions.scale * 2)}
+                    strokeDasharray={`${dimensions.scale * 5},${dimensions.scale * 5}`}
+                  />
+                )}
+                
+                {/* Player paddle */}
+                <rect
+                  x={gameState.data.playerPaddle.x}
+                  y={gameState.data.playerPaddle.y}
+                  width={gameState.data.playerPaddle.width}
+                  height={gameState.data.playerPaddle.height}
+                  fill="var(--color-accent, #3b82f6)"
+                  rx={Math.max(1, dimensions.scale * 2)}
+                />
+                
+                {/* AI paddle */}
+                <rect
+                  x={gameState.data.aiPaddle.x}
+                  y={gameState.data.aiPaddle.y}
+                  width={gameState.data.aiPaddle.width}
+                  height={gameState.data.aiPaddle.height}
+                  fill="var(--color-error, #dc2626)"
+                  rx={Math.max(1, dimensions.scale * 2)}
+                />
+                
+                {/* Ball */}
+                <circle
+                  cx={gameState.data.ball.x + gameState.data.ball.width / 2}
+                  cy={gameState.data.ball.y + gameState.data.ball.height / 2}
+                  r={gameState.data.ball.width / 2}
+                  fill="var(--color-text, #ffffff)"
+                />
+              </svg>
+              
+              {/* Mobile instructions overlay */}
+              {isMobile && (
+                <div style={{
+                  position: 'absolute',
+                  bottom: '8px',
+                  left: '8px',
+                  right: '8px',
+                  fontSize: `${Math.max(0.7, dimensions.scale * 0.8)}rem`,
+                  color: 'var(--color-textMuted, #9ca3af)',
+                  textAlign: 'center',
+                  opacity: 0.7,
+                  pointerEvents: 'none'
+                }}>
+                  Touch & drag to move paddle • Swipe for actions
+                </div>
+              )}
+            </div>
+          );
+        }}
+      </Playfield>
 
       {/* Rotation hint for portrait mode */}
       {shouldRotate && (
@@ -782,7 +840,7 @@ export const PingPongControls: React.FC<SlotComponentProps> = ({ playerId }) => 
       {/* Game Controls */}
       <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
         <button 
-          onClick={startNewGame}
+          onClick={() => startNewGame()}
           className="ping-pong-btn ping-pong-btn--primary"
         >
           🎮 New Game
