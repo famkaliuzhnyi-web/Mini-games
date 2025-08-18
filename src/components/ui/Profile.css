@@ -25,18 +25,27 @@
 }
 
 .profile-back-btn {
-  background: var(--color-surface, #f5f5f5);
-  border: none;
-  border-radius: 8px;
-  padding: 0.5rem 1rem;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-accent, #2196F3);
+  border: 2px solid var(--color-accent, #2196F3);
+  color: white;
   cursor: pointer;
   font-size: 0.9rem;
-  color: var(--color-text, #333);
-  transition: background-color 0.2s ease;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(33, 150, 243, 0.3);
 }
 
 .profile-back-btn:hover {
-  background: var(--color-border, #e0e0e0);
+  background: var(--color-accent-hover, #1976D2);
+  border-color: var(--color-accent-hover, #1976D2);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(33, 150, 243, 0.4);
 }
 
 .profile-header h1 {
@@ -425,7 +434,8 @@
   }
   
   .profile-back-btn {
-    padding: 0.4rem 0.8rem;
+    width: 36px;
+    height: 36px;
     font-size: 0.8rem;
   }
 }
