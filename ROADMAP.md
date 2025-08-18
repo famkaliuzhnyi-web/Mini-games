@@ -57,38 +57,6 @@ This roadmap outlines the planned development of the Mini-games platform, includ
   - Daily challenges
   - Achievement system
 
-### 🧱 Tetris Development  
-**Status**: 📋 Planned  
-**Target**: February 2024
-
-#### Features
-- [ ] **Core Implementation**
-  - Seven standard tetromino pieces (I, O, T, S, Z, J, L)
-  - Tetromino rotation and movement
-  - Line clearing mechanics
-  - Progressive speed increase
-  - Soft drop and hard drop controls
-
-- [ ] **Modern Features**
-  - Hold piece functionality
-  - Ghost piece preview
-  - Next pieces preview (up to 6 pieces)  
-  - Wall kicks and T-spins
-  - Modern scoring system
-
-- [ ] **Game Modes**
-  - Marathon: Play until game over
-  - Sprint: Clear 40 lines as fast as possible
-  - Ultra: Get highest score in 3 minutes
-  - Battle: Multiplayer competitive mode
-
-- [ ] **Multiplayer Battle**
-  - Real-time 1v1 battles
-  - Attack lines sent to opponents
-  - Combo and T-spin bonus attacks
-  - Tournament bracket system
-  - Spectator mode
-
 ### 🎮 Platform Enhancements
 - [ ] **Game Launcher**
   - Game selection menu
@@ -325,7 +293,7 @@ This roadmap outlines the planned development of the Mini-games platform, includ
 ## 🤝 How to Contribute
 
 ### Immediate Opportunities
-- **Game Development**: Help implement Sudoku and Tetris
+- **Game Development**: Help implement Sudoku
 - **Testing**: Cross-platform and accessibility testing
 - **Documentation**: Improve guides and tutorials
 - **Design**: UI/UX improvements and game mockups

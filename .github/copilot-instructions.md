@@ -1,6 +1,6 @@
 # Mini Games Platform - React + TypeScript + Vite
 
-Mini Games is a React + TypeScript web application built with Vite that provides a collection of classic mini-games including 2048, Tetris, Tic-Tac-Toe, Ping Pong, and Sudoku. The platform supports offline play, auto-save functionality, and is deployed as a Progressive Web App (PWA) on GitHub Pages.
+Mini Games is a React + TypeScript web application built with Vite that provides a collection of classic mini-games including 2048, Tic-Tac-Toe, Ping Pong, and Sudoku. The platform supports offline play, auto-save functionality, and is deployed as a Progressive Web App (PWA) on GitHub Pages.
 
 Always reference these instructions first and fallback to search or bash commands only when you encounter unexpected information that does not match the info here.
 
@@ -40,7 +40,7 @@ ALWAYS manually validate the application by running through complete user scenar
    - Click "Start Playing" to access game selection
 
 2. **Game Testing**:
-   - Test at least 2 different games from: 2048, Tetris, Tic-Tac-Toe, Ping Pong, Sudoku
+   - Test at least 2 different games from: 2048, Tic-Tac-Toe, Ping Pong, Sudoku
    - For Tic-Tac-Toe: Click cells to place X/O markers, verify turn switching
    - For Sudoku: Verify 9x9 grid loads, number input works (1-9), hint system available
    - Verify auto-save functionality works (✅ Saved indicator appears)
@@ -68,7 +68,6 @@ Key directories and files:
 │   │   ├── game2048/              # 2048 game
 │   │   ├── ping-pong/             # Ping Pong game
 │   │   ├── sudoku/                # Sudoku game
-│   │   ├── tetris/                # Tetris game
 │   │   └── tic-tac-toe/           # Tic-Tac-Toe game
 │   ├── components/                 # Shared React components
 │   ├── services/                   # Platform services (GameSave, PWA, etc.)

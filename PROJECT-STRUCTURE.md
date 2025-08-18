@@ -45,7 +45,6 @@ Mini-games/
         │
         ├── 🎮 games/            # Individual game implementations
         │   ├── sudoku/          # Sudoku game (planned)
-        │   ├── tetris/          # Tetris game (planned)
         │   └── [game-name]/     # Template for future games
         │
         ├── 🧩 components/       # Shared React components

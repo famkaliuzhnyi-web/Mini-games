@@ -268,7 +268,6 @@ Games without multiplayer support show the standard message:
 
 **Current unsupported games**:
 - 2048 (`src/games/game2048/`)
-- Tetris (`src/games/tetris/`)
 - Sudoku (`src/games/sudoku/`)
 
 ## 🛠️ Implementation Guide

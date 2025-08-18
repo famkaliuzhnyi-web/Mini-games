@@ -71,7 +71,6 @@ export const UnsupportedMultiplayerSlot: React.FC = () => (
 | Snake | 🚧 Partial | Multi-snake logic, needs WebRTC integration |
 | Drawing | 🚧 Partial | Multiplayer types, needs message handling |
 | 2048 | ❌ None | Shows "WIP" message |
-| Tetris | ❌ None | Shows "WIP" message |
 | Sudoku | ❌ None | Shows "WIP" message |
 
 ## 🛠️ Key Components
