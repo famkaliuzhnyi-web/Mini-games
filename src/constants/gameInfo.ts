@@ -46,5 +46,12 @@ export const GAME_INFO: Record<string, GameInfo> = {
     name: 'Sudoku',
     hasMultiplayerSupport: false,
     multiplayerStatus: 'wip'
+  },
+
+  'tetris': {
+    id: 'tetris',
+    name: 'Tetris',
+    hasMultiplayerSupport: false,
+    multiplayerStatus: 'wip'
   }
 };
