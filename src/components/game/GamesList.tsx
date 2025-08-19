@@ -60,6 +60,13 @@ const AVAILABLE_GAMES: GameInfo[] = [
     description: 'Draw on 32x32 pixel canvas - multiplayer coming soon!',
     emoji: '🎨',
     category: 'Creative'
+  },
+  {
+    id: 'tetris',
+    name: 'Tetris',
+    description: 'Classic block puzzle game - arrange falling pieces to clear lines!',
+    emoji: '🧱',
+    category: 'Puzzle'
   }
 ];
 

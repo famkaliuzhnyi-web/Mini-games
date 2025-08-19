@@ -5,6 +5,7 @@ import { SudokuGame } from '../../games/sudoku';
 import { PingPongGame } from '../../games/ping-pong';
 import { SnakeGame } from '../../games/snake';
 import { DrawingGame } from '../../games/drawing';
+import { Tetris } from '../../games/tetris';
 import { MultiplayerWIP } from '../multiplayer/MultiplayerWIP';
 import { multiplayerService } from '../../services/MultiplayerService';
 import { GAME_INFO } from '../../constants/gameInfo';
@@ -47,6 +48,8 @@ export const GameContainer: React.FC<GameContainerProps> = ({
         return <SnakeGame playerId={playerId} />;
       case 'drawing':
         return <DrawingGame playerId={playerId} />;
+      case 'tetris':
+        return <Tetris playerId={playerId} />;
       default:
         return (
           <div className="game-not-found">
