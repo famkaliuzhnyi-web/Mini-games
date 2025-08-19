@@ -46,16 +46,32 @@ self.addEventListener('activate', event => {
   
   event.waitUntil(
     caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          if (!currentCaches.includes(cacheName)) {
-            console.log('Service Worker: Deleting old cache', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    }).then(() => {
-      console.log('Service Worker: All old caches cleaned up');
+      const deletePromises = cacheNames.map(cacheName => {
+        // Delete any cache that doesn't match current cache names
+        // This includes old versioned caches and any orphaned caches
+        if (!currentCaches.includes(cacheName)) {
+          console.log('Service Worker: Deleting old cache', cacheName);
+          return caches.delete(cacheName);
+        }
+      }).filter(Boolean); // Remove undefined entries
+      
+      return Promise.all(deletePromises);
+    }).then((results) => {
+      const deletedCount = results.filter(result => result === true).length;
+      console.log(`Service Worker: Cleaned up ${deletedCount} old cache(s)`);
+      
+      // Force all clients to reload to use the new service worker
+      return self.clients.matchAll().then(clients => {
+        clients.forEach(client => {
+          client.postMessage({
+            type: 'SW_UPDATED',
+            payload: { 
+              cacheVersion: STATIC_CACHE_NAME.split('-v')[1],
+              deletedCaches: deletedCount
+            }
+          });
+        });
+      });
     })
   );
   self.clients.claim(); // Take control of all pages
@@ -93,52 +109,99 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        // Return cached version if available
-        if (response) {
-          return response;
-        }
+  // Determine if request is for critical assets that should use network-first
+  const isCriticalAsset = (url) => {
+    return url.includes('.html') || 
+           url.includes('.js') || 
+           url.includes('.css') || 
+           url.includes('manifest.json');
+  };
 
-        // Clone the request because it's a one-time use stream
-        const fetchRequest = event.request.clone();
-
-        return fetch(fetchRequest).then(response => {
-          // Check if valid response
-          if (!response || response.status !== 200 || response.type !== 'basic') {
-            return response;
+  // Use network-first strategy for critical assets, cache-first for others
+  if (isCriticalAsset(event.request.url)) {
+    // Network-first strategy for critical assets
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          // If network request successful, update cache and return response
+          if (response && response.status === 200 && response.type === 'basic') {
+            const responseToCache = response.clone();
+            caches.open(DYNAMIC_CACHE_NAME)
+              .then(cache => {
+                cache.put(event.request, responseToCache);
+              });
           }
-
-          // Clone the response because it's a one-time use stream
-          const responseToCache = response.clone();
-
-          // Cache dynamic content
-          caches.open(DYNAMIC_CACHE_NAME)
-            .then(cache => {
-              cache.put(event.request, responseToCache);
-            });
-
           return response;
-        }).catch(() => {
-          // Fallback for offline mode
-          if (event.request.destination === 'document') {
-            // For HTML requests, always return the index.html so React Router can handle it
-            return caches.match('/index.html').then(response => {
-              if (response) return response;
-              // If index.html is not cached, try to get it from the network
-              return fetch('/index.html').catch(() => {
-                // Last resort - return a basic offline page
+        })
+        .catch(() => {
+          // Network failed, try cache
+          return caches.match(event.request).then(cachedResponse => {
+            if (cachedResponse) {
+              return cachedResponse;
+            }
+            // Fallback for offline mode
+            if (event.request.destination === 'document') {
+              return caches.match('/index.html').then(response => {
+                if (response) return response;
                 return new Response(
                   '<!DOCTYPE html><html><head><title>Mini Games - Offline</title></head><body><h1>Mini Games</h1><p>Please check your internet connection and try again.</p></body></html>',
                   { headers: { 'Content-Type': 'text/html' } }
                 );
               });
-            });
+            }
+            throw new Error('Network failed and no cache available');
+          });
+        })
+    );
+  } else {
+    // Cache-first strategy for non-critical assets (images, fonts, etc.)
+    event.respondWith(
+      caches.match(event.request)
+        .then(response => {
+          // Return cached version if available
+          if (response) {
+            return response;
           }
-        });
-      })
-  );
+
+          // Clone the request because it's a one-time use stream
+          const fetchRequest = event.request.clone();
+
+          return fetch(fetchRequest).then(response => {
+            // Check if valid response
+            if (!response || response.status !== 200 || response.type !== 'basic') {
+              return response;
+            }
+
+            // Clone the response because it's a one-time use stream
+            const responseToCache = response.clone();
+
+            // Cache dynamic content
+            caches.open(DYNAMIC_CACHE_NAME)
+              .then(cache => {
+                cache.put(event.request, responseToCache);
+              });
+
+            return response;
+          }).catch(() => {
+            // Fallback for offline mode
+            if (event.request.destination === 'document') {
+              // For HTML requests, always return the index.html so React Router can handle it
+              return caches.match('/index.html').then(response => {
+                if (response) return response;
+                // If index.html is not cached, try to get it from the network
+                return fetch('/index.html').catch(() => {
+                  // Last resort - return a basic offline page
+                  return new Response(
+                    '<!DOCTYPE html><html><head><title>Mini Games - Offline</title></head><body><h1>Mini Games</h1><p>Please check your internet connection and try again.</p></body></html>',
+                    { headers: { 'Content-Type': 'text/html' } }
+                  );
+                });
+              });
+            }
+          });
+        })
+    );
+  }
 });
 
 // IndexedDB helper functions
@@ -224,6 +287,11 @@ self.addEventListener('message', event => {
       break;
     case 'SYNC_WHEN_ONLINE':
       handleSyncWhenOnline(clientId);
+      break;
+    case 'SKIP_WAITING':
+      // Force service worker to skip waiting and activate immediately
+      console.log('Service Worker: Skipping waiting...');
+      self.skipWaiting();
       break;
     default:
       console.log('Service Worker: Unknown message type:', type);
