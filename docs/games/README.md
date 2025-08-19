@@ -6,7 +6,6 @@ This directory contains detailed design documents for all games in the Mini-game
 
 ### 🚧 Games in Active Development
 - **[Sudoku](./sudoku.md)** - Logic-based number placement puzzle
-- **[Tetris](./tetris.md)** - Classic falling block puzzle game
 
 ### 🚧 Games in Development
 - **[Tic-Tac-Toe](./tic-tac-toe.md)** - Classic strategy game for two players
@@ -23,7 +22,6 @@ This directory contains detailed design documents for all games in the Mini-game
 | Game | Status | Priority | Target Release | Development Time | Team Size |
 |------|--------|----------|----------------|------------------|-----------|
 | Sudoku | 🚧 Active Development | High | Q1 2024 | 10 weeks | 2-3 developers |
-| Tetris | 🚧 Active Development | High | Q1 2024 | 10 weeks | 2-3 developers |
 | Tic-Tac-Toe | 🚧 In Development | Low | Q1 2024 | 2.5 weeks | 1 developer |
 | Ping Pong | 🚧 In Development | Low | Q1 2024 | 3 weeks | 1-2 developers |
 | Memory Match | 📋 Planned | High | Q2 2024 | 6 weeks | 2-3 developers |

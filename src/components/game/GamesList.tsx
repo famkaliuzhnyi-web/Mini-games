@@ -25,13 +25,7 @@ const AVAILABLE_GAMES: GameInfo[] = [
     emoji: '🔢',
     category: 'Puzzle'
   },
-  {
-    id: 'tetris',
-    name: 'Tetris',
-    description: 'Classic falling blocks puzzle game',
-    emoji: '🧱',
-    category: 'Puzzle'
-  },
+
   {
     id: 'tic-tac-toe',
     name: 'Tic-Tac-Toe',

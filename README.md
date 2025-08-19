@@ -4,7 +4,7 @@ A collection of classic and modern mini-games built with React + TypeScript, fea
 
 🌐 **Live Demo**: [https://famkaliuzhnyi-web.github.io/Mini-games/](https://famkaliuzhnyi-web.github.io/Mini-games/)  
 📱 **Mobile-Friendly**: Fully responsive and optimized for mobile devices  
-🎮 **Coming Soon**: Sudoku, Tetris, and more classic games!
+🎮 **Coming Soon**: Sudoku and more classic games!
 
 ## 🎯 Available Games
 
@@ -14,13 +14,6 @@ A collection of classic and modern mini-games built with React + TypeScript, fea
 - **Progress tracking** with statistics and achievements
 - **Multiplayer mode** - compete to solve puzzles fastest
 - **Offline play** - perfect for commuting or travel
-
-### 🧱 Tetris *(Coming Soon)*
-- **Classic falling blocks gameplay** with modern controls
-- **Multiple game modes**: Marathon, Sprint, and Multiplayer Battle
-- **Progressive difficulty** with increasing speed levels
-- **Real-time multiplayer** - send attack lines to opponents
-- **Offline mode** with personal best tracking
 
 ### 🎮 More Games Planned
 - Memory Match

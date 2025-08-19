@@ -14,7 +14,6 @@ src/
 ├── services/          # Platform services (WebSocket, Offline)
 ├── games/             # Individual game modules
 │   ├── sudoku/        # Sudoku game implementation
-│   ├── tetris/        # Tetris game implementation  
 │   └── [new-game]/    # Template for new games
 ├── utils/             # Shared utility functions
 └── types/             # Shared TypeScript types

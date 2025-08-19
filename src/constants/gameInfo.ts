@@ -40,12 +40,7 @@ export const GAME_INFO: Record<string, GameInfo> = {
     hasMultiplayerSupport: false,
     multiplayerStatus: 'wip'
   },
-  'tetris': {
-    id: 'tetris',
-    name: 'Tetris',
-    hasMultiplayerSupport: false,
-    multiplayerStatus: 'wip'
-  },
+
   'sudoku': {
     id: 'sudoku',
     name: 'Sudoku',

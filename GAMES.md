@@ -23,14 +23,6 @@ Logic-based number placement puzzle where players fill a 9×9 grid with digits 1
 **Key Features**: Multiple difficulty levels, hint system, multiplayer races, daily challenges
 **Development Focus**: Advanced solving algorithms, real-time multiplayer, comprehensive tutorial system
 
-### 🧱 Tetris  
-**Status**: 🚧 In Active Development | **Target**: Q1 2024 | **[📖 Full Documentation](./docs/games/tetris.md)**
-
-Classic falling block puzzle with modern features and competitive multiplayer battles.
-
-**Key Features**: Classic 7-piece gameplay, modern mechanics (hold, ghost piece), battle mode, tournament system
-**Development Focus**: 60 FPS precision gameplay, competitive features, advanced techniques (T-spins)
-
 ## 🔧 Games in Development
 
 ### ⭕ Tic-Tac-Toe
@@ -92,7 +84,6 @@ Strategic disc-dropping game with AI opponents and competitive multiplayer.
 | Game | Status | Priority | Release Target | Development Time | Team Size |
 |------|--------|----------|----------------|------------------|-----------|
 | Sudoku | 🚧 Active Dev | High | Q1 2024 | 10 weeks | 2-3 devs |
-| Tetris | 🚧 Active Dev | High | Q1 2024 | 10 weeks | 2-3 devs |
 | Tic-Tac-Toe | 🚧 In Dev | Low | Q1 2024 | 2.5 weeks | 1 dev |
 | Ping Pong | 🚧 In Dev | Low | Q1 2024 | 3 weeks | 1-2 devs |
 | Memory Match | 📋 Planned | High | Q2 2024 | 6 weeks | 2-3 devs |
