@@ -139,6 +139,30 @@ self.addEventListener('fetch', event => {
             if (cachedResponse) {
               return cachedResponse;
             }
+            
+            // Special handling for old asset files that no longer exist
+            if (event.request.url.includes('/assets/') && event.request.url.includes('.js')) {
+              // If someone is requesting an old JS asset, redirect them to the main page
+              // which will load the correct current assets
+              return caches.match('/index.html').then(response => {
+                if (response) {
+                  // Return a 302 redirect response to the main page
+                  return new Response(null, {
+                    status: 302,
+                    headers: {
+                      'Location': '/'
+                    }
+                  });
+                }
+                return fetch('/index.html').catch(() => {
+                  return new Response(
+                    '<!DOCTYPE html><html><head><title>Mini Games - Offline</title></head><body><h1>Mini Games</h1><p>Asset not found. <a href="/">Return to main page</a></p></body></html>',
+                    { headers: { 'Content-Type': 'text/html' } }
+                  );
+                });
+              });
+            }
+            
             // Fallback for offline mode
             if (event.request.destination === 'document') {
               return caches.match('/index.html').then(response => {
@@ -191,6 +215,34 @@ self.addEventListener('fetch', event => {
                 // If index.html is not cached, try to get it from the network
                 return fetch('/index.html').catch(() => {
                   // Last resort - return a basic offline page
+                  return new Response(
+                    '<!DOCTYPE html><html><head><title>Mini Games - Offline</title></head><body><h1>Mini Games</h1><p>Please check your internet connection and try again.</p></body></html>',
+                    { headers: { 'Content-Type': 'text/html' } }
+                  );
+                });
+              });
+            }
+            
+            // Special handling for old asset files (JS/CSS) that no longer exist
+            if (event.request.url.includes('/assets/') && (event.request.url.includes('.js') || event.request.url.includes('.css'))) {
+              console.log('Service Worker: Old asset requested:', event.request.url);
+              // Return a helpful response that redirects to the main page
+              return new Response(
+                `// This asset file no longer exists. Please visit the main page to get the latest version.
+window.location.href = '/';`,
+                { 
+                  headers: { 'Content-Type': 'application/javascript' },
+                  status: 200
+                }
+              );
+            }
+            
+            // Last resort - return a basic offline page
+            return new Response(
+              '<!DOCTYPE html><html><head><title>Mini Games - Offline</title></head><body><h1>Mini Games</h1><p>Please check your internet connection and try again.</p></body></html>',
+              { headers: { 'Content-Type': 'text/html' } }
+            );
+          });
                   return new Response(
                     '<!DOCTYPE html><html><head><title>Mini Games - Offline</title></head><body><h1>Mini Games</h1><p>Please check your internet connection and try again.</p></body></html>',
                     { headers: { 'Content-Type': 'text/html' } }
