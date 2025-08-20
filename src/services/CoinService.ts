@@ -181,7 +181,7 @@ export class CoinService implements CoinServiceInterface {
     if (score && score > 0) {
       const scoreBonus = Math.floor(score / 1000); // 1 coin per 1000 points
       totalReward += scoreBonus;
-      description += ` with score ${score.toLocaleString()}`;
+      description += ` with score ${(score ?? 0).toLocaleString()}`;
     }
 
     return this.earnCoins(totalReward, 'game_completion', gameId, description);
