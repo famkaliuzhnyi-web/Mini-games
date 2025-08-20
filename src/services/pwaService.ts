@@ -23,13 +23,24 @@ export class PWAService {
 
   constructor() {
     this.init();
+    
+    // Add debugging utilities to window object for development
+    if (typeof window !== 'undefined') {
+      (window as unknown as { pwaDebug: unknown }).pwaDebug = {
+        forceClearCache: () => this.forceClearCache(),
+        forceRefresh: () => this.forceRefresh(),
+        getStorageEstimate: () => this.getStorageEstimate(),
+        getInstallState: () => this.getInstallState()
+      };
+    }
   }
 
   private async init() {
     // Register service worker
     if ('serviceWorker' in navigator) {
       try {
-        const swPath = getAbsolutePath('/sw.js')
+        // Add cache busting parameter to force service worker updates
+        const swPath = getAbsolutePath('/sw.js') + '?v=' + Date.now()
         const registration = await navigator.serviceWorker.register(swPath, {
           scope: getAbsolutePath('/'),
           updateViaCache: 'none', // Don't cache the service worker file itself
@@ -46,8 +57,11 @@ export class PWAService {
             newWorker.addEventListener('statechange', () => {
               if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                 console.log('New service worker available, refresh to use it');
-                // You can dispatch a custom event here to notify the user about the update
+                // Notify user about the update and offer to refresh
                 window.dispatchEvent(new CustomEvent('sw-update-available'));
+                
+                // Show update notification
+                this.showUpdateNotification();
               }
             });
           }
@@ -59,6 +73,18 @@ export class PWAService {
             registration.update();
           }
         }, 5 * 60 * 1000);
+
+        // Listen for messages from service worker
+        navigator.serviceWorker.addEventListener('message', (event) => {
+          const { type, payload } = event.data;
+          if (type === 'SW_UPDATED') {
+            console.log('Service Worker updated, cache version:', payload.cacheVersion);
+            // Optionally reload the page to use the new version
+            if (payload.deletedCaches > 0) {
+              this.showUpdateNotification();
+            }
+          }
+        });
 
       } catch (error) {
         console.error('Service Worker registration failed:', error);
@@ -103,6 +129,20 @@ export class PWAService {
   private notifyInstallable() {
     // Dispatch custom event to notify components that app is installable
     window.dispatchEvent(new CustomEvent('pwa-installable'));
+  }
+
+  private showUpdateNotification() {
+    // Show a simple notification to users about the update
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification('Mini Games Update Available', {
+        body: 'A new version is available. Refresh the page to get the latest features!',
+        icon: '/icon-192x192.png',
+        tag: 'app-update'
+      });
+    } else {
+      // Fallback to console and custom event for components to handle
+      console.log('App update available - refresh recommended');
+    }
   }
 
   public async showInstallPrompt(): Promise<boolean> {
@@ -164,6 +204,63 @@ export class PWAService {
       }
     }
     return null;
+  }
+
+  /**
+   * Force clear all caches and reload the page
+   * Useful for developers and users experiencing caching issues
+   */
+  public async forceClearCache(): Promise<boolean> {
+    try {
+      // Clear all caches
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        await Promise.all(
+          cacheNames.map(cacheName => {
+            console.log('Clearing cache:', cacheName);
+            return caches.delete(cacheName);
+          })
+        );
+      }
+
+      // Clear localStorage (but preserve essential data)
+      const essentialKeys = ['minigames_player_'];
+      Object.keys(localStorage).forEach(key => {
+        if (!essentialKeys.some(essential => key.startsWith(essential))) {
+          localStorage.removeItem(key);
+        }
+      });
+
+      // Unregister service worker
+      if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(
+          registrations.map(registration => {
+            console.log('Unregistering service worker');
+            return registration.unregister();
+          })
+        );
+      }
+
+      console.log('All caches cleared successfully');
+      return true;
+    } catch (error) {
+      console.error('Error clearing caches:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Quick refresh that forces service worker update
+   */
+  public async forceRefresh(): Promise<void> {
+    // Skip waiting for any new service worker
+    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage({ type: 'SKIP_WAITING' });
+    }
+    
+    // Reload with cache bypass
+    window.location.reload();
   }
 }
 
