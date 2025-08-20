@@ -21,7 +21,9 @@ import {
   isGameOver,
   getHardDropPosition,
   BOARD_HEIGHT,
-  BOARD_BUFFER
+  BOARD_BUFFER,
+  BOARD_WIDTH,
+  PIECE_DEFINITIONS
 } from './logic';
 
 // Game configuration
@@ -64,17 +66,62 @@ class TetrisController implements GameController<TetrisData> {
   }
 
   validateState(state: GameState<TetrisData>): boolean {
-    return !!(
-      state &&
-      state.data &&
-      Array.isArray(state.data.board) &&
-      state.data.board.length === BOARD_HEIGHT + BOARD_BUFFER &&
-      typeof state.data.score === 'number' &&
-      typeof state.data.level === 'number' &&
-      typeof state.data.lines === 'number' &&
-      typeof state.data.gameOver === 'boolean' &&
-      typeof state.data.isPaused === 'boolean'
-    );
+    // Basic structure validation
+    if (!state || !state.data) {
+      return false;
+    }
+
+    const data = state.data;
+
+    // Validate board structure
+    if (!Array.isArray(data.board) || data.board.length !== BOARD_HEIGHT + BOARD_BUFFER) {
+      return false;
+    }
+
+    // Validate each row in the board
+    for (const row of data.board) {
+      if (!Array.isArray(row) || row.length !== BOARD_WIDTH) {
+        return false;
+      }
+    }
+
+    // Validate required primitive fields
+    if (typeof data.score !== 'number' ||
+        typeof data.level !== 'number' ||
+        typeof data.lines !== 'number' ||
+        typeof data.gameOver !== 'boolean' ||
+        typeof data.isPaused !== 'boolean' ||
+        typeof data.dropTime !== 'number') {
+      return false;
+    }
+
+    // Validate nextPiece
+    if (!data.nextPiece || !PIECE_DEFINITIONS[data.nextPiece]) {
+      return false;
+    }
+
+    // Validate activePiece (can be null, but if present must be valid)
+    if (data.activePiece !== null) {
+      if (!data.activePiece ||
+          !data.activePiece.type ||
+          !PIECE_DEFINITIONS[data.activePiece.type] ||
+          !Array.isArray(data.activePiece.shape) ||
+          data.activePiece.shape.length !== 4 ||
+          typeof data.activePiece.position?.row !== 'number' ||
+          typeof data.activePiece.position?.col !== 'number' ||
+          typeof data.activePiece.rotation !== 'number') {
+        return false;
+      }
+
+      // Validate shape structure
+      for (const shapeRow of data.activePiece.shape) {
+        if (!Array.isArray(shapeRow) || shapeRow.length !== 4) {
+          return false;
+        }
+      }
+    }
+
+    return true;
   }
 
   onSaveLoad(state: GameState<TetrisData>): void {
@@ -88,6 +135,24 @@ class TetrisController implements GameController<TetrisData> {
 
   onSaveDropped(): void {
     console.log('Tetris game save dropped');
+  }
+
+  // Create a safe, validated state from potentially corrupted data
+  sanitizeState(state: GameState<TetrisData>): GameState<TetrisData> {
+    const initialState = this.getInitialState();
+    
+    if (!this.validateState(state)) {
+      console.warn('Invalid Tetris state detected, using initial state');
+      return {
+        ...initialState,
+        playerId: state.playerId || '',
+        createdAt: state.createdAt || initialState.createdAt,
+        lastModified: new Date().toISOString()
+      };
+    }
+
+    // State is valid, return as-is
+    return state;
   }
 }
 
