@@ -149,7 +149,7 @@ export const GameStats: React.FC<GameStatsProps> = ({
             color: '#FFD700',
             fontSize: '1.1rem'
           }}>
-            🏆 {score.toLocaleString()}
+            🏆 {(score ?? 0).toLocaleString()}
           </div>
         </div>
       )}

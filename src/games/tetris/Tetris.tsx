@@ -246,7 +246,7 @@ export const Tetris: React.FC<TetrisProps> = ({ playerId }) => {
           {gameData.gameOver && (
             <div className="tetris-game-over">
               <h2>Game Over!</h2>
-              <p>Final Score: {gameData.score.toLocaleString()}</p>
+              <p>Final Score: {(gameData.score ?? 0).toLocaleString()}</p>
               <button onClick={() => performAction({ type: 'NEW_GAME' })}>
                 Play Again
               </button>
@@ -268,15 +268,15 @@ export const Tetris: React.FC<TetrisProps> = ({ playerId }) => {
           <div className="tetris-stats">
             <div className="tetris-stat">
               <label>Score</label>
-              <span>{gameData.score.toLocaleString()}</span>
+              <span>{(gameData.score ?? 0).toLocaleString()}</span>
             </div>
             <div className="tetris-stat">
               <label>Level</label>
-              <span>{gameData.level}</span>
+              <span>{gameData.level ?? 0}</span>
             </div>
             <div className="tetris-stat">
               <label>Lines</label>
-              <span>{gameData.lines}</span>
+              <span>{gameData.lines ?? 0}</span>
             </div>
           </div>
 

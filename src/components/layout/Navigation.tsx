@@ -46,7 +46,7 @@ export const Navigation: React.FC<NavigationProps> = ({
           </button>
           <div className="nav-right">
             <div className="nav-coins" title="Your coin balance">
-              🪙 {balance.toLocaleString()}
+              🪙 {(balance ?? 0).toLocaleString()}
             </div>
             <div className="nav-user">
               {isConnected && players.length > 0 ? (
