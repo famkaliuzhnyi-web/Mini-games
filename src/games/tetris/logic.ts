@@ -114,9 +114,14 @@ export const createPiece = (type: PieceType): TetrisPiece => {
 
 // Check if position is valid for piece
 export const isValidPosition = (board: GameBoard, piece: TetrisPiece, position: Position): boolean => {
+  // Defensive checks
+  if (!Array.isArray(board) || !piece || !Array.isArray(piece.shape) || !position) {
+    return false;
+  }
+
   for (let row = 0; row < 4; row++) {
     for (let col = 0; col < 4; col++) {
-      if (piece.shape[row][col]) {
+      if (piece.shape[row] && piece.shape[row][col]) {
         const newRow = position.row + row;
         const newCol = position.col + col;
         
@@ -127,7 +132,7 @@ export const isValidPosition = (board: GameBoard, piece: TetrisPiece, position: 
         }
         
         // Check collision with placed pieces
-        if (board[newRow][newCol] !== 0) {
+        if (!board[newRow] || board[newRow][newCol] !== 0) {
           return false;
         }
       }
@@ -148,15 +153,22 @@ export const rotatePiece = (piece: TetrisPiece): TetrisPiece => {
 
 // Place piece on board
 export const placePiece = (board: GameBoard, piece: TetrisPiece): GameBoard => {
-  const newBoard = board.map(row => [...row]);
+  // Defensive checks
+  if (!Array.isArray(board) || !piece || !Array.isArray(piece.shape)) {
+    console.error('Invalid board or piece in placePiece');
+    return board || createEmptyBoard();
+  }
+
+  const newBoard = board.map(row => Array.isArray(row) ? [...row] : []);
   
   for (let row = 0; row < 4; row++) {
     for (let col = 0; col < 4; col++) {
-      if (piece.shape[row][col]) {
+      if (piece.shape[row] && piece.shape[row][col]) {
         const boardRow = piece.position.row + row;
         const boardCol = piece.position.col + col;
         if (boardRow >= 0 && boardRow < BOARD_HEIGHT + BOARD_BUFFER && 
-            boardCol >= 0 && boardCol < BOARD_WIDTH) {
+            boardCol >= 0 && boardCol < BOARD_WIDTH &&
+            newBoard[boardRow]) {
           newBoard[boardRow][boardCol] = piece.type;
         }
       }
@@ -181,14 +193,22 @@ export const getCompletedLines = (board: GameBoard): number[] => {
 
 // Clear completed lines
 export const clearLines = (board: GameBoard, lines: number[]): GameBoard => {
-  const newBoard = board.map(row => [...row]);
+  // Defensive check
+  if (!Array.isArray(board)) {
+    console.error('Invalid board in clearLines');
+    return createEmptyBoard();
+  }
+
+  const newBoard = board.map(row => Array.isArray(row) ? [...row] : []);
   
   // Remove completed lines (from bottom to top)
   const sortedLines = [...lines].sort((a, b) => b - a);
   for (const line of sortedLines) {
-    newBoard.splice(line, 1);
-    // Add empty line at top
-    newBoard.unshift(Array.from({ length: BOARD_WIDTH }, () => 0 as CellValue));
+    if (line >= 0 && line < newBoard.length) {
+      newBoard.splice(line, 1);
+      // Add empty line at top
+      newBoard.unshift(Array.from({ length: BOARD_WIDTH }, () => 0 as CellValue));
+    }
   }
   
   return newBoard;

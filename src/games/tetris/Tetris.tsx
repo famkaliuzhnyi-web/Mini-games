@@ -133,18 +133,28 @@ export const Tetris: React.FC<TetrisProps> = ({ playerId }) => {
 
   // Render the game board with active piece
   const renderBoard = () => {
-    const displayBoard = gameData.board.map(row => [...row]);
+    // Defensive check: ensure board exists and is properly structured
+    if (!gameData.board || !Array.isArray(gameData.board)) {
+      return (
+        <div className="tetris-board tetris-board--error">
+          <div className="tetris-error-message">Board not available</div>
+        </div>
+      );
+    }
+
+    const displayBoard = gameData.board.map(row => Array.isArray(row) ? [...row] : []);
     
     // Add active piece to display board
-    if (gameData.activePiece) {
+    if (gameData.activePiece && gameData.activePiece.shape && Array.isArray(gameData.activePiece.shape)) {
       const piece = gameData.activePiece;
       for (let row = 0; row < 4; row++) {
         for (let col = 0; col < 4; col++) {
-          if (piece.shape[row][col]) {
+          if (piece.shape[row] && piece.shape[row][col]) {
             const boardRow = piece.position.row + row;
             const boardCol = piece.position.col + col;
             if (boardRow >= 0 && boardRow < BOARD_HEIGHT + BOARD_BUFFER && 
-                boardCol >= 0 && boardCol < BOARD_WIDTH) {
+                boardCol >= 0 && boardCol < BOARD_WIDTH &&
+                displayBoard[boardRow]) {
               displayBoard[boardRow][boardCol] = piece.type;
             }
           }
@@ -159,12 +169,14 @@ export const Tetris: React.FC<TetrisProps> = ({ playerId }) => {
       <div className="tetris-board">
         {visibleBoard.map((row, rowIndex) => (
           <div key={rowIndex} className="tetris-row">
-            {row.map((cell, colIndex) => (
+            {(Array.isArray(row) ? row : []).map((cell, colIndex) => (
               <div
                 key={colIndex}
                 className={`tetris-cell ${cell !== 0 ? `tetris-cell--${cell}` : ''}`}
                 style={{
-                  backgroundColor: cell !== 0 ? PIECE_DEFINITIONS[cell as PieceType].color : undefined
+                  backgroundColor: cell !== 0 && PIECE_DEFINITIONS[cell as PieceType] 
+                    ? PIECE_DEFINITIONS[cell as PieceType].color 
+                    : undefined
                 }}
               />
             ))}
@@ -176,19 +188,43 @@ export const Tetris: React.FC<TetrisProps> = ({ playerId }) => {
 
   // Render next piece preview
   const renderNextPiece = () => {
-    const nextShape = PIECE_DEFINITIONS[gameData.nextPiece].shapes[0];
+    // Defensive check: ensure nextPiece exists and is valid
+    if (!gameData.nextPiece || !PIECE_DEFINITIONS[gameData.nextPiece]) {
+      return (
+        <div className="tetris-next-piece">
+          <h3>Next</h3>
+          <div className="tetris-next-grid tetris-next-grid--error">
+            <div className="tetris-error-message">Next piece not available</div>
+          </div>
+        </div>
+      );
+    }
+
+    const pieceDefinition = PIECE_DEFINITIONS[gameData.nextPiece];
+    if (!pieceDefinition.shapes || !Array.isArray(pieceDefinition.shapes) || !pieceDefinition.shapes[0]) {
+      return (
+        <div className="tetris-next-piece">
+          <h3>Next</h3>
+          <div className="tetris-next-grid tetris-next-grid--error">
+            <div className="tetris-error-message">Shape not available</div>
+          </div>
+        </div>
+      );
+    }
+
+    const nextShape = pieceDefinition.shapes[0];
     return (
       <div className="tetris-next-piece">
         <h3>Next</h3>
         <div className="tetris-next-grid">
           {nextShape.map((row, rowIndex) => (
             <div key={rowIndex} className="tetris-next-row">
-              {row.map((cell, colIndex) => (
+              {(Array.isArray(row) ? row : []).map((cell, colIndex) => (
                 <div
                   key={colIndex}
                   className={`tetris-next-cell ${cell ? `tetris-next-cell--${gameData.nextPiece}` : ''}`}
                   style={{
-                    backgroundColor: cell ? PIECE_DEFINITIONS[gameData.nextPiece].color : undefined
+                    backgroundColor: cell ? pieceDefinition.color : undefined
                   }}
                 />
               ))}
