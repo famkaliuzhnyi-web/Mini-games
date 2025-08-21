@@ -199,16 +199,20 @@ export const clearLines = (board: GameBoard, lines: number[]): GameBoard => {
     return createEmptyBoard();
   }
 
-  const newBoard = board.map(row => Array.isArray(row) ? [...row] : []);
+  const lineSet = new Set(lines);
+  const newBoard: GameBoard = [];
   
-  // Remove completed lines (from bottom to top)
-  const sortedLines = [...lines].sort((a, b) => b - a);
-  for (const line of sortedLines) {
-    if (line >= 0 && line < newBoard.length) {
-      newBoard.splice(line, 1);
-      // Add empty line at top
-      newBoard.unshift(Array.from({ length: BOARD_WIDTH }, () => 0 as CellValue));
+  // Copy all non-completed lines
+  for (let i = 0; i < board.length; i++) {
+    if (!lineSet.has(i)) {
+      newBoard.push(Array.isArray(board[i]) ? [...board[i]] : []);
     }
+  }
+  
+  // Add empty lines at the top to maintain board size
+  const linesToAdd = lines.length;
+  for (let i = 0; i < linesToAdd; i++) {
+    newBoard.unshift(Array.from({ length: BOARD_WIDTH }, () => 0 as CellValue));
   }
   
   return newBoard;
