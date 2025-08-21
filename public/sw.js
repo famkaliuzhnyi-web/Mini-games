@@ -243,14 +243,6 @@ window.location.href = '/';`,
               { headers: { 'Content-Type': 'text/html' } }
             );
           });
-                  return new Response(
-                    '<!DOCTYPE html><html><head><title>Mini Games - Offline</title></head><body><h1>Mini Games</h1><p>Please check your internet connection and try again.</p></body></html>',
-                    { headers: { 'Content-Type': 'text/html' } }
-                  );
-                });
-              });
-            }
-          });
         })
     );
   }
