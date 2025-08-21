@@ -1,0 +1,809 @@
+/**
+ * IoT Scanner Application Styles
+ */
+
+.iot-scanner {
+  padding: 1rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  background: var(--background-color, #f5f5f5);
+  min-height: calc(100vh - 80px);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.iot-scanner-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 1rem;
+}
+
+.loading-spinner {
+  font-size: 2rem;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Header */
+.iot-scanner-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.iot-scanner-header h1 {
+  margin: 0 0 0.5rem 0;
+  color: #2c3e50;
+  font-size: 2rem;
+}
+
+.iot-scanner-header p {
+  margin: 0;
+  color: #7f8c8d;
+  font-size: 1.1rem;
+}
+
+/* Main Layout */
+.iot-scanner-main {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.iot-scanner-left,
+.iot-scanner-right {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Network Info */
+.network-info {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.network-info-header {
+  display: flex;
+  justify-content: between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.network-info-header h3 {
+  margin: 0;
+  color: #2c3e50;
+  flex: 1;
+}
+
+.network-status {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.status-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #ecf0f1;
+}
+
+.status-label {
+  font-weight: 500;
+  color: #34495e;
+}
+
+.status-value {
+  color: #2c3e50;
+  font-family: 'Courier New', monospace;
+}
+
+/* Config Panel */
+.config-panel {
+  border-top: 1px solid #ecf0f1;
+  padding-top: 1rem;
+  margin-top: 1rem;
+}
+
+.config-section {
+  margin-bottom: 1rem;
+}
+
+.config-section label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+.config-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #ecf0f1;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+}
+
+.config-input:focus {
+  border-color: #3498db;
+  outline: none;
+}
+
+.config-section small {
+  display: block;
+  margin-top: 0.25rem;
+  color: #7f8c8d;
+  font-size: 0.875rem;
+}
+
+.config-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+/* Scan Controls */
+.scan-controls {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.scan-controls-header h3 {
+  margin: 0 0 1rem 0;
+  color: #2c3e50;
+}
+
+.scan-btn {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-bottom: 1rem;
+}
+
+/* Progress Bar */
+.scan-progress {
+  margin-top: 1rem;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #ecf0f1;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3498db, #2ecc71);
+  transition: width 0.3s ease;
+  border-radius: 4px;
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+  color: #7f8c8d;
+  margin-bottom: 1rem;
+}
+
+.progress-current {
+  font-family: 'Courier New', monospace;
+}
+
+.scan-stats {
+  display: flex;
+  gap: 1rem;
+}
+
+.stat {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.stat-label {
+  color: #7f8c8d;
+  font-size: 0.875rem;
+}
+
+.stat-value {
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+/* Device List */
+.device-list {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  flex: 1;
+}
+
+.device-list.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+}
+
+.empty-state {
+  text-align: center;
+  color: #7f8c8d;
+}
+
+.empty-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.device-list-header h3 {
+  margin: 0 0 1rem 0;
+  color: #2c3e50;
+}
+
+.device-list-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.device-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border: 2px solid #ecf0f1;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.device-item:hover {
+  border-color: #3498db;
+  background: #f8f9fa;
+}
+
+.device-item.selected {
+  border-color: #3498db;
+  background: #e3f2fd;
+}
+
+.device-icon {
+  font-size: 1.5rem;
+  min-width: 2rem;
+  text-align: center;
+}
+
+.device-info {
+  flex: 1;
+}
+
+.device-name {
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 0.25rem;
+}
+
+.device-ip {
+  color: #7f8c8d;
+  font-family: 'Courier New', monospace;
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}
+
+.device-services {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.service-tag {
+  background: #ecf0f1;
+  color: #2c3e50;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.service-tag.more {
+  background: #3498db;
+  color: white;
+}
+
+.device-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.status-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.1);
+}
+
+.test-btn {
+  padding: 0.5rem;
+  background: #ecf0f1;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.test-btn:hover {
+  background: #d5dbdb;
+}
+
+/* Device Details */
+.device-details {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  height: fit-content;
+}
+
+.device-details-header {
+  margin-bottom: 1.5rem;
+}
+
+.device-title {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.device-icon-large {
+  font-size: 2.5rem;
+  min-width: 3rem;
+  text-align: center;
+}
+
+.device-title-text {
+  flex: 1;
+}
+
+.device-title-text h3 {
+  margin: 0 0 0.25rem 0;
+  color: #2c3e50;
+  font-size: 1.5rem;
+}
+
+.device-type {
+  color: #7f8c8d;
+  text-transform: capitalize;
+  font-size: 0.875rem;
+}
+
+.device-status-large {
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  color: white;
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+}
+
+.device-info-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.info-section {
+  border: 1px solid #ecf0f1;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.info-section h4 {
+  margin: 0 0 1rem 0;
+  color: #2c3e50;
+  font-size: 1rem;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #f8f9fa;
+}
+
+.info-row:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.info-label {
+  font-weight: 500;
+  color: #34495e;
+}
+
+.info-value {
+  color: #2c3e50;
+  font-family: 'Courier New', monospace;
+}
+
+.services-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.service-badge {
+  background: #3498db;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.no-services {
+  color: #7f8c8d;
+  font-style: italic;
+}
+
+/* Control Panel */
+.control-panel {
+  margin-top: 1rem;
+}
+
+.test-connectivity {
+  margin-bottom: 1rem;
+}
+
+.endpoint-selector {
+  margin-bottom: 1rem;
+}
+
+.endpoint-selector label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+.endpoint-select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #ecf0f1;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.endpoint-info {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.endpoint-details {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: #2c3e50;
+}
+
+.control-btn {
+  width: 100%;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.control-result {
+  padding: 1rem;
+  border-radius: 8px;
+  margin-top: 1rem;
+}
+
+.control-result.success {
+  background: #d4edda;
+  border: 1px solid #c3e6cb;
+}
+
+.control-result.error {
+  background: #f8d7da;
+  border: 1px solid #f5c6cb;
+}
+
+.result-header {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.result-content pre {
+  background: rgba(0,0,0,0.05);
+  padding: 0.5rem;
+  border-radius: 4px;
+  margin: 0;
+  overflow-x: auto;
+  font-size: 0.875rem;
+}
+
+.error-message {
+  color: #721c24;
+}
+
+.no-controls {
+  text-align: center;
+  color: #7f8c8d;
+  padding: 2rem;
+}
+
+.no-controls .hint {
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+/* No Device Selected */
+.no-device-selected {
+  text-align: center;
+  color: #7f8c8d;
+  padding: 3rem 2rem;
+}
+
+.no-device-selected h3 {
+  color: #2c3e50;
+  margin-bottom: 1rem;
+}
+
+.scan-hint {
+  margin-top: 2rem;
+  padding: 1rem;
+  background: #e3f2fd;
+  border-radius: 8px;
+  color: #1976d2;
+}
+
+/* Buttons */
+.btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: #3498db;
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #2980b9;
+}
+
+.btn-secondary {
+  background: #95a5a6;
+  color: white;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #7f8c8d;
+}
+
+.btn-danger {
+  background: #e74c3c;
+  color: white;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: #c0392b;
+}
+
+.btn-small {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+}
+
+/* Footer */
+.iot-scanner-footer {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.game-controls {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.auto-save-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #2c3e50;
+  cursor: pointer;
+}
+
+.save-status {
+  color: #27ae60;
+  font-size: 0.875rem;
+}
+
+/* Scan History */
+.scan-history {
+  margin-top: 1rem;
+  border-top: 1px solid #ecf0f1;
+  padding-top: 1rem;
+}
+
+.scan-history h4 {
+  margin: 0 0 1rem 0;
+  color: #2c3e50;
+  font-size: 1rem;
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.history-item {
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: 6px;
+  font-size: 0.875rem;
+}
+
+.history-time {
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 0.25rem;
+}
+
+.history-details {
+  display: flex;
+  gap: 1rem;
+  color: #7f8c8d;
+}
+
+.ports-config {
+  position: relative;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .iot-scanner-main {
+    grid-template-columns: 1fr;
+  }
+  
+  .iot-scanner-left {
+    order: 2;
+  }
+  
+  .iot-scanner-right {
+    order: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .iot-scanner {
+    padding: 0.5rem;
+  }
+  
+  .iot-scanner-header {
+    margin-bottom: 1rem;
+    padding: 1rem;
+  }
+  
+  .iot-scanner-header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .iot-scanner-main {
+    gap: 1rem;
+  }
+  
+  .iot-scanner-left,
+  .iot-scanner-right {
+    gap: 1rem;
+  }
+  
+  .game-controls {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+  .iot-scanner-footer {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+  
+  .device-title {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.5rem;
+  }
+  
+  .device-item {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+  
+  .device-status {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .iot-scanner-header h1 {
+    font-size: 1.25rem;
+  }
+  
+  .iot-scanner-header p {
+    font-size: 1rem;
+  }
+  
+  .network-info,
+  .scan-controls,
+  .device-list,
+  .device-details {
+    padding: 1rem;
+  }
+  
+  .config-actions {
+    flex-direction: column;
+  }
+  
+  .history-details {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+}

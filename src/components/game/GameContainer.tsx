@@ -6,6 +6,7 @@ import { PingPongGame } from '../../games/ping-pong';
 import { SnakeGame } from '../../games/snake';
 import { DrawingGame } from '../../games/drawing';
 import { Tetris } from '../../games/tetris';
+import { IoTScannerGame } from '../../games/iot-scanner';
 import { MultiplayerWIP } from '../multiplayer/MultiplayerWIP';
 import { multiplayerService } from '../../services/MultiplayerService';
 import { GAME_INFO } from '../../constants/gameInfo';
@@ -50,6 +51,8 @@ export const GameContainer: React.FC<GameContainerProps> = ({
         return <DrawingGame playerId={playerId} />;
       case 'tetris':
         return <Tetris playerId={playerId} />;
+      case 'iot-scanner':
+        return <IoTScannerGame playerId={playerId} />;
       default:
         return (
           <div className="game-not-found">

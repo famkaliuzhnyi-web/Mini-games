@@ -67,6 +67,13 @@ const AVAILABLE_GAMES: GameInfo[] = [
     description: 'Classic block puzzle game - arrange falling pieces to clear lines!',
     emoji: '🧱',
     category: 'Puzzle'
+  },
+  {
+    id: 'iot-scanner',
+    name: 'IoT Scanner',
+    description: 'Scan local network for IoT devices and manage them remotely!',
+    emoji: '🌐',
+    category: 'Utility'
   }
 ];
 
