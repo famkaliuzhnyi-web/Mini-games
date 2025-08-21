@@ -53,5 +53,12 @@ export const GAME_INFO: Record<string, GameInfo> = {
     name: 'Tetris',
     hasMultiplayerSupport: false,
     multiplayerStatus: 'wip'
+  },
+
+  'iot-scanner': {
+    id: 'iot-scanner',
+    name: 'IoT Scanner',
+    hasMultiplayerSupport: false,
+    multiplayerStatus: 'wip'
   }
 };
