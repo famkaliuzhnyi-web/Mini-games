@@ -40,7 +40,7 @@ A collection of classic and modern mini-games built with React + TypeScript, fea
 - **Drop-in/Drop-out**: Players can connect and disconnect at any time
 - **Cross-device**: Play on different devices seamlessly
 
-📖 **[Full Multiplayer Documentation](docs/WEBRTC-MULTIPLAYER.md)** | **[Quick Reference](docs/MULTIPLAYER-QUICK-REFERENCE.md)**  
+📖 **[Full Multiplayer Documentation](docs/analysis/WEBRTC-MULTIPLAYER.md)** | **[Quick Reference](docs/analysis/MULTIPLAYER-QUICK-REFERENCE.md)**  
 
 ## 🚀 Getting Started
 
@@ -99,6 +99,31 @@ src/games/example-game/
 ├── utils/              # Helper functions
 └── index.ts            # Game entry point
 ```
+
+## 📚 Documentation
+
+This project is organized with comprehensive documentation to help developers, contributors, and users:
+
+### 🏠 Quick Access Documentation
+- **[REPOSITORY-GUIDE.md](REPOSITORY-GUIDE.md)** - Guide to repository structure and how to work with it
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - How to contribute to the project
+- **[QUICK-START.md](QUICK-START.md)** - Quick start guide for developers
+- **[ROADMAP.md](ROADMAP.md)** - Project timeline and future plans
+
+### 📊 Generic Analysis (`docs/analysis/`)
+Project-wide documentation and architecture guides:
+- **[Development Guide](docs/analysis/DEVELOPMENT.md)** - Technical development guide and best practices
+- **[Project Structure](docs/analysis/PROJECT-STRUCTURE.md)** - Complete codebase organization guide
+- **[Game Development](docs/analysis/GAME-DEVELOPMENT.md)** - General game development guidelines
+- **[Shared Functionality](docs/analysis/SHARED-FUNCTIONALITY.md)** - Platform features and utilities
+
+### 💡 Specific Ideas (`docs/ideas/`)
+Detailed specifications for games, features, and components:
+- **[Games](docs/ideas/games/)** - Individual game designs and specifications
+- **[Features](docs/ideas/features/)** - Platform feature proposals and specs
+- **[Components](docs/ideas/components/)** - Component design documentation
+
+**See [REPOSITORY-GUIDE.md](REPOSITORY-GUIDE.md) for complete documentation navigation.**
 
 ## 🛠️ Development Stack
 

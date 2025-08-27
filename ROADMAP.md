@@ -16,7 +16,7 @@ This roadmap outlines the planned development of the Mini-games platform, includ
 - **Documentation**
   - Comprehensive README with Mini-games focus
   - Detailed games documentation (GAMES.md)
-  - Development guide for contributors (DEVELOPMENT.md)
+  - Development guide for contributors (docs/analysis/DEVELOPMENT.md)
   - Contributing guidelines (CONTRIBUTING.md)
   - Project roadmap and vision
 

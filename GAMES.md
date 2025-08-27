@@ -1,6 +1,6 @@
 # 🎮 Games Documentation
 
-This document provides an overview of all games in the Mini-games collection. For detailed design documents, implementation plans, and technical specifications, see the individual game documentation in [`docs/games/`](./docs/games/).
+This document provides an overview of all games in the Mini-games collection. For detailed design documents, implementation plans, and technical specifications, see the individual game documentation in [`docs/ideas/games/`](./docs/ideas/games/).
 
 ## 📚 Game Documentation Structure
 
@@ -16,7 +16,7 @@ Each game has its own comprehensive design document containing:
 ## 🚧 Games in Active Development
 
 ### 🔢 Sudoku
-**Status**: 🚧 In Active Development | **Target**: Q1 2024 | **[📖 Full Documentation](./docs/games/sudoku.md)**
+**Status**: 🚧 In Active Development | **Target**: Q1 2024 | **[📖 Full Documentation](./docs/ideas/games/sudoku.md)**
 
 Logic-based number placement puzzle where players fill a 9×9 grid with digits 1-9 following specific constraints.
 
@@ -26,7 +26,7 @@ Logic-based number placement puzzle where players fill a 9×9 grid with digits 1
 ## 🔧 Games in Development
 
 ### ⭕ Tic-Tac-Toe
-**Status**: 🚧 In Development | **Target**: Q1 2024 | **[📖 Full Documentation](./docs/games/tic-tac-toe.md)**
+**Status**: 🚧 In Development | **Target**: Q1 2024 | **[📖 Full Documentation](./docs/ideas/games/tic-tac-toe.md)**
 
 Classic strategy game for two players taking turns marking spaces in a 3×3 grid.
 
@@ -34,7 +34,7 @@ Classic strategy game for two players taking turns marking spaces in a 3×3 grid
 **Development Focus**: Perfect AI implementation, competitive features, accessibility
 
 ### 🏓 Ping Pong
-**Status**: 🚧 In Development | **Target**: Q1 2024 | **[📖 Full Documentation](./docs/games/ping-pong.md)**
+**Status**: 🚧 In Development | **Target**: Q1 2024 | **[📖 Full Documentation](./docs/ideas/games/ping-pong.md)**
 
 Fast-paced arcade table tennis with realistic physics and competitive gameplay.
 
@@ -46,7 +46,7 @@ Fast-paced arcade table tennis with realistic physics and competitive gameplay.
 ## 📋 Planned Games
 
 ### 🧠 Memory Match
-**Status**: 📋 Planned | **Target**: Q2 2024 | **[📖 Full Documentation](./docs/games/memory-match.md)**
+**Status**: 📋 Planned | **Target**: Q2 2024 | **[📖 Full Documentation](./docs/ideas/games/memory-match.md)**
 
 Card matching memory challenge with multiple themes and difficulty levels.
 
@@ -54,7 +54,7 @@ Card matching memory challenge with multiple themes and difficulty levels.
 **Development Timeline**: 6 weeks with 2-3 developers
 
 ### 🔢 2048
-**Status**: 📋 Planned | **Target**: Q2 2024 | **[📖 Full Documentation](./docs/games/2048.md)**
+**Status**: 📋 Planned | **Target**: Q2 2024 | **[📖 Full Documentation](./docs/ideas/games/2048.md)**
 
 Number sliding puzzle where players combine tiles to reach the 2048 goal.
 
@@ -62,7 +62,7 @@ Number sliding puzzle where players combine tiles to reach the 2048 goal.
 **Development Timeline**: 4 weeks with 1-2 developers
 
 ### 🐍 Snake
-**Status**: 📋 Planned | **Target**: Q2 2024 | **[📖 Full Documentation](./docs/games/snake.md)**
+**Status**: 📋 Planned | **Target**: Q2 2024 | **[📖 Full Documentation](./docs/ideas/games/snake.md)**
 
 Classic growing snake game with modern enhancements and multiplayer battles.
 
@@ -70,7 +70,7 @@ Classic growing snake game with modern enhancements and multiplayer battles.
 **Development Timeline**: 5 weeks with 1-2 developers
 
 ### 🔴 Connect Four
-**Status**: 📋 Planned | **Target**: Q3 2024 | **[📖 Full Documentation](./docs/games/connect-four.md)**
+**Status**: 📋 Planned | **Target**: Q3 2024 | **[📖 Full Documentation](./docs/ideas/games/connect-four.md)**
 
 Strategic disc-dropping game with AI opponents and competitive multiplayer.
 
@@ -166,17 +166,17 @@ Games are prioritized based on:
 ## 📖 Additional Resources
 
 ### Documentation Links
-- **[Individual Game Documents](./docs/games/)** - Comprehensive design documents for each game
+- **[Individual Game Documents](./docs/ideas/games/)** - Comprehensive design documents for each game
 - **[Development Guide](./GAME-DEVELOPMENT.md)** - Technical implementation guidelines
 - **[Project Roadmap](./ROADMAP.md)** - Overall development timeline and milestones
 - **[Contributing Guidelines](./CONTRIBUTING.md)** - How to contribute to game development
 
 ### Quick Navigation
-- **[Game Documentation Index](./docs/games/README.md)** - Central hub for all game planning documents
+- **[Game Documentation Index](./docs/ideas/games/README.md)** - Central hub for all game planning documents
 - **[Development Status](#-development-timeline-overview)** - Current progress and timelines
 - **[Feature Standards](#-common-features-across-all-games)** - Platform-wide capabilities
 - **[Request Process](#-game-request-system)** - How to propose new games
 
 ---
 
-*For detailed implementation plans, technical specifications, and development timelines, see the individual game documentation in [`docs/games/`](./docs/games/).*
+*For detailed implementation plans, technical specifications, and development timelines, see the individual game documentation in [`docs/ideas/games/`](./docs/ideas/games/).*
