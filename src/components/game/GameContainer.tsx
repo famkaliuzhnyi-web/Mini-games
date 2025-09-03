@@ -1,5 +1,5 @@
 import React from 'react';
-import { Game2048 } from '../../games/game2048';
+import { Game2048GameField, Game2048Stats, Game2048Controls } from '../../games/game2048';
 import { TicTacToeGame } from '../../games/tic-tac-toe';
 import { SudokuGame } from '../../games/sudoku';
 import { PingPongGame } from '../../games/ping-pong';
@@ -10,6 +10,7 @@ import { IoTScannerGame } from '../../games/iot-scanner';
 import { MultiplayerWIP } from '../multiplayer/MultiplayerWIP';
 import { multiplayerService } from '../../services/MultiplayerService';
 import { GAME_INFO } from '../../constants/gameInfo';
+import { GameLayout } from '../layout/GameLayout';
 import './GameContainer.css';
 
 interface GameContainerProps {
@@ -38,7 +39,15 @@ export const GameContainer: React.FC<GameContainerProps> = ({
     
     switch (gameId) {
       case 'game2048':
-        return <Game2048 playerId={playerId} />;
+        return (
+          <GameLayout 
+            slots={{
+              gameField: <Game2048GameField playerId={playerId} />,
+              stats: <Game2048Stats playerId={playerId} />,
+              controls: <Game2048Controls playerId={playerId} />
+            }}
+          />
+        );
       case 'tic-tac-toe':
         return <TicTacToeGame playerId={playerId} />;
       case 'sudoku':

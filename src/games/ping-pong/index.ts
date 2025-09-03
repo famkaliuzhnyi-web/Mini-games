@@ -4,6 +4,11 @@
 
 export { PingPongGame, default } from './PingPongGame';
 export { PingPongGameController } from './controller';
+export { 
+  PingPongGameField,
+  PingPongStats,
+  PingPongControls
+} from './SlotComponents';
 export type { 
   PingPongGameData,
   Position,
