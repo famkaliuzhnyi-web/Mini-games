@@ -56,7 +56,9 @@ class SudokuGameController implements GameController<SudokuGameData> {
         timeSpent: 0,
         isComplete: false,
         maxHints: settings.maxHints,
-        maxMistakes: settings.maxMistakes
+        maxMistakes: settings.maxMistakes,
+        selectedNumber: 1,
+        isPaused: false
       },
       isComplete: false,
       score: 0
@@ -168,7 +170,9 @@ export const SudokuGame: React.FC<SudokuGameProps> = ({ playerId }) => {
         timeSpent: 0,
         isComplete: false,
         maxHints: settings.maxHints,
-        maxMistakes: settings.maxMistakes
+        maxMistakes: settings.maxMistakes,
+        selectedNumber: 1,
+        isPaused: false
       },
       isComplete: false,
       score: 0,

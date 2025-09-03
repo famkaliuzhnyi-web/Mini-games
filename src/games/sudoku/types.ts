@@ -34,6 +34,8 @@ export interface SudokuGameData extends Record<string, unknown> {
   isComplete: boolean;         // True when puzzle is solved
   maxHints: number;            // Maximum hints allowed for this difficulty
   maxMistakes: number;         // Maximum mistakes allowed before game over
+  selectedNumber: CellValue;   // Currently selected number for placement
+  isPaused: boolean;           // Game pause state
 }
 
 // Move history for undo functionality

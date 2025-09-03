@@ -55,7 +55,9 @@ class SudokuGameController implements GameController<SudokuGameData> {
         timeSpent: 0,
         isComplete: false,
         maxHints: settings.maxHints,
-        maxMistakes: settings.maxMistakes
+        maxMistakes: settings.maxMistakes,
+        selectedNumber: 1,
+        isPaused: false
       },
       isComplete: false,
       score: 0
@@ -75,7 +77,9 @@ class SudokuGameController implements GameController<SudokuGameData> {
       typeof state.data.timeSpent === 'number' &&
       typeof state.data.isComplete === 'boolean' &&
       typeof state.data.maxHints === 'number' &&
-      typeof state.data.maxMistakes === 'number'
+      typeof state.data.maxMistakes === 'number' &&
+      typeof state.data.selectedNumber === 'number' &&
+      typeof state.data.isPaused === 'boolean'
     );
   }
 
@@ -103,8 +107,6 @@ const useSudokuState = (playerId: string) => {
   const { earnCoins, awardGameCompletion } = useCoinService();
   
   const [solutionGrid, setSolutionGrid] = useState<SudokuGrid>(createEmptyGrid());
-  const [selectedNumber, setSelectedNumber] = useState<CellValue>(1);
-  const [isPaused, setIsPaused] = useState<boolean>(false);
   const [gameStartTime, setGameStartTime] = useState<number>(Date.now());
   
   const {
@@ -130,7 +132,7 @@ const useSudokuState = (playerId: string) => {
 
   // Timer effect
   useEffect(() => {
-    if (gameState.data.isComplete || isPaused) return;
+    if (gameState.data.isComplete || gameState.data.isPaused) return;
 
     const interval = setInterval(() => {
       const currentTime = Math.floor((Date.now() - gameStartTime) / 1000);
@@ -147,7 +149,7 @@ const useSudokuState = (playerId: string) => {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [gameState, gameStartTime, setGameState, isPaused]);
+  }, [gameState, gameStartTime, setGameState]);
 
   const startNewGame = useCallback((difficulty: Difficulty) => {
     const completeGrid = generateCompleteGrid();
@@ -157,8 +159,6 @@ const useSudokuState = (playerId: string) => {
     
     setSolutionGrid(completeGrid);
     setGameStartTime(Date.now());
-    setSelectedNumber(1);
-    setIsPaused(false);
     
     setGameState({
       ...gameState,
@@ -172,7 +172,9 @@ const useSudokuState = (playerId: string) => {
         timeSpent: 0,
         isComplete: false,
         maxHints: settings.maxHints,
-        maxMistakes: settings.maxMistakes
+        maxMistakes: settings.maxMistakes,
+        selectedNumber: 1,
+        isPaused: false
       },
       isComplete: false,
       score: 0,
@@ -181,17 +183,17 @@ const useSudokuState = (playerId: string) => {
   }, [gameState, setGameState]);
 
   const handleCellClick = useCallback(async (row: number, col: number) => {
-    if (gameState.data.uiGrid[row][col].isInitial || gameState.data.isComplete || isPaused) return;
+    if (gameState.data.uiGrid[row][col].isInitial || gameState.data.isComplete || gameState.data.isPaused) return;
     
     // Place the selected number immediately
     const newGrid = gameState.data.currentGrid.map(r => [...r]) as SudokuGrid;
-    newGrid[row][col] = selectedNumber;
+    newGrid[row][col] = gameState.data.selectedNumber;
 
     let newMistakes = gameState.data.mistakes;
     
-    if (selectedNumber !== 0 && solutionGrid[row][col] !== selectedNumber) {
+    if (gameState.data.selectedNumber !== 0 && solutionGrid[row][col] !== gameState.data.selectedNumber) {
       newMistakes++;
-    } else if (selectedNumber !== 0 && solutionGrid[row][col] === selectedNumber) {
+    } else if (gameState.data.selectedNumber !== 0 && solutionGrid[row][col] === gameState.data.selectedNumber) {
       // Award coins for correct number placement
       earnCoins(2, 'game_play', 'sudoku', 'Sudoku: correct number placement');
     }
@@ -226,7 +228,7 @@ const useSudokuState = (playerId: string) => {
       lastModified: new Date().toISOString()
     });
 
-    if (selectedNumber !== 0 || isGameComplete) {
+    if (gameState.data.selectedNumber !== 0 || isGameComplete) {
       await triggerAutoSave();
     }
 
@@ -246,18 +248,32 @@ const useSudokuState = (playerId: string) => {
       });
       await triggerAutoSave();
     }
-  }, [selectedNumber, gameState, solutionGrid, setGameState, triggerAutoSave, earnCoins, awardGameCompletion, isPaused]);
+  }, [gameState, solutionGrid, setGameState, triggerAutoSave, earnCoins, awardGameCompletion]);
 
   const handleNumberSelect = useCallback((number: CellValue) => {
-    setSelectedNumber(number);
-  }, []);
+    setGameState({
+      ...gameState,
+      data: {
+        ...gameState.data,
+        selectedNumber: number
+      },
+      lastModified: new Date().toISOString()
+    });
+  }, [gameState, setGameState]);
 
   const handlePause = useCallback(() => {
-    setIsPaused(!isPaused);
-  }, [isPaused]);
+    setGameState({
+      ...gameState,
+      data: {
+        ...gameState.data,
+        isPaused: !gameState.data.isPaused
+      },
+      lastModified: new Date().toISOString()
+    });
+  }, [gameState, setGameState]);
 
   const handleHint = useCallback(async () => {
-    if (gameState.data.hintsUsed >= gameState.data.maxHints || gameState.data.isComplete || isPaused) return;
+    if (gameState.data.hintsUsed >= gameState.data.maxHints || gameState.data.isComplete || gameState.data.isPaused) return;
     
     const hint = getHint(gameState.data.currentGrid, solutionGrid);
     if (!hint) return;
@@ -282,17 +298,22 @@ const useSudokuState = (playerId: string) => {
     });
     
     await triggerAutoSave();
-  }, [gameState, solutionGrid, setGameState, triggerAutoSave, isPaused]);
+  }, [gameState, solutionGrid, setGameState, triggerAutoSave]);
 
   const handleClearCell = useCallback(() => {
-    setSelectedNumber(0);
-  }, []);
+    setGameState({
+      ...gameState,
+      data: {
+        ...gameState.data,
+        selectedNumber: 0
+      },
+      lastModified: new Date().toISOString()
+    });
+  }, [gameState, setGameState]);
 
   return {
     gameState,
     isLoading,
-    selectedNumber,
-    isPaused,
     currentTheme,
     startNewGame,
     handleCellClick,
@@ -316,8 +337,7 @@ export const SudokuGameField: React.FC<SlotComponentProps> = ({ playerId }) => {
   const {
     gameState,
     isLoading,
-    handleCellClick,
-    isPaused
+    handleCellClick
   } = useSudokuState(playerId);
 
   if (isLoading) {
@@ -329,14 +349,14 @@ export const SudokuGameField: React.FC<SlotComponentProps> = ({ playerId }) => {
       {/* Modern Game Status */}
       <div className="modern-game-status">
         <div className="status-title">
-          {isPaused ? '⏸️ Game Paused' : gameState.data.isComplete ? '🎉 Puzzle Complete!' : `${gameState.data.difficulty.charAt(0).toUpperCase() + gameState.data.difficulty.slice(1)} Sudoku`}
+          {gameState.data.isPaused ? '⏸️ Game Paused' : gameState.data.isComplete ? '🎉 Puzzle Complete!' : `${gameState.data.difficulty.charAt(0).toUpperCase() + gameState.data.difficulty.slice(1)} Sudoku`}
         </div>
-        {!gameState.data.isComplete && !isPaused && (
+        {!gameState.data.isComplete && !gameState.data.isPaused && (
           <div className="progress-hint">
             Fill each row, column, and 3×3 box with digits 1-9
           </div>
         )}
-        {isPaused && (
+        {gameState.data.isPaused && (
           <div className="progress-hint">
             Click the Pause button to resume playing
           </div>
@@ -344,7 +364,7 @@ export const SudokuGameField: React.FC<SlotComponentProps> = ({ playerId }) => {
       </div>
 
       {/* Modern Sudoku Board */}
-      <div className="modern-sudoku-board" style={{ opacity: isPaused ? 0.5 : 1 }}>
+      <div className="modern-sudoku-board" style={{ opacity: gameState.data.isPaused ? 0.5 : 1 }}>
         {gameState.data.uiGrid.map((row, rowIndex) =>
           row.map((cell, colIndex) => {
             
@@ -352,7 +372,7 @@ export const SudokuGameField: React.FC<SlotComponentProps> = ({ playerId }) => {
               <button
                 key={`${rowIndex}-${colIndex}`}
                 onClick={() => handleCellClick(rowIndex, colIndex)}
-                disabled={isPaused}
+                disabled={gameState.data.isPaused}
                 className={`
                   modern-sudoku-cell
                   ${cell.isInitial ? 'given' : 'user-entry'}
@@ -388,8 +408,7 @@ export const SudokuStats: React.FC<SlotComponentProps> = ({ playerId }) => {
   const {
     gameState,
     isLoading,
-    lastSaveEvent,
-    isPaused
+    lastSaveEvent
   } = useSudokuState(playerId);
 
   if (isLoading) {
@@ -411,7 +430,7 @@ export const SudokuStats: React.FC<SlotComponentProps> = ({ playerId }) => {
       fontSize: '0.9rem'
     }}>
       <div style={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>
-        {isPaused ? 'Game Paused' : 'Stats'}
+        {gameState.data.isPaused ? 'Game Paused' : 'Stats'}
       </div>
       <div style={{ fontSize: '0.8rem', color: `var(--color-textSecondary)`, display: 'flex', flexDirection: 'column', gap: '0.1rem' }}>
         <div>Difficulty: {gameState.data.difficulty}</div>
@@ -439,8 +458,6 @@ export const SudokuControls: React.FC<SlotComponentProps> = ({ playerId }) => {
   const {
     gameState,
     isLoading,
-    selectedNumber,
-    isPaused,
     handleNumberSelect,
     handleHint,
     handlePause,
@@ -511,11 +528,11 @@ export const SudokuControls: React.FC<SlotComponentProps> = ({ playerId }) => {
               onClick={() => handleNumberSelect(num as CellValue)}
               style={{
                 padding: '0.3rem',
-                backgroundColor: selectedNumber === num 
+                backgroundColor: gameState.data.selectedNumber === num 
                   ? `var(--color-warning)` 
                   : `var(--color-accent)`,
                 color: 'white',
-                border: selectedNumber === num 
+                border: gameState.data.selectedNumber === num 
                   ? '2px solid var(--color-warningDark, #F57C00)' 
                   : 'none',
                 borderRadius: '4px',
@@ -523,7 +540,7 @@ export const SudokuControls: React.FC<SlotComponentProps> = ({ playerId }) => {
                 fontSize: '0.9rem',
                 minHeight: '36px',
                 touchAction: 'manipulation',
-                fontWeight: selectedNumber === num ? 'bold' : 'normal'
+                fontWeight: gameState.data.selectedNumber === num ? 'bold' : 'normal'
               }}
             >
               {num === 0 ? '✕' : num}
@@ -549,23 +566,23 @@ export const SudokuControls: React.FC<SlotComponentProps> = ({ playerId }) => {
             fontWeight: '500'
           }}
         >
-          {isPaused ? 'Resume' : 'Pause'}
+          {gameState.data.isPaused ? 'Resume' : 'Pause'}
         </button>
 
         <button 
           onClick={handleHint}
-          disabled={gameState.data.hintsUsed >= gameState.data.maxHints || gameState.data.isComplete || isPaused}
+          disabled={gameState.data.hintsUsed >= gameState.data.maxHints || gameState.data.isComplete || gameState.data.isPaused}
           style={{ 
             padding: '0.4rem 0.8rem',
-            backgroundColor: gameState.data.hintsUsed >= gameState.data.maxHints || gameState.data.isComplete || isPaused
+            backgroundColor: gameState.data.hintsUsed >= gameState.data.maxHints || gameState.data.isComplete || gameState.data.isPaused
               ? `var(--color-surface)` 
               : `var(--color-warning)`,
-            color: gameState.data.hintsUsed >= gameState.data.maxHints || gameState.data.isComplete || isPaused
+            color: gameState.data.hintsUsed >= gameState.data.maxHints || gameState.data.isComplete || gameState.data.isPaused
               ? `var(--color-textMuted)` 
               : 'white',
             border: 'none',
             borderRadius: '6px',
-            cursor: gameState.data.hintsUsed >= gameState.data.maxHints || gameState.data.isComplete || isPaused
+            cursor: gameState.data.hintsUsed >= gameState.data.maxHints || gameState.data.isComplete || gameState.data.isPaused
               ? 'not-allowed' 
               : 'pointer',
             fontSize: '0.8rem',
