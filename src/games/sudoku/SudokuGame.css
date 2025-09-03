@@ -132,15 +132,6 @@
   font-weight: 700;
 }
 
-.modern-sudoku-cell.related {
-  background-color: var(--color-accentLight, #e3f2fd);
-}
-
-.modern-sudoku-cell.same-number {
-  background-color: var(--color-warningLight, #fff3e0);
-  border: 2px solid var(--color-warning, #ff9800);
-}
-
 .modern-sudoku-cell.invalid {
   background-color: var(--color-errorLight, #ffebee) !important;
   border: 2px solid var(--color-error, #f44336);

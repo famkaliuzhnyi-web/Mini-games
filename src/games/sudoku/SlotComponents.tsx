@@ -103,7 +103,8 @@ const useSudokuState = (playerId: string) => {
   const { earnCoins, awardGameCompletion } = useCoinService();
   
   const [solutionGrid, setSolutionGrid] = useState<SudokuGrid>(createEmptyGrid());
-  const [selectedCell, setSelectedCell] = useState<{ row: number; col: number } | null>(null);
+  const [selectedNumber, setSelectedNumber] = useState<CellValue>(1);
+  const [isPaused, setIsPaused] = useState<boolean>(false);
   const [gameStartTime, setGameStartTime] = useState<number>(Date.now());
   
   const {
@@ -129,7 +130,7 @@ const useSudokuState = (playerId: string) => {
 
   // Timer effect
   useEffect(() => {
-    if (gameState.data.isComplete) return;
+    if (gameState.data.isComplete || isPaused) return;
 
     const interval = setInterval(() => {
       const currentTime = Math.floor((Date.now() - gameStartTime) / 1000);
@@ -146,7 +147,7 @@ const useSudokuState = (playerId: string) => {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [gameState, gameStartTime, setGameState]);
+  }, [gameState, gameStartTime, setGameState, isPaused]);
 
   const startNewGame = useCallback((difficulty: Difficulty) => {
     const completeGrid = generateCompleteGrid();
@@ -156,7 +157,8 @@ const useSudokuState = (playerId: string) => {
     
     setSolutionGrid(completeGrid);
     setGameStartTime(Date.now());
-    setSelectedCell(null);
+    setSelectedNumber(1);
+    setIsPaused(false);
     
     setGameState({
       ...gameState,
@@ -178,25 +180,18 @@ const useSudokuState = (playerId: string) => {
     });
   }, [gameState, setGameState]);
 
-  const handleCellClick = useCallback((row: number, col: number) => {
-    if (gameState.data.uiGrid[row][col].isInitial) return;
-    setSelectedCell({ row, col });
-  }, [gameState.data.uiGrid]);
-
-  const handleNumberInput = useCallback(async (number: CellValue) => {
-    if (!selectedCell || gameState.data.isComplete) return;
+  const handleCellClick = useCallback(async (row: number, col: number) => {
+    if (gameState.data.uiGrid[row][col].isInitial || gameState.data.isComplete || isPaused) return;
     
-    const { row, col } = selectedCell;
-    if (gameState.data.uiGrid[row][col].isInitial) return;
-
+    // Place the selected number immediately
     const newGrid = gameState.data.currentGrid.map(r => [...r]) as SudokuGrid;
-    newGrid[row][col] = number;
+    newGrid[row][col] = selectedNumber;
 
     let newMistakes = gameState.data.mistakes;
     
-    if (number !== 0 && solutionGrid[row][col] !== number) {
+    if (selectedNumber !== 0 && solutionGrid[row][col] !== selectedNumber) {
       newMistakes++;
-    } else if (number !== 0 && solutionGrid[row][col] === number) {
+    } else if (selectedNumber !== 0 && solutionGrid[row][col] === selectedNumber) {
       // Award coins for correct number placement
       earnCoins(2, 'game_play', 'sudoku', 'Sudoku: correct number placement');
     }
@@ -231,7 +226,7 @@ const useSudokuState = (playerId: string) => {
       lastModified: new Date().toISOString()
     });
 
-    if (number !== 0 || isGameComplete) {
+    if (selectedNumber !== 0 || isGameComplete) {
       await triggerAutoSave();
     }
 
@@ -251,10 +246,18 @@ const useSudokuState = (playerId: string) => {
       });
       await triggerAutoSave();
     }
-  }, [selectedCell, gameState, solutionGrid, setGameState, triggerAutoSave, earnCoins, awardGameCompletion]);
+  }, [selectedNumber, gameState, solutionGrid, setGameState, triggerAutoSave, earnCoins, awardGameCompletion, isPaused]);
+
+  const handleNumberSelect = useCallback((number: CellValue) => {
+    setSelectedNumber(number);
+  }, []);
+
+  const handlePause = useCallback(() => {
+    setIsPaused(!isPaused);
+  }, [isPaused]);
 
   const handleHint = useCallback(async () => {
-    if (gameState.data.hintsUsed >= gameState.data.maxHints || gameState.data.isComplete) return;
+    if (gameState.data.hintsUsed >= gameState.data.maxHints || gameState.data.isComplete || isPaused) return;
     
     const hint = getHint(gameState.data.currentGrid, solutionGrid);
     if (!hint) return;
@@ -278,24 +281,25 @@ const useSudokuState = (playerId: string) => {
       lastModified: new Date().toISOString()
     });
     
-    setSelectedCell({ row: hint.row, col: hint.col });
     await triggerAutoSave();
-  }, [gameState, solutionGrid, setGameState, triggerAutoSave]);
+  }, [gameState, solutionGrid, setGameState, triggerAutoSave, isPaused]);
 
   const handleClearCell = useCallback(() => {
-    handleNumberInput(0);
-  }, [handleNumberInput]);
+    setSelectedNumber(0);
+  }, []);
 
   return {
     gameState,
     isLoading,
-    selectedCell,
+    selectedNumber,
+    isPaused,
     currentTheme,
     startNewGame,
     handleCellClick,
-    handleNumberInput,
+    handleNumberSelect,
     handleHint,
     handleClearCell,
+    handlePause,
     saveGame,
     loadGame,
     dropSave,
@@ -312,8 +316,8 @@ export const SudokuGameField: React.FC<SlotComponentProps> = ({ playerId }) => {
   const {
     gameState,
     isLoading,
-    selectedCell,
-    handleCellClick
+    handleCellClick,
+    isPaused
   } = useSudokuState(playerId);
 
   if (isLoading) {
@@ -325,39 +329,33 @@ export const SudokuGameField: React.FC<SlotComponentProps> = ({ playerId }) => {
       {/* Modern Game Status */}
       <div className="modern-game-status">
         <div className="status-title">
-          {gameState.data.isComplete ? '🎉 Puzzle Complete!' : `${gameState.data.difficulty.charAt(0).toUpperCase() + gameState.data.difficulty.slice(1)} Sudoku`}
+          {isPaused ? '⏸️ Game Paused' : gameState.data.isComplete ? '🎉 Puzzle Complete!' : `${gameState.data.difficulty.charAt(0).toUpperCase() + gameState.data.difficulty.slice(1)} Sudoku`}
         </div>
-        {!gameState.data.isComplete && (
+        {!gameState.data.isComplete && !isPaused && (
           <div className="progress-hint">
             Fill each row, column, and 3×3 box with digits 1-9
+          </div>
+        )}
+        {isPaused && (
+          <div className="progress-hint">
+            Click the Pause button to resume playing
           </div>
         )}
       </div>
 
       {/* Modern Sudoku Board */}
-      <div className="modern-sudoku-board">
+      <div className="modern-sudoku-board" style={{ opacity: isPaused ? 0.5 : 1 }}>
         {gameState.data.uiGrid.map((row, rowIndex) =>
           row.map((cell, colIndex) => {
-            const isSelected = selectedCell && selectedCell.row === rowIndex && selectedCell.col === colIndex;
-            const isRelated = selectedCell && (
-              selectedCell.row === rowIndex || 
-              selectedCell.col === colIndex || 
-              (Math.floor(selectedCell.row / 3) === Math.floor(rowIndex / 3) && 
-               Math.floor(selectedCell.col / 3) === Math.floor(colIndex / 3))
-            );
-            const isSameNumber = selectedCell && cell.value !== 0 && 
-              gameState.data.uiGrid[selectedCell.row][selectedCell.col].value === cell.value;
             
             return (
               <button
                 key={`${rowIndex}-${colIndex}`}
                 onClick={() => handleCellClick(rowIndex, colIndex)}
+                disabled={isPaused}
                 className={`
                   modern-sudoku-cell
                   ${cell.isInitial ? 'given' : 'user-entry'}
-                  ${isSelected ? 'selected' : ''}
-                  ${isRelated && !isSelected ? 'related' : ''}
-                  ${isSameNumber && !isSelected ? 'same-number' : ''}
                   ${cell.isInvalid ? 'invalid' : ''}
                   ${rowIndex % 3 === 2 && rowIndex < 8 ? 'bottom-box-border' : ''}
                   ${colIndex % 3 === 2 && colIndex < 8 ? 'right-box-border' : ''}
@@ -390,7 +388,8 @@ export const SudokuStats: React.FC<SlotComponentProps> = ({ playerId }) => {
   const {
     gameState,
     isLoading,
-    lastSaveEvent
+    lastSaveEvent,
+    isPaused
   } = useSudokuState(playerId);
 
   if (isLoading) {
@@ -411,7 +410,9 @@ export const SudokuStats: React.FC<SlotComponentProps> = ({ playerId }) => {
       color: `var(--color-text)`,
       fontSize: '0.9rem'
     }}>
-      <div style={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Stats</div>
+      <div style={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>
+        {isPaused ? 'Game Paused' : 'Stats'}
+      </div>
       <div style={{ fontSize: '0.8rem', color: `var(--color-textSecondary)`, display: 'flex', flexDirection: 'column', gap: '0.1rem' }}>
         <div>Difficulty: {gameState.data.difficulty}</div>
         <div>Time: {formatTime(gameState.data.timeSpent)}</div>
@@ -438,9 +439,11 @@ export const SudokuControls: React.FC<SlotComponentProps> = ({ playerId }) => {
   const {
     gameState,
     isLoading,
-    startNewGame,
-    handleNumberInput,
+    selectedNumber,
+    isPaused,
+    handleNumberSelect,
     handleHint,
+    handlePause,
     saveGame,
     loadGame,
     dropSave,
@@ -450,7 +453,6 @@ export const SudokuControls: React.FC<SlotComponentProps> = ({ playerId }) => {
   } = useSudokuState(playerId);
 
   const [showSaveMenu, setShowSaveMenu] = useState(false);
-  const [showDifficultyMenu, setShowDifficultyMenu] = useState(false);
 
   const handleManualSave = async () => {
     const result = await saveGame();
@@ -498,44 +500,72 @@ export const SudokuControls: React.FC<SlotComponentProps> = ({ playerId }) => {
       borderRadius: '8px'
     }}>
       {/* Number Input Buttons */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '0.25rem' }}>
-        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map(num => (
-          <button
-            key={num}
-            onClick={() => handleNumberInput(num as CellValue)}
-            style={{
-              padding: '0.3rem',
-              backgroundColor: `var(--color-accent)`,
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontSize: '0.9rem',
-              minHeight: '36px',
-              touchAction: 'manipulation'
-            }}
-          >
-            {num === 0 ? '✕' : num}
-          </button>
-        ))}
+      <div style={{ marginBottom: '0.5rem' }}>
+        <div style={{ marginBottom: '0.25rem', fontSize: '0.8rem', fontWeight: 'bold' }}>
+          Select Number:
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '0.25rem' }}>
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map(num => (
+            <button
+              key={num}
+              onClick={() => handleNumberSelect(num as CellValue)}
+              style={{
+                padding: '0.3rem',
+                backgroundColor: selectedNumber === num 
+                  ? `var(--color-warning)` 
+                  : `var(--color-accent)`,
+                color: 'white',
+                border: selectedNumber === num 
+                  ? '2px solid var(--color-warningDark, #F57C00)' 
+                  : 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '0.9rem',
+                minHeight: '36px',
+                touchAction: 'manipulation',
+                fontWeight: selectedNumber === num ? 'bold' : 'normal'
+              }}
+            >
+              {num === 0 ? '✕' : num}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Action Buttons */}
       <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
         <button 
-          onClick={handleHint}
-          disabled={gameState.data.hintsUsed >= gameState.data.maxHints || gameState.data.isComplete}
+          onClick={handlePause}
           style={{ 
             padding: '0.4rem 0.8rem',
-            backgroundColor: gameState.data.hintsUsed >= gameState.data.maxHints || gameState.data.isComplete 
+            backgroundColor: `var(--color-surface, #f0f0f0)`,
+            color: `var(--color-text, #333)`,
+            border: `1px solid var(--color-border, #e0e0e0)`,
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontSize: '0.8rem',
+            minHeight: '36px',
+            touchAction: 'manipulation',
+            fontWeight: '500'
+          }}
+        >
+          {isPaused ? 'Resume' : 'Pause'}
+        </button>
+
+        <button 
+          onClick={handleHint}
+          disabled={gameState.data.hintsUsed >= gameState.data.maxHints || gameState.data.isComplete || isPaused}
+          style={{ 
+            padding: '0.4rem 0.8rem',
+            backgroundColor: gameState.data.hintsUsed >= gameState.data.maxHints || gameState.data.isComplete || isPaused
               ? `var(--color-surface)` 
               : `var(--color-warning)`,
-            color: gameState.data.hintsUsed >= gameState.data.maxHints || gameState.data.isComplete 
+            color: gameState.data.hintsUsed >= gameState.data.maxHints || gameState.data.isComplete || isPaused
               ? `var(--color-textMuted)` 
               : 'white',
             border: 'none',
             borderRadius: '6px',
-            cursor: gameState.data.hintsUsed >= gameState.data.maxHints || gameState.data.isComplete 
+            cursor: gameState.data.hintsUsed >= gameState.data.maxHints || gameState.data.isComplete || isPaused
               ? 'not-allowed' 
               : 'pointer',
             fontSize: '0.8rem',
@@ -544,23 +574,6 @@ export const SudokuControls: React.FC<SlotComponentProps> = ({ playerId }) => {
           }}
         >
           💡 Hint
-        </button>
-
-        <button 
-          onClick={() => setShowDifficultyMenu(!showDifficultyMenu)}
-          style={{ 
-            padding: '0.4rem 0.8rem',
-            backgroundColor: `var(--color-accent)`,
-            color: 'white',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontSize: '0.8rem',
-            minHeight: '36px',
-            touchAction: 'manipulation'
-          }}
-        >
-          New Game
         </button>
 
         <button 
@@ -580,45 +593,6 @@ export const SudokuControls: React.FC<SlotComponentProps> = ({ playerId }) => {
           Save/Load
         </button>
       </div>
-
-      {/* Difficulty Selection Menu */}
-      {showDifficultyMenu && (
-        <div style={{
-          padding: '0.5rem',
-          backgroundColor: `var(--color-gameBackground)`,
-          borderRadius: '6px',
-          border: `1px solid var(--color-border)`
-        }}>
-          <div style={{ marginBottom: '0.5rem', fontSize: '0.9rem', fontWeight: 'bold' }}>Select Difficulty:</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.25rem' }}>
-            {(['easy', 'medium', 'hard', 'expert'] as Difficulty[]).map(difficulty => (
-              <button
-                key={difficulty}
-                onClick={() => {
-                  startNewGame(difficulty);
-                  setShowDifficultyMenu(false);
-                }}
-                style={{
-                  padding: '0.4rem',
-                  backgroundColor: gameState.data.difficulty === difficulty 
-                    ? `var(--color-accent)` 
-                    : `var(--color-surface)`,
-                  color: gameState.data.difficulty === difficulty 
-                    ? 'white' 
-                    : `var(--color-text)`,
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontSize: '0.8rem',
-                  textTransform: 'capitalize'
-                }}
-              >
-                {difficulty}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Save Menu */}
       {showSaveMenu && (
