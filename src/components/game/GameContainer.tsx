@@ -1,9 +1,9 @@
 import React from 'react';
 import { Game2048GameField, Game2048Stats, Game2048Controls } from '../../games/game2048';
-import { TicTacToeGame } from '../../games/tic-tac-toe';
-import { SudokuGame } from '../../games/sudoku';
+import { TicTacToeGameField, TicTacToeStats, TicTacToeControls } from '../../games/tic-tac-toe';
+import { SudokuGameField, SudokuStats, SudokuControls } from '../../games/sudoku';
 import { PingPongGame } from '../../games/ping-pong';
-import { SnakeGame } from '../../games/snake';
+import { SnakeGameField, SnakeStats, SnakeControls } from '../../games/snake';
 import { DrawingGame } from '../../games/drawing';
 import { Tetris } from '../../games/tetris';
 import { IoTScannerGame } from '../../games/iot-scanner';
@@ -49,13 +49,37 @@ export const GameContainer: React.FC<GameContainerProps> = ({
           />
         );
       case 'tic-tac-toe':
-        return <TicTacToeGame playerId={playerId} />;
+        return (
+          <GameLayout 
+            slots={{
+              gameField: <TicTacToeGameField playerId={playerId} />,
+              stats: <TicTacToeStats playerId={playerId} />,
+              controls: <TicTacToeControls playerId={playerId} />
+            }}
+          />
+        );
       case 'sudoku':
-        return <SudokuGame playerId={playerId} />;
+        return (
+          <GameLayout 
+            slots={{
+              gameField: <SudokuGameField playerId={playerId} />,
+              stats: <SudokuStats playerId={playerId} />,
+              controls: <SudokuControls playerId={playerId} />
+            }}
+          />
+        );
       case 'ping-pong':
         return <PingPongGame playerId={playerId} />;
       case 'snake':
-        return <SnakeGame playerId={playerId} />;
+        return (
+          <GameLayout 
+            slots={{
+              gameField: <SnakeGameField playerId={playerId} />,
+              stats: <SnakeStats playerId={playerId} />,
+              controls: <SnakeControls playerId={playerId} />
+            }}
+          />
+        );
       case 'drawing':
         return <DrawingGame playerId={playerId} />;
       case 'tetris':
