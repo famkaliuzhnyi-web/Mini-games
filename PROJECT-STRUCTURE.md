@@ -43,9 +43,16 @@ Mini-games/
         ├── index.css            # Base CSS styles and variables
         ├── vite-env.d.ts        # Vite type definitions
         │
-        ├── 🎮 games/            # Individual game implementations
-        │   ├── sudoku/          # Sudoku game (planned)
-        │   └── [game-name]/     # Template for future games
+        ├── 🎮 games/            # Individual game implementations  
+        │   ├── game2048/        # 2048 number puzzle game
+        │   ├── tic-tac-toe/     # Tic-Tac-Toe strategy game
+        │   ├── ping-pong/       # Ping Pong arcade game
+        │   ├── sudoku/          # Sudoku logic puzzle game
+        │   ├── snake/           # Snake arcade game
+        │   ├── drawing/         # Drawing creative tool
+        │   ├── tetris/          # Tetris block puzzle game
+        │   ├── iot-scanner/     # IoT device scanning utility
+        │   └── [future-games]/  # Template for additional games
         │
         ├── 🧩 components/       # Shared React components
         │   ├── ui/              # Basic UI components (buttons, inputs)
@@ -58,9 +65,13 @@ Mini-games/
         │   └── [custom-hooks]        # Game-specific and utility hooks
         │
         ├── 🛠️ services/         # Core platform services
-        │   ├── WebSocketService.ts   # Real-time communication
+        │   ├── MultiplayerService.ts # WebRTC peer-to-peer communication
+        │   ├── GameSaveService.ts    # Auto-save and progress management
+        │   ├── UserService.ts        # User profiles and preferences
+        │   ├── ThemeService.ts       # Theme system and customization
+        │   ├── CoinService.ts        # Virtual currency system
         │   ├── OfflineService.ts     # Offline data management
-        │   └── [other-services]      # Additional platform services
+        │   └── pwaService.ts         # Progressive Web App functionality
         │
         ├── 🎯 utils/            # Utility functions and helpers
         │   ├── gameUtils.ts          # Game-related utilities
@@ -225,9 +236,9 @@ Custom React hooks for reusable logic:
 ```
 src/hooks/
 ├── platform/               # Platform-specific hooks
-│   ├── useGameConnection.ts # Multiplayer connection management
-│   ├── useOfflineSync.ts    # Offline synchronization
-│   └── useWebSocket.ts      # WebSocket connection hook
+│   ├── useGameSession.ts     # Game session management
+│   ├── useMultiplayer.ts     # WebRTC multiplayer connections
+│   └── useGameSave.ts        # Auto-save and progress hooks
 │
 ├── game/                   # Game-related hooks
 │   ├── useGameTimer.ts     # Game timing functionality
@@ -246,12 +257,14 @@ Core platform services for cross-cutting concerns:
 
 ```
 src/services/
-├── WebSocketService.ts     # Real-time communication service
-├── OfflineService.ts       # Offline data management
-├── StorageService.ts       # Data persistence abstraction
-├── AnalyticsService.ts     # User analytics tracking
-├── NotificationService.ts  # Push notifications
-└── [other-services]        # Additional platform services
+├── MultiplayerService.ts     # WebRTC peer-to-peer communication
+├── GameSaveService.ts        # Auto-save and game progress management
+├── UserService.ts            # User profiles and preferences
+├── ThemeService.ts           # Theme system and customization
+├── CoinService.ts            # Virtual currency tracking
+├── OfflineService.ts         # Offline data management and sync
+├── pwaService.ts             # PWA installation and updates
+└── [additional-services]     # Future platform services
 ```
 
 ### 📝 Types Directory (`src/types/`)
@@ -260,12 +273,11 @@ TypeScript type definitions organized by domain:
 
 ```
 src/types/
-├── platform.ts             # Core platform types
-├── game.ts                 # Generic game types
-├── user.ts                 # User and player types
-├── websocket.ts            # WebSocket message types
-├── storage.ts              # Data storage types
-└── [domain-types]          # Additional domain types
+├── game.ts                 # Generic game types and interfaces
+├── multiplayer.ts          # WebRTC and multiplayer types
+├── coin.ts                 # Virtual currency system types  
+├── user.ts                 # User profiles and preferences
+└── [domain-types]          # Additional domain-specific types
 ```
 
 ### 🎯 Utils Directory (`src/utils/`)
