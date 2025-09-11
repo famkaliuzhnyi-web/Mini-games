@@ -1,37 +1,74 @@
 # Mini Games Collection
 
-A collection of classic and modern mini-games built with React + TypeScript, featuring real-time multiplayer support and offline capabilities. Play your favorite games solo or compete with friends online!
+A comprehensive collection of 8 classic and modern mini-games built with React + TypeScript, featuring real-time multiplayer support, offline capabilities, and PWA installation. Play your favorite games solo or compete with friends online!
 
 🌐 **Live Demo**: [https://famkaliuzhnyi-web.github.io/Mini-games/](https://famkaliuzhnyi-web.github.io/Mini-games/)  
 📱 **Mobile-Friendly**: Fully responsive and optimized for mobile devices  
-🎮 **Coming Soon**: Sudoku and more classic games!
+🎮 **8 Games Available**: 2048, Tic-Tac-Toe, Ping Pong, Sudoku, Snake, Drawing, Tetris, IoT Scanner
 
 ## 🎯 Available Games
 
-### 🔢 Sudoku *(Coming Soon)*
-- **Classic 9x9 Sudoku puzzles** with multiple difficulty levels
-- **Smart hints system** to help you learn and improve
-- **Progress tracking** with statistics and achievements
-- **Multiplayer mode** - compete to solve puzzles fastest
-- **Offline play** - perfect for commuting or travel
+### 🔢 2048
+- **Classic number puzzle** - combine tiles to reach 2048
+- **Smooth animations** and intuitive touch controls
+- **Auto-save functionality** to continue your progress
+- **Multiple grid themes** for personalized experience
 
-### 🎮 More Games Planned
-- Memory Match
-- 2048
-- Snake
-- Tic-tac-toe
-- Connect Four
+### ⭕ Tic-Tac-Toe
+- **Classic 3x3 strategy game** - get three in a row to win
+- **AI opponent** with adjustable difficulty
+- **Real-time multiplayer** via WebRTC peer-to-peer connections
+- **Tournament-style gameplay** for competitive matches
 
-*Vote for your favorite games or suggest new ones in the [Issues](https://github.com/famkaliuzhnyi-web/Mini-games/issues)!*
+### 🏓 Ping Pong
+- **Classic Pong experience** with modern physics
+- **Responsive paddle controls** optimized for all devices
+- **AI opponent** with progressive difficulty
+- **Full multiplayer support** for head-to-head matches
+
+### 🧩 Sudoku
+- **Classic 9x9 number placement puzzle** with four difficulty levels
+- **Smart hint system** with strategic suggestions (Easy: 10 hints, Expert: 3 hints)
+- **Comprehensive statistics** tracking time, mistakes, and completion rate
+- **Auto-save and manual save/load** functionality
+- **Multiple puzzle difficulties**: Easy, Medium, Hard, Expert
+
+### 🐍 Snake
+- **Classic arcade gameplay** - eat food, grow longer, avoid collisions
+- **Smooth controls** optimized for keyboard and touch
+- **Progressive difficulty** with increasing speed
+- **High score tracking** and auto-save progress
+
+### 🎨 Drawing
+- **32x32 pixel canvas** for creative expression
+- **Full color palette** with drawing tools
+- **Save and load artwork** with persistent storage
+- **Multiplayer collaboration** (coming soon)
+
+### 🧱 Tetris
+- **Classic block puzzle gameplay** - arrange falling pieces to clear lines
+- **Traditional Tetris mechanics** with line clearing and scoring
+- **Progressive difficulty** with increasing speed
+- **Modern responsive controls** for all devices
+
+### 🌐 IoT Scanner
+- **Network device discovery** - scan for IoT devices on your local network
+- **Device management interface** with detailed information
+- **Real-time network monitoring** and device status
+- **Utility tool** for network administrators and tech enthusiasts
+
+*More games in development! Vote for your favorites or suggest new ones in the [Issues](https://github.com/famkaliuzhnyi-web/Mini-games/issues)!*
 
 ## ✨ Platform Features
 
+✅ **8 Fully Implemented Games**: 2048, Tic-Tac-Toe, Ping Pong, Sudoku, Snake, Drawing, Tetris, IoT Scanner  
 ✅ **WebRTC Multiplayer**: Real-time peer-to-peer gaming with QR code joining  
-✅ **Offline Support**: Play anytime, anywhere with offline mode  
-✅ **Cross-platform**: Works on desktop, tablet, and mobile devices  
-✅ **No Installation**: Play directly in your browser  
-✅ **Progress Sync**: Your achievements and progress saved across devices  
-✅ **Auto-reconnect**: Seamless reconnection if connection is lost  
+✅ **Progressive Web App**: Install on any device with offline support and native-like experience  
+✅ **Auto-Save System**: Your progress is automatically saved and synced across devices  
+✅ **Cross-Platform**: Optimized for desktop, tablet, and mobile devices  
+✅ **Multiple Themes**: Dark and light themes with system preference detection  
+✅ **Coin System**: Earn and track coins across games with persistent storage  
+✅ **User Profiles**: Personalized experience with saved preferences and statistics  
 
 ### 🌐 Multiplayer Features
 - **QR Code Joining**: Host creates session, guests scan QR code to join instantly
@@ -39,6 +76,7 @@ A collection of classic and modern mini-games built with React + TypeScript, fea
 - **Auto-navigation**: Host selects game, all players navigate automatically
 - **Drop-in/Drop-out**: Players can connect and disconnect at any time
 - **Cross-device**: Play on different devices seamlessly
+- **Currently Available**: Tic-Tac-Toe and Ping Pong support full multiplayer, Snake and Drawing have partial support
 
 📖 **[Full Multiplayer Documentation](docs/WEBRTC-MULTIPLAYER.md)** | **[Quick Reference](docs/MULTIPLAYER-QUICK-REFERENCE.md)**  
 
@@ -46,9 +84,10 @@ A collection of classic and modern mini-games built with React + TypeScript, fea
 
 ### For Players
 1. Visit the [live demo](https://famkaliuzhnyi-web.github.io/Mini-games/)
-2. Choose your game from the available options
-3. Play solo or invite friends for multiplayer fun!
-4. Works offline - no internet required for single player games
+2. Enter your name to create your player profile
+3. Choose from 8 available games: 2048, Tic-Tac-Toe, Ping Pong, Sudoku, Snake, Drawing, Tetris, or IoT Scanner
+4. Enjoy solo play with auto-save, or invite friends for multiplayer matches!
+5. Install as a PWA for offline access and native app-like experience
 
 ### For Developers
 ```bash
@@ -68,17 +107,20 @@ npm run preview
 ## 🏗️ Technical Architecture
 
 ### Core Platform Features
-- **Real-time Communication**: WebSocket integration for multiplayer gaming
-- **Offline-First Design**: Web Workers enable games to work without internet
-- **State Management**: Automatic game state synchronization across devices
-- **Progressive Web App**: Install on any device for native-like experience
+- **Real-time Communication**: WebRTC peer-to-peer connections for multiplayer gaming
+- **Offline-First Design**: Service Workers and IndexedDB enable games to work without internet
+- **State Management**: Automatic game state synchronization and persistence across devices
+- **Progressive Web App**: Install on any device for native-like experience with offline support
+- **Auto-Save System**: Comprehensive save/load functionality for all games
+- **Theme System**: Dynamic theming with dark/light modes and system preference detection
 
 ### Game Development Framework
 Each game is built as a self-contained module with:
-- **Game Logic**: Pure TypeScript game mechanics
-- **UI Components**: React components for game interface  
-- **State Management**: Game-specific state with platform integration
-- **Multiplayer Support**: Built-in networking for competitive play
+- **Game Logic**: Pure TypeScript game mechanics and algorithms
+- **UI Components**: React components for responsive game interfaces  
+- **State Management**: Game-specific state with platform integration and persistence
+- **Multiplayer Support**: Built-in WebRTC networking for competitive and cooperative play
+- **Auto-Save Integration**: Seamless progress saving and restoration
 
 ## 🎮 Game Development Guide
 
@@ -104,17 +146,17 @@ src/games/example-game/
 
 - **Frontend**: React 19 + TypeScript + Vite
 - **Styling**: CSS Modules + Responsive Design  
-- **State**: React Hooks + Context API
-- **Networking**: WebSocket with auto-reconnection
-- **Offline**: Web Workers + IndexedDB
-- **Testing**: (Testing framework to be added)
-- **Deployment**: GitHub Actions → GitHub Pages
+- **State**: React Hooks + Context API + IndexedDB persistence
+- **Networking**: WebRTC peer-to-peer connections with auto-reconnection
+- **Offline**: Service Workers + IndexedDB for PWA functionality
+- **Build**: Vite bundler with TypeScript compilation and asset optimization
+- **Deployment**: GitHub Actions → GitHub Pages with automated PWA asset management
 
 ### Code Quality
-- **TypeScript**: Strict type checking for reliability
-- **ESLint**: Automated code quality and consistency checks
-- **JSDoc**: Comprehensive inline documentation
-- **Error Boundaries**: Graceful error handling and recovery
+- **TypeScript**: Strict type checking for reliability and developer experience
+- **ESLint**: Automated code quality and consistency checks with React-specific rules
+- **Modular Architecture**: Self-contained game modules with clean interfaces
+- **Error Boundaries**: Graceful error handling and recovery throughout the application
 
 ## 📝 Contributing
 
