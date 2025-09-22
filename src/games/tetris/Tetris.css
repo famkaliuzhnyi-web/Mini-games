@@ -11,6 +11,11 @@
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
   color: #ffffff;
   font-family: 'Arial', sans-serif;
+  /* Improve mobile touch handling */
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .tetris-container {
@@ -28,6 +33,8 @@
   border-radius: 8px;
   padding: 1rem;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  /* Allow swipe gestures only on game board area */
+  touch-action: pan-x pan-y;
 }
 
 .tetris-board {
@@ -154,6 +161,8 @@
   border-radius: 8px;
   padding: 1rem;
   border: 2px solid #4a4a5a;
+  /* Prevent swipe gestures on control area */
+  touch-action: manipulation;
 }
 
 .tetris-controls h3 {
@@ -188,6 +197,10 @@
   cursor: pointer;
   font-size: 0.9rem;
   transition: all 0.2s ease;
+  /* Improve mobile touch handling */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
 }
 
 .tetris-buttons button:hover:not(:disabled) {
@@ -212,6 +225,8 @@
   border-radius: 8px;
   padding: 1rem;
   border: 2px solid #4a4a5a;
+  /* Prevent swipe gestures on mobile control buttons */
+  touch-action: manipulation;
 }
 
 .tetris-mobile-row {
@@ -235,6 +250,10 @@
   font-size: 0.9rem;
   min-width: 60px;
   transition: all 0.2s ease;
+  /* Improve mobile touch responsiveness */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
 }
 
 .tetris-mobile-controls button:hover:not(:disabled) {

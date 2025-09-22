@@ -101,12 +101,14 @@ export const Tetris: React.FC<TetrisProps> = ({ playerId }) => {
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [handleKeyPress]);
 
-  // Touch/swipe controls
+  // Touch/swipe controls - exclude mobile control buttons to prevent conflicts
   useSwipeGestures(gameContainerRef, {
     onSwipeLeft: () => performAction({ type: 'MOVE_LEFT' }),
     onSwipeRight: () => performAction({ type: 'MOVE_RIGHT' }),
     onSwipeDown: () => performAction({ type: 'HARD_DROP' }),
-    onSwipeUp: () => performAction({ type: 'ROTATE' })
+    onSwipeUp: () => performAction({ type: 'ROTATE' }),
+    excludeSelector: '.tetris-mobile-controls, .tetris-buttons, .tetris-side-panel', // Exclude control areas
+    preventDefault: false // Allow normal browser touch behaviors
   });
 
   if (isLoading) {
