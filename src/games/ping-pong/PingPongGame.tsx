@@ -60,10 +60,11 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
       const newIsMobile = window.innerWidth <= 768;
       setIsMobile(newIsMobile);
       
-      // Auto-rotate for portrait mode on smaller screens for better UX
+      // More conservative auto-rotate logic to avoid intrusive overlays
       const isPortrait = window.innerHeight > window.innerWidth;
       const aspectRatio = window.innerWidth / window.innerHeight;
-      setShouldRotate(isPortrait && aspectRatio < 0.75 && window.innerWidth < 768);
+      // Only suggest rotation for very narrow portrait screens and smaller devices
+      setShouldRotate(isPortrait && aspectRatio < 0.6 && window.innerWidth < 480);
     };
 
     updateMobileState();
@@ -113,8 +114,8 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
     const updateDimensions = () => {
       if (containerRef.current) {
         const containerWidth = containerRef.current.clientWidth - 40; // Account for padding
-        // Use more screen space on mobile - 70% of viewport height instead of 40%
-        const maxHeight = isMobile ? window.innerHeight * 0.7 : window.innerHeight * 0.4;
+        // Use much more screen space on mobile - 85% of viewport height instead of 70%
+        const maxHeight = isMobile ? window.innerHeight * 0.85 : window.innerHeight * 0.4;
         const newDimensions = calculateGameDimensions(containerWidth, maxHeight);
         setGameDimensions(newDimensions);
       }
@@ -159,7 +160,11 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
    * Handle touch start for paddle control
    */
   const handleTouchStart = useCallback((event: React.TouchEvent) => {
-    event.preventDefault();
+    // Prevent default to avoid gesture conflicts, but only for single touch
+    if (event.touches.length === 1) {
+      event.preventDefault();
+    }
+    
     const touch = event.touches[0];
     const currentGameState = gameStateRef.current;
     
@@ -180,7 +185,11 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
    * Handle touch move for paddle control
    */
   const handleTouchMove = useCallback((event: React.TouchEvent) => {
-    event.preventDefault();
+    // Only prevent default for single touch and if we're actively tracking
+    if (event.touches.length === 1 && touchStateRef.current.isActive) {
+      event.preventDefault();
+    }
+    
     if (!touchStateRef.current.isActive) return;
     
     const touch = event.touches[0];
@@ -783,22 +792,23 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
         )}
       </div>
 
-      {/* Rotation hint for portrait mode */}
+      {/* Rotation hint for portrait mode - less intrusive */}
       {shouldRotate && (
         <div style={{
           position: 'absolute',
-          bottom: '1rem',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          padding: '0.5rem 1rem',
-          background: 'rgba(0, 0, 0, 0.8)',
+          top: '1rem',
+          right: '1rem',
+          padding: '0.25rem 0.5rem',
+          background: 'rgba(0, 0, 0, 0.6)',
           color: 'white',
-          borderRadius: '0.5rem',
-          fontSize: '0.8rem',
+          borderRadius: '0.25rem',
+          fontSize: '0.7rem',
           textAlign: 'center',
-          zIndex: 100
+          zIndex: 10,
+          pointerEvents: 'none',
+          opacity: 0.8
         }}>
-          🔄 Game rotated for better portrait experience
+          💡 Rotate for better experience
         </div>
       )}
 
