@@ -11,6 +11,7 @@ interface SwipeGestureOptions {
   onSwipeUp?: () => void;
   onSwipeDown?: () => void;
   preventDefault?: boolean;
+  excludeSelector?: string; // CSS selector for elements to exclude from swipe detection
 }
 
 interface TouchPoint {
@@ -30,13 +31,21 @@ export const useSwipeGestures = (
     onSwipeRight,
     onSwipeUp,
     onSwipeDown,
-    preventDefault = true
+    preventDefault = false, // Changed default to false for better mobile experience
+    excludeSelector
   } = options;
 
   const touchStart = useRef<TouchPoint | null>(null);
   const isSwiping = useRef(false);
 
   const handleTouchStart = useCallback((e: TouchEvent) => {
+    // Check if touch started on excluded element
+    if (excludeSelector && e.target instanceof Element) {
+      if (e.target.closest(excludeSelector)) {
+        return; // Don't handle swipes on excluded elements
+      }
+    }
+    
     if (preventDefault) {
       e.preventDefault();
     }
@@ -50,9 +59,16 @@ export const useSwipeGestures = (
       };
       isSwiping.current = false;
     }
-  }, [preventDefault]);
+  }, [preventDefault, excludeSelector]);
 
   const handleTouchMove = useCallback((e: TouchEvent) => {
+    // Check if touch is on excluded element
+    if (excludeSelector && e.target instanceof Element) {
+      if (e.target.closest(excludeSelector)) {
+        return;
+      }
+    }
+    
     if (preventDefault) {
       e.preventDefault();
     }
@@ -69,9 +85,18 @@ export const useSwipeGestures = (
         isSwiping.current = true;
       }
     }
-  }, [preventDefault]);
+  }, [preventDefault, excludeSelector]);
 
   const handleTouchEnd = useCallback((e: TouchEvent) => {
+    // Check if touch ended on excluded element
+    if (excludeSelector && e.target instanceof Element) {
+      if (e.target.closest(excludeSelector)) {
+        touchStart.current = null;
+        isSwiping.current = false;
+        return;
+      }
+    }
+    
     if (preventDefault) {
       e.preventDefault();
     }
@@ -127,7 +152,7 @@ export const useSwipeGestures = (
 
     touchStart.current = null;
     isSwiping.current = false;
-  }, [minSwipeDistance, maxSwipeTime, onSwipeLeft, onSwipeRight, onSwipeUp, onSwipeDown, preventDefault]);
+  }, [minSwipeDistance, maxSwipeTime, onSwipeLeft, onSwipeRight, onSwipeUp, onSwipeDown, preventDefault, excludeSelector]);
 
   useEffect(() => {
     const element = elementRef.current;
