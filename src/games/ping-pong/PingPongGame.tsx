@@ -114,8 +114,8 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
     const updateDimensions = () => {
       if (containerRef.current) {
         const containerWidth = containerRef.current.clientWidth - 40; // Account for padding
-        // Use much more screen space on mobile - 85% of viewport height instead of 70%
-        const maxHeight = isMobile ? window.innerHeight * 0.85 : window.innerHeight * 0.4;
+        // Use 80% of screen space for mobile game field as requested
+        const maxHeight = isMobile ? window.innerHeight * 0.8 : window.innerHeight * 0.4;
         const newDimensions = calculateGameDimensions(containerWidth, maxHeight);
         setGameDimensions(newDimensions);
       }
@@ -160,8 +160,8 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
    * Handle touch start for paddle control
    */
   const handleTouchStart = useCallback((event: React.TouchEvent) => {
-    // Prevent default to avoid gesture conflicts, but only for single touch
-    if (event.touches.length === 1) {
+    // Only prevent default for single touch events to avoid gesture conflicts
+    if (event.touches.length === 1 && gameState.data.gameStatus === 'playing') {
       event.preventDefault();
     }
     
@@ -179,14 +179,14 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
       currentX: touch.clientX,
       startTime: Date.now()
     });
-  }, []);
+  }, [gameState.data.gameStatus]);
 
   /**
    * Handle touch move for paddle control
    */
   const handleTouchMove = useCallback((event: React.TouchEvent) => {
-    // Only prevent default for single touch and if we're actively tracking
-    if (event.touches.length === 1 && touchStateRef.current.isActive) {
+    // Only prevent default for single touch and if we're actively tracking during gameplay
+    if (event.touches.length === 1 && touchStateRef.current.isActive && gameState.data.gameStatus === 'playing') {
       event.preventDefault();
     }
     
@@ -198,7 +198,7 @@ export const PingPongGame: React.FC<PingPongGameProps> = ({ playerId }) => {
       currentY: touch.clientY,
       currentX: touch.clientX
     }));
-  }, []);
+  }, [gameState.data.gameStatus]);
 
   /**
    * Handle touch end with swipe detection

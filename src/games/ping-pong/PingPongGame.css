@@ -73,7 +73,7 @@
   padding: 1rem;
   transition: var(--pp-transition);
   border: 1px solid var(--pp-border-dark);
-  touch-action: pan-y; /* Allow vertical scrolling but prevent other gestures */
+  touch-action: pan-y pinch-zoom; /* Allow vertical scrolling and pinch-zoom but prevent horizontal pan */
 }
 
 .ping-pong-canvas-container:hover {
@@ -89,7 +89,7 @@
   border-radius: var(--pp-radius);
   background: #000;
   transition: var(--pp-transition);
-  touch-action: pan-y; /* Allow vertical scrolling but prevent pinch-zoom and other gestures */
+  touch-action: manipulation; /* Allow standard touch actions but prevent double-tap-zoom */
 }
 
 /* Responsive Rotation for Portrait Mode */
@@ -277,7 +277,7 @@
 
   .ping-pong-game-field {
     padding: 0.25rem;
-    min-height: 85vh; /* Increased from 70vh for more game area */
+    min-height: 80vh; /* Set to 80% as requested by user */
   }
 
   .ping-pong-score {
@@ -288,9 +288,9 @@
   }
 
   .ping-pong-canvas-container {
-    padding: 0.25rem; /* Reduced padding for more game area */
-    margin: 0.25rem 0;
-    max-width: 98vw; /* Use almost full width */
+    padding: 0.125rem; /* Minimal padding for maximum game area */
+    margin: 0.125rem 0;
+    max-width: 99vw; /* Use almost full width for maximum field visibility */
   }
 
   .ping-pong-btn {
