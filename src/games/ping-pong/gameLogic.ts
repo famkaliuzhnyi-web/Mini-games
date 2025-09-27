@@ -58,10 +58,10 @@ export function calculateGameDimensions(maxWidth: number, maxHeight?: number): {
     width = height * aspectRatio;
   }
 
-  // Ensure minimum playable size - larger for mobile devices
+  // Ensure minimum playable size - much larger for mobile devices  
   const isMobileDevice = window.innerWidth <= 768;
-  const minWidth = isMobileDevice ? 400 : 300;
-  const minHeight = isMobileDevice ? 200 : 150;
+  const minWidth = isMobileDevice ? 350 : 300; // Increased mobile min width
+  const minHeight = isMobileDevice ? 250 : 150; // Increased mobile min height
   if (width < minWidth) {
     width = minWidth;
     height = minHeight;
