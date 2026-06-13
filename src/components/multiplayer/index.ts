@@ -1,8 +1,1 @@
-/**
- * Multiplayer Components Exports
- */
-
-export { QRCodeDisplay } from './QRCodeDisplay';
-export { MultiplayerLobby } from './MultiplayerLobby';
-export { MultiplayerModal } from './MultiplayerModal';
-export { MultiplayerWIP } from './MultiplayerWIP';
+export { SessionPanel } from './SessionPanel';

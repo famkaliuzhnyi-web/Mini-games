@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { useCoinService } from '../../hooks/useCoinService';
-import { useMultiplayerSession } from '../../hooks/useMultiplayerSession';
-import { MultiplayerModal } from '../multiplayer/MultiplayerModal';
+import { useSession } from '../../hooks/useSession';
+import { SessionPanel } from '../multiplayer/SessionPanel';
 import { getProfileInitials } from '../../utils/nameUtils';
 import './Navigation.css';
 
 interface NavigationProps {
   playerName: string;
+  playerId?: string;
   showHomeButton?: boolean;
   onHomeClick?: () => void;
   onProfileClick?: () => void;
@@ -15,88 +16,85 @@ interface NavigationProps {
 
 export const Navigation: React.FC<NavigationProps> = ({
   playerName,
+  playerId = '',
   showHomeButton = false,
   onHomeClick,
   onProfileClick,
-  onNavigateToGame
 }) => {
   const { balance } = useCoinService();
-  const { isConnected, players } = useMultiplayerSession();
-  const [isMultiplayerModalOpen, setIsMultiplayerModalOpen] = useState(false);
+  const session = useSession();
+  const [sessionPanelOpen, setSessionPanelOpen] = useState(false);
 
-  const handleMultiplayerClick = () => {
-    setIsMultiplayerModalOpen(true);
-  };
+  const allPlayers = [
+    ...(session.localPlayer ? [session.localPlayer] : []),
+    ...session.peers,
+  ];
 
-  const handleCloseMultiplayerModal = () => {
-    setIsMultiplayerModalOpen(false);
-  };
+  const showPlayers = session.isInSession && allPlayers.length > 0;
 
   return (
     <>
       <nav className="navigation">
         <div className="nav-content">
-          <button 
+          <button
             className={`nav-home-btn ${!showHomeButton ? 'nav-home-btn-current' : ''}`}
             onClick={showHomeButton ? onHomeClick : undefined}
-            aria-label={showHomeButton ? "Go home" : "Games (current page)"}
+            aria-label={showHomeButton ? 'Go home' : 'Games (current page)'}
             disabled={!showHomeButton}
           >
             🏠 Games
           </button>
+
           <div className="nav-right">
             <div className="nav-coins" title="Your coin balance">
               🪙 {(balance ?? 0).toLocaleString()}
             </div>
+
             <div className="nav-user">
-              {isConnected && players.length > 0 ? (
-                // Show all multiplayer players (remove duplicates based on player name)
-                players
-                  .filter((player, index, array) => 
-                    array.findIndex(p => p.name === player.name) === index
-                  )
-                  .map((player) => (
-                    <button
-                      key={player.id}
-                      className={`nav-profile-btn ${player.name === playerName ? 'nav-profile-btn-current' : 'nav-profile-btn-other'}`}
-                      onClick={player.name === playerName ? onProfileClick : undefined}
-                      aria-label={player.name === playerName ? `Open profile for ${player.name}` : `Player ${player.name}`}
-                      title={player.name === playerName ? `${player.name} - Click to edit profile` : `${player.name} (${player.role})`}
-                      disabled={player.name !== playerName}
-                    >
-                      {getProfileInitials(player.name)}
-                    </button>
-                  ))
+              {showPlayers ? (
+                allPlayers.map(p => (
+                  <button
+                    key={p.id}
+                    className={`nav-profile-btn ${p.id === session.localPlayer?.id ? 'nav-profile-btn-current' : 'nav-profile-btn-other'}`}
+                    onClick={p.id === session.localPlayer?.id ? onProfileClick : undefined}
+                    aria-label={p.id === session.localPlayer?.id ? `Profile: ${p.name}` : p.name}
+                    title={p.name}
+                    disabled={p.id !== session.localPlayer?.id}
+                  >
+                    {getProfileInitials(p.name)}
+                  </button>
+                ))
               ) : (
-                // Show only current player when not in multiplayer
-                <button 
-                  className="nav-profile-btn" 
+                <button
+                  className="nav-profile-btn"
                   onClick={onProfileClick}
-                  aria-label={`Open profile for ${playerName}`}
-                  title={`${playerName} - Click to edit profile`}
+                  aria-label={`Profile: ${playerName}`}
+                  title={playerName}
                 >
                   {getProfileInitials(playerName)}
                 </button>
               )}
-              <button 
-                className="nav-multiplayer-btn" 
-                onClick={handleMultiplayerClick}
-                aria-label="Open multiplayer"
-                title="Join or create multiplayer games"
+
+              <button
+                className={`nav-multiplayer-btn ${session.isInSession ? 'active' : ''}`}
+                onClick={() => setSessionPanelOpen(true)}
+                aria-label="Multiplayer session"
+                title={session.isInSession ? `Session active (${allPlayers.length} players)` : 'Start a multiplayer session'}
               >
-                +
+                {session.isInSession ? `👥 ${allPlayers.length}` : '+'}
               </button>
             </div>
           </div>
         </div>
       </nav>
 
-      <MultiplayerModal
-        isOpen={isMultiplayerModalOpen}
-        onClose={handleCloseMultiplayerModal}
-        playerName={playerName}
-        onNavigateToGame={onNavigateToGame}
-      />
+      {sessionPanelOpen && (
+        <SessionPanel
+          playerName={playerName}
+          playerId={playerId}
+          onClose={() => setSessionPanelOpen(false)}
+        />
+      )}
     </>
   );
 };

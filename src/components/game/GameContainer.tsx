@@ -7,9 +7,6 @@ import { SnakeGame } from '../../games/snake';
 import { DrawingGame } from '../../games/drawing';
 import { Tetris } from '../../games/tetris';
 import { IoTScannerGame } from '../../games/iot-scanner';
-import { MultiplayerWIP } from '../multiplayer/MultiplayerWIP';
-import { multiplayerService } from '../../services/MultiplayerService';
-import { GAME_INFO } from '../../constants/gameInfo';
 import './GameContainer.css';
 
 interface GameContainerProps {
@@ -18,41 +15,17 @@ interface GameContainerProps {
   playerName: string;
 }
 
-export const GameContainer: React.FC<GameContainerProps> = ({
-  gameId,
-  playerId
-}) => {
-  // Check if we're in a multiplayer session
-  const currentSession = multiplayerService.getCurrentSession();
-  const isInMultiplayerSession = currentSession !== null;
-  
-  // Get game info
-  const gameInfo = GAME_INFO[gameId];
-  
-  // Render the original integrated game components instead of slots system
+export const GameContainer: React.FC<GameContainerProps> = ({ gameId, playerId, playerName }) => {
   const renderGame = () => {
-    // If in multiplayer session and game doesn't support multiplayer, show WIP message
-    if (isInMultiplayerSession && gameInfo && !gameInfo.hasMultiplayerSupport) {
-      return <MultiplayerWIP gameId={gameId} gameName={gameInfo.name} />;
-    }
-    
     switch (gameId) {
-      case 'game2048':
-        return <Game2048 playerId={playerId} />;
-      case 'tic-tac-toe':
-        return <TicTacToeGame playerId={playerId} />;
-      case 'sudoku':
-        return <SudokuGame playerId={playerId} />;
-      case 'ping-pong':
-        return <PingPongGame playerId={playerId} />;
-      case 'snake':
-        return <SnakeGame playerId={playerId} />;
-      case 'drawing':
-        return <DrawingGame playerId={playerId} />;
-      case 'tetris':
-        return <Tetris playerId={playerId} />;
-      case 'iot-scanner':
-        return <IoTScannerGame playerId={playerId} />;
+      case 'game2048':    return <Game2048 playerId={playerId} />;
+      case 'tic-tac-toe': return <TicTacToeGame playerId={playerId} playerName={playerName} />;
+      case 'sudoku':      return <SudokuGame playerId={playerId} />;
+      case 'ping-pong':   return <PingPongGame playerId={playerId} />;
+      case 'snake':       return <SnakeGame playerId={playerId} />;
+      case 'drawing':     return <DrawingGame playerId={playerId} />;
+      case 'tetris':      return <Tetris playerId={playerId} />;
+      case 'iot-scanner': return <IoTScannerGame playerId={playerId} />;
       default:
         return (
           <div className="game-not-found">
