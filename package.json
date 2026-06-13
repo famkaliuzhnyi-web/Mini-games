@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@types/qrcode": "^1.5.5",
+    "firebase": "^12.14.0",
     "jsdom": "^26.1.0",
     "puppeteer-core": "^24.16.1",
     "qrcode": "^1.5.4",

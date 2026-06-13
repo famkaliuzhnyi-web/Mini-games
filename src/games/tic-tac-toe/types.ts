@@ -38,11 +38,8 @@ export type GameMode = 'single-player' | 'multiplayer';
 // Multiplayer game state
 export interface MultiplayerState {
   isMultiplayer: boolean;
-  sessionId?: string;
-  isHost?: boolean;
-  playerId?: string;
-  remotePlayerName?: string;
-  waitingForMove?: boolean;
+  xPlayerId?: string;  // player assigned to X (host)
+  oPlayerId?: string;  // player assigned to O (guest)
 }
 
 // Tic-Tac-Toe specific game data that extends base game requirements

@@ -1,202 +1,177 @@
-import './App.css'
-import { HashRouter, Routes, Route, useParams } from 'react-router-dom'
-import { useGameSession } from './hooks/useGameSession'
-import { NameEntry, Profile, GameContainer, GamesList, Navigation, InstallPrompt, ErrorBoundary } from './components'
-import { useEffect, useState, useMemo } from 'react'
-import { ThemeService } from './services/ThemeService'
-import { multiplayerService } from './services/MultiplayerService'
-import { UserService } from './services/UserService'
+import './App.css';
+import { HashRouter, Routes, Route, useParams, useNavigate } from 'react-router-dom';
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { useGameSession } from './hooks/useGameSession';
+import { NameEntry, Profile, GameContainer, GamesList, Navigation, InstallPrompt, ErrorBoundary } from './components';
+import { ThemeService } from './services/ThemeService';
+import { UserService } from './services/UserService';
+import { SessionContext, useNavigationSync } from './hooks/useSession';
+import { createSessionManager } from './core';
+import type { SessionManager } from './core/session/SessionManager';
 
-// Component for the main games list/name entry page
-function MainPage() {
-  const navigation = useGameSession()
+// ── Session manager singleton ─────────────────────────────────────────────────
 
-  // Show name entry if no player name, otherwise show games list
-  if (!navigation.playerName) {
-    return <NameEntry onNameSubmit={navigation.setPlayerName} />
-  }
+const managerCtx = createContext<SessionManager | null>(null);
 
-  return (
-    <div className="app">
-      <Navigation
-        playerName={navigation.playerName}
-        showHomeButton={false}
-        onHomeClick={navigation.goHome}
-        onProfileClick={navigation.showProfile}
-        onNavigateToGame={navigation.playGame}
-      />
-      <GamesList onGameSelect={navigation.playGame} />
-    </div>
-  )
+function AppShell({ children }: { children: React.ReactNode }) {
+  const manager = useContext(managerCtx)!;
+  const navigate = useNavigate();
+
+  // Follow the host's navigation commands
+  useNavigationSync(route => navigate(route));
+
+  return <SessionContext.Provider value={manager}>{children}</SessionContext.Provider>;
 }
 
-// Component for playing a specific game
-function GamePage() {
-  const navigation = useGameSession()
+// ── Pages ─────────────────────────────────────────────────────────────────────
 
-  // Redirect to main page if no player name or no game selected
-  if (!navigation.playerName || !navigation.currentGame) {
-    return <MainPage />
-  }
+function MainPage() {
+  const nav = useGameSession();
+  if (!nav.playerName) return <NameEntry onNameSubmit={nav.setPlayerName} />;
 
   return (
     <div className="app">
       <Navigation
-        playerName={navigation.playerName}
+        playerName={nav.playerName}
+        showHomeButton={false}
+        onHomeClick={nav.goHome}
+        onProfileClick={nav.showProfile}
+        onNavigateToGame={nav.playGame}
+      />
+      <GamesList onGameSelect={nav.playGame} />
+    </div>
+  );
+}
+
+function GamePage() {
+  const nav = useGameSession();
+  if (!nav.playerName || !nav.currentGame) return <MainPage />;
+
+  return (
+    <div className="app">
+      <Navigation
+        playerName={nav.playerName}
         showHomeButton={true}
-        onHomeClick={navigation.goHome}
-        onProfileClick={navigation.showProfile}
-        onNavigateToGame={navigation.playGame}
+        onHomeClick={nav.goHome}
+        onProfileClick={nav.showProfile}
+        onNavigateToGame={nav.playGame}
       />
       <GameContainer
-        gameId={navigation.currentGame}
-        playerId={navigation.playerId}
-        playerName={navigation.playerName}
+        gameId={nav.currentGame}
+        playerId={nav.playerId}
+        playerName={nav.playerName}
       />
     </div>
-  )
+  );
 }
 
-// Component for the profile page
 function ProfilePage() {
-  const navigation = useGameSession()
-
-  // Redirect to main page if no player name
-  if (!navigation.playerName) {
-    return <MainPage />
-  }
+  const nav = useGameSession();
+  if (!nav.playerName) return <MainPage />;
 
   return (
     <Profile
-      playerName={navigation.playerName}
-      onNameUpdate={navigation.setPlayerName}
-      onBack={navigation.showGamesList}
+      playerName={nav.playerName}
+      onNameUpdate={nav.setPlayerName}
+      onBack={nav.showGamesList}
     />
-  )
+  );
 }
 
-// Component for multiplayer join page
-function MultiplayerJoinPage() {
-  const { sessionId } = useParams<{ sessionId: string }>()
-  const [forceUpdate, setForceUpdate] = useState(0)
-  
-  // Create a custom navigation that refreshes when forceUpdate changes
-  const baseNavigation = useGameSession()
-  const navigation = useMemo(() => {
-    if (forceUpdate > 0) {
-      const profile = UserService.getInstance().loadProfile()
-      return {
-        ...baseNavigation,
-        playerName: profile?.playerName || '',
-        playerId: profile?.playerId || baseNavigation.playerId
-      }
+/**
+ * Handles QR code / link joins.
+ * Shows name entry first if needed, then connects to the session.
+ */
+function JoinPage() {
+  const { sessionId } = useParams<{ sessionId: string }>();
+  const navigate = useNavigate();
+  const userService = UserService.getInstance();
+  const [playerName, setPlayerName] = useState(() => userService.loadProfile()?.playerName ?? '');
+  const [playerId] = useState(() => userService.loadProfile()?.playerId ?? crypto.randomUUID());
+  const manager = useContext(managerCtx)!;
+
+  const [phase, setPhase] = useState<'name' | 'joining' | 'done' | 'error'>('name');
+  const [error, setError] = useState('');
+
+  const attemptJoin = async (name: string) => {
+    if (!sessionId) return;
+    setPhase('joining');
+    try {
+      await manager.joinSession(sessionId, { id: playerId, name, joinedAt: Date.now() });
+      userService.saveProfile({ playerName: name, playerId });
+      setPhase('done');
+      // Navigate back to main — host will push us to the right game
+      navigate('/');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not join session');
+      setPhase('error');
     }
-    return baseNavigation
-  }, [baseNavigation, forceUpdate])
-  
-  const [isJoining, setIsJoining] = useState(true)
-  const [joinError, setJoinError] = useState<string | null>(null)
+  };
 
-  useEffect(() => {
-    const joinSession = async () => {
-      if (!sessionId || !navigation.playerName) return
-
-      try {
-        await multiplayerService.joinSession({
-          sessionId,
-          playerName: navigation.playerName
-        })
-        setIsJoining(false)
-        // Redirect to games list after successful join
-        navigation.showGamesList()
-      } catch (error) {
-        console.error('Failed to join multiplayer session:', error)
-        setJoinError('Failed to join multiplayer session')
-        setIsJoining(false)
-      }
-    }
-
-    if (navigation.playerName && sessionId) {
-      joinSession()
-    }
-  }, [sessionId, navigation.playerName, navigation])
-
-  // Show name entry if no player name
-  if (!navigation.playerName) {
-    const handleNameSubmit = (name: string) => {
-      const trimmedName = name.trim();
-      if (!trimmedName) return;
-      
-      // Use UserService directly to save the profile
-      const userService = UserService.getInstance();
-      userService.saveProfile({
-        playerName: trimmedName,
-        playerId: navigation.playerId
-      });
-
-      // Trigger re-evaluation of navigation state
-      setForceUpdate(1);
-    };
-
-    return <NameEntry onNameSubmit={handleNameSubmit} />
-  }
-
-  if (isJoining) {
+  if (!playerName) {
     return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',
-        flexDirection: 'column'
-      }}>
-        <div>🎮</div>
-        <h2>Joining multiplayer session...</h2>
-        <p>Please wait while we connect you to the game.</p>
-      </div>
-    )
+      <NameEntry
+        onNameSubmit={name => {
+          setPlayerName(name);
+          attemptJoin(name);
+        }}
+      />
+    );
   }
 
-  if (joinError) {
+  if (phase === 'name') {
+    // Name already known — proceed automatically
+    useEffect(() => { attemptJoin(playerName); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }
+
+  if (phase === 'joining') {
     return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',
-        flexDirection: 'column'
-      }}>
-        <div>❌</div>
-        <h2>Failed to join session</h2>
-        <p>{joinError}</p>
-        <button onClick={navigation.showGamesList}>Go to Games</button>
+      <div className="join-page">
+        <div className="join-page-icon">🎮</div>
+        <h2>Joining session…</h2>
+        <p>Connecting to <strong>{sessionId}</strong></p>
       </div>
-    )
+    );
   }
 
-  // This should not be reached as we redirect after successful join
-  return <MainPage />
+  if (phase === 'error') {
+    return (
+      <div className="join-page">
+        <div className="join-page-icon">❌</div>
+        <h2>Couldn't join</h2>
+        <p>{error}</p>
+        <button onClick={() => navigate('/')}>Go home</button>
+      </div>
+    );
+  }
+
+  return null;
 }
+
+// ── Root ──────────────────────────────────────────────────────────────────────
 
 function App() {
-  // Initialize theme service
-  useEffect(() => {
-    ThemeService.getInstance();
-  }, []);
+  const manager = useMemo(() => createSessionManager(), []);
+
+  useEffect(() => { ThemeService.getInstance(); }, []);
 
   return (
-    <ErrorBoundary>
-      <HashRouter>
-        <Routes>
-          <Route path="/" element={<MainPage />} />
-          <Route path="/game/:gameId" element={<GamePage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/multiplayer/join/:sessionId" element={<MultiplayerJoinPage />} />
-        </Routes>
-        <InstallPrompt />
-      </HashRouter>
-    </ErrorBoundary>
-  )
+    <managerCtx.Provider value={manager}>
+      <ErrorBoundary>
+        <HashRouter>
+          <AppShell>
+            <Routes>
+              <Route path="/" element={<MainPage />} />
+              <Route path="/game/:gameId" element={<GamePage />} />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/join/:sessionId" element={<JoinPage />} />
+            </Routes>
+            <InstallPrompt />
+          </AppShell>
+        </HashRouter>
+      </ErrorBoundary>
+    </managerCtx.Provider>
+  );
 }
 
-export default App
+export default App;
