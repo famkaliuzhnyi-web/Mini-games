@@ -1,4 +1,4 @@
-export type ThemeName = 'forever-winter' | 'xbox' | 'playstation' | 'nintendo' | 'steam';
+export type ThemeName = 'cyberpunk' | 'xbox' | 'playstation' | 'nintendo' | 'steam';
 
 export interface Theme {
   name: ThemeName;
@@ -9,9 +9,9 @@ export interface Theme {
 }
 
 export const THEMES: Record<ThemeName, Theme> = {
-  'forever-winter': {
-    name: 'forever-winter',
-    displayName: 'Forever Winter',
+  cyberpunk: {
+    name: 'cyberpunk',
+    displayName: 'Cyberpunk',
     description: 'Dark military terminal. Amber glow. Zero mercy.',
     swatchBg: '#0d0e10',
     swatchAccent: '#c8a84b',
@@ -49,7 +49,7 @@ export const THEMES: Record<ThemeName, Theme> = {
 export class ThemeService {
   private static instance: ThemeService | null = null;
   private static readonly STORAGE_KEY = 'minigames_theme';
-  private currentTheme: ThemeName = 'forever-winter';
+  private currentTheme: ThemeName = 'cyberpunk';
   private listeners: ((theme: ThemeName) => void)[] = [];
 
   private constructor() {
