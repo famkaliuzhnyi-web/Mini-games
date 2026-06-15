@@ -25,28 +25,29 @@ export const THEME_DATA: Record<string, Game2048ThemeData> = {
   classic: {
     id: 'classic',
     name: 'Classic',
-    description: 'Original 2048 colors',
-    cost: 0, // Free default theme
+    description: 'Dark cyberpunk style',
+    cost: 0,
     colors: {
-      background: 'linear-gradient(135deg, #faf8ef 0%, #f2ebe5 100%)',
-      container: 'linear-gradient(135deg, #faf8ef 0%, #f2ebe5 100%)',
-      gridBackground: 'rgba(187, 173, 160, 0.35)',
-      emptyCell: 'rgba(238, 228, 218, 0.35)',
-      text: '#776e65',
-      title: 'linear-gradient(135deg, #776e65, #8f7a66)',
-      tiles: createTileColors([
-        'linear-gradient(135deg, #eee4da, #e6dcd2)', // 2
-        'linear-gradient(135deg, #ede0c8, #e5d4b8)', // 4
-        'linear-gradient(135deg, #f2b179, #f0a865)', // 8
-        'linear-gradient(135deg, #f59563, #f3884f)', // 16
-        'linear-gradient(135deg, #f67c5f, #f46d4b)', // 32
-        'linear-gradient(135deg, #f65e3b, #f44d27)', // 64
-        'linear-gradient(135deg, #edcf72, #e6c862)', // 128
-        'linear-gradient(135deg, #edcc61, #e6c551)', // 256
-        'linear-gradient(135deg, #edc850, #e6c140)', // 512
-        'linear-gradient(135deg, #edc53f, #e6be2f)', // 1024
-        'linear-gradient(135deg, #edc22e, #e6bb1d)', // 2048
-      ])
+      background: '#0a0a0a',
+      container: '#111111',
+      gridBackground: '#1a1a1a',
+      emptyCell: '#222222',
+      text: '#e0e0e0',
+      title: 'linear-gradient(135deg, #ff0040, #ff4060)',
+      tiles: {
+        0:    { background: '',        color: '' },
+        2:    { background: '#2d2a22', color: '#c8bb99' },
+        4:    { background: '#3a3320', color: '#d4c58a' },
+        8:    { background: '#c87941', color: '#fff' },
+        16:   { background: '#c96435', color: '#fff' },
+        32:   { background: '#c54f30', color: '#fff' },
+        64:   { background: '#bf3820', color: '#fff' },
+        128:  { background: '#c9a030', color: '#fff' },
+        256:  { background: '#c99a28', color: '#fff' },
+        512:  { background: '#c99420', color: '#fff' },
+        1024: { background: '#c98e18', color: '#fff' },
+        2048: { background: '#ff0040', color: '#fff' },
+      }
     }
   },
   
