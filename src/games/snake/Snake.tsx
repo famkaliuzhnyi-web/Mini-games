@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useCallback, useState } from 'react';
 import { useSession } from '../../hooks/useSession';
 import { useCoinService } from '../../hooks/useCoinService';
 import { useSwipeGestures } from '../../hooks/useSwipeGestures';
+import { GameButton } from '../../components/ui';
 import type { SnakeGameState, SnakeAction, Direction } from './types';
 import { snakeGame } from './Snake.game';
 import {
@@ -153,7 +154,7 @@ export const SnakeGame: React.FC<SnakeProps> = ({ playerId, playerName }) => {
     return () => window.removeEventListener('keydown', onKey);
   }, [changeDirection]);
 
-  // Swipe — exclude overlay so its buttons still receive click events on mobile
+  // Swipe — interactive elements (buttons etc.) are excluded automatically by the hook.
   useSwipeGestures(containerRef, {
     onSwipeUp:    () => changeDirection('up'),
     onSwipeDown:  () => changeDirection('down'),
@@ -161,7 +162,6 @@ export const SnakeGame: React.FC<SnakeProps> = ({ playerId, playerName }) => {
     onSwipeRight: () => changeDirection('right'),
     minSwipeDistance: 25,
     preventDefault: true,
-    excludeSelector: '.snake-overlay',
   });
 
   // ── Multiplayer wiring ─────────────────────────────────────────────────
@@ -363,11 +363,11 @@ export const SnakeGame: React.FC<SnakeProps> = ({ playerId, playerName }) => {
                 </div>
               )}
               {isHost ? (
-                <button className="snake-action-btn" onPointerDown={(e) => { e.stopPropagation(); handleStart(); }}>
+                <GameButton className="snake-action-btn" onClick={handleStart}>
                   {isInSession
                     ? `Start Game · ${allPlayers.length} player${allPlayers.length !== 1 ? 's' : ''}`
                     : 'Play Solo'}
-                </button>
+                </GameButton>
               ) : (
                 <p className="snake-waiting-msg">Waiting for host to start…</p>
               )}
@@ -397,9 +397,9 @@ export const SnakeGame: React.FC<SnakeProps> = ({ playerId, playerName }) => {
                   ))}
               </div>
               {isHost ? (
-                <button className="snake-action-btn" onPointerDown={(e) => { e.stopPropagation(); handleStart(); }}>
+                <GameButton className="snake-action-btn" onClick={handleStart}>
                   Play Again
-                </button>
+                </GameButton>
               ) : (
                 <p className="snake-waiting-msg">Waiting for host to restart…</p>
               )}

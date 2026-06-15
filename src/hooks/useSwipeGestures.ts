@@ -1,7 +1,7 @@
-/**
- * Custom hook for detecting swipe gestures on touch devices
- */
 import { useEffect, useRef, useCallback } from 'react';
+
+// Always excluded from swipe detection — tapping these should never trigger a swipe.
+const INTERACTIVE_SELECTOR = 'button, a, input, select, textarea, [role="button"]';
 
 interface SwipeGestureOptions {
   minSwipeDistance?: number;
@@ -11,7 +11,8 @@ interface SwipeGestureOptions {
   onSwipeUp?: () => void;
   onSwipeDown?: () => void;
   preventDefault?: boolean;
-  excludeSelector?: string; // CSS selector for elements to exclude from swipe detection
+  // Additional selector to exclude on top of the built-in interactive-element exclusion.
+  excludeSelector?: string;
 }
 
 interface TouchPoint {
@@ -20,9 +21,16 @@ interface TouchPoint {
   timestamp: number;
 }
 
+function isExcluded(target: EventTarget | null, extraSelector?: string): boolean {
+  if (!(target instanceof Element)) return false;
+  if (target.closest(INTERACTIVE_SELECTOR)) return true;
+  if (extraSelector && target.closest(extraSelector)) return true;
+  return false;
+}
+
 export const useSwipeGestures = (
   elementRef: React.RefObject<HTMLElement | null>,
-  options: SwipeGestureOptions
+  options: SwipeGestureOptions,
 ) => {
   const {
     minSwipeDistance = 50,
@@ -31,122 +39,62 @@ export const useSwipeGestures = (
     onSwipeRight,
     onSwipeUp,
     onSwipeDown,
-    preventDefault = false, // Changed default to false for better mobile experience
-    excludeSelector
+    preventDefault = false,
+    excludeSelector,
   } = options;
 
   const touchStart = useRef<TouchPoint | null>(null);
   const isSwiping = useRef(false);
 
   const handleTouchStart = useCallback((e: TouchEvent) => {
-    // Check if touch started on excluded element
-    if (excludeSelector && e.target instanceof Element) {
-      if (e.target.closest(excludeSelector)) {
-        return; // Don't handle swipes on excluded elements
-      }
-    }
-    
-    if (preventDefault) {
-      e.preventDefault();
-    }
-    
+    if (isExcluded(e.target, excludeSelector)) return;
+    if (preventDefault) e.preventDefault();
     const touch = e.touches[0];
     if (touch) {
-      touchStart.current = {
-        x: touch.clientX,
-        y: touch.clientY,
-        timestamp: Date.now()
-      };
+      touchStart.current = { x: touch.clientX, y: touch.clientY, timestamp: Date.now() };
       isSwiping.current = false;
     }
   }, [preventDefault, excludeSelector]);
 
   const handleTouchMove = useCallback((e: TouchEvent) => {
-    // Check if touch is on excluded element
-    if (excludeSelector && e.target instanceof Element) {
-      if (e.target.closest(excludeSelector)) {
-        return;
-      }
-    }
-    
-    if (preventDefault) {
-      e.preventDefault();
-    }
-    
+    if (isExcluded(e.target, excludeSelector)) return;
+    if (preventDefault) e.preventDefault();
     if (!touchStart.current) return;
-    
     const touch = e.touches[0];
     if (touch) {
-      const deltaX = Math.abs(touch.clientX - touchStart.current.x);
-      const deltaY = Math.abs(touch.clientY - touchStart.current.y);
-      
-      // Start tracking swipe if movement is significant
-      if (deltaX > 10 || deltaY > 10) {
-        isSwiping.current = true;
-      }
+      const dx = Math.abs(touch.clientX - touchStart.current.x);
+      const dy = Math.abs(touch.clientY - touchStart.current.y);
+      if (dx > 10 || dy > 10) isSwiping.current = true;
     }
   }, [preventDefault, excludeSelector]);
 
   const handleTouchEnd = useCallback((e: TouchEvent) => {
-    // Check if touch ended on excluded element
-    if (excludeSelector && e.target instanceof Element) {
-      if (e.target.closest(excludeSelector)) {
-        touchStart.current = null;
-        isSwiping.current = false;
-        return;
-      }
-    }
-    
-    if (preventDefault) {
-      e.preventDefault();
-    }
-    
-    if (!touchStart.current || !isSwiping.current) {
+    if (isExcluded(e.target, excludeSelector)) {
       touchStart.current = null;
+      isSwiping.current = false;
       return;
     }
+    if (preventDefault) e.preventDefault();
+    if (!touchStart.current || !isSwiping.current) { touchStart.current = null; return; }
 
     const touch = e.changedTouches[0];
-    if (!touch) {
-      touchStart.current = null;
-      return;
-    }
+    if (!touch) { touchStart.current = null; return; }
 
-    const endTime = Date.now();
-    const timeDelta = endTime - touchStart.current.timestamp;
-    
-    // Check if swipe was fast enough
-    if (timeDelta > maxSwipeTime) {
+    if (Date.now() - touchStart.current.timestamp > maxSwipeTime) {
       touchStart.current = null;
       return;
     }
 
     const deltaX = touch.clientX - touchStart.current.x;
     const deltaY = touch.clientY - touchStart.current.y;
-    
-    const absDeltaX = Math.abs(deltaX);
-    const absDeltaY = Math.abs(deltaY);
+    const absDX = Math.abs(deltaX);
+    const absDY = Math.abs(deltaY);
 
-    // Check if swipe distance is sufficient
-    if (Math.max(absDeltaX, absDeltaY) < minSwipeDistance) {
-      touchStart.current = null;
-      return;
-    }
-
-    // Determine swipe direction
-    if (absDeltaX > absDeltaY) {
-      // Horizontal swipe
-      if (deltaX > 0) {
-        onSwipeRight?.();
+    if (Math.max(absDX, absDY) >= minSwipeDistance) {
+      if (absDX > absDY) {
+        deltaX > 0 ? onSwipeRight?.() : onSwipeLeft?.();
       } else {
-        onSwipeLeft?.();
-      }
-    } else {
-      // Vertical swipe
-      if (deltaY > 0) {
-        onSwipeDown?.();
-      } else {
-        onSwipeUp?.();
+        deltaY > 0 ? onSwipeDown?.() : onSwipeUp?.();
       }
     }
 
@@ -157,12 +105,10 @@ export const useSwipeGestures = (
   useEffect(() => {
     const element = elementRef.current;
     if (!element) return;
-
-    // Add touch event listeners
-    element.addEventListener('touchstart', handleTouchStart, { passive: !preventDefault });
-    element.addEventListener('touchmove', handleTouchMove, { passive: !preventDefault });
-    element.addEventListener('touchend', handleTouchEnd, { passive: !preventDefault });
-
+    const opts = { passive: !preventDefault };
+    element.addEventListener('touchstart', handleTouchStart, opts);
+    element.addEventListener('touchmove', handleTouchMove, opts);
+    element.addEventListener('touchend', handleTouchEnd, opts);
     return () => {
       element.removeEventListener('touchstart', handleTouchStart);
       element.removeEventListener('touchmove', handleTouchMove);
