@@ -363,7 +363,7 @@ export const SnakeGame: React.FC<SnakeProps> = ({ playerId, playerName }) => {
                 </div>
               )}
               {isHost ? (
-                <button className="snake-action-btn" onClick={handleStart}>
+                <button className="snake-action-btn" onPointerDown={(e) => { e.stopPropagation(); handleStart(); }}>
                   {isInSession
                     ? `Start Game · ${allPlayers.length} player${allPlayers.length !== 1 ? 's' : ''}`
                     : 'Play Solo'}
@@ -397,7 +397,7 @@ export const SnakeGame: React.FC<SnakeProps> = ({ playerId, playerName }) => {
                   ))}
               </div>
               {isHost ? (
-                <button className="snake-action-btn" onClick={handleStart}>
+                <button className="snake-action-btn" onPointerDown={(e) => { e.stopPropagation(); handleStart(); }}>
                   Play Again
                 </button>
               ) : (

@@ -197,6 +197,9 @@
   text-transform: var(--ui-text-transform);
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
 }
 
 .snake-action-btn:hover {
