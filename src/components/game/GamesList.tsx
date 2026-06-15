@@ -19,16 +19,23 @@ interface GamesListProps {
 
 const AVAILABLE_GAMES: GameInfo[] = [
   {
+    id: 'snake',
+    name: 'Snake',
+    description: 'Every player has their own snake. Eat food, grow long, survive.',
+    emoji: '🐍',
+    category: 'Arcade'
+  },
+  {
     id: 'game2048',
     name: '2048',
-    description: 'Chaos mode - everyone swipes, tiles merge! Host controls who plays.',
+    description: 'Chaos mode — everyone swipes, tiles merge! Host controls who plays.',
     emoji: '🔢',
     category: 'Puzzle'
   },
   {
     id: 'tic-tac-toe',
     name: 'Tic-Tac-Toe',
-    description: 'Two randomly chosen players duel - everyone else watches!',
+    description: 'Two randomly chosen players duel — everyone else watches!',
     emoji: '⭕',
     category: 'Strategy'
   },
