@@ -142,14 +142,20 @@ export const TicTacToeGame: React.FC<TicTacToeGameProps> = ({ playerId, playerNa
       : [];
 
     const fresh = ticTacToeGame.initialState(players);
+    const newData = { ...fresh, ...stats };
 
     setGameState({
       ...current,
-      data: { ...fresh, ...stats },
+      data: newData,
       score: 0,
       isComplete: false,
       lastModified: new Date().toISOString(),
     });
+
+    // Broadcast fresh state so all guests start the same game with same role assignment
+    if (isInSession && isHost) {
+      session.broadcastSnapshot('tic-tac-toe', newData);
+    }
 
     if (wasPlaying) awardGamePlay('tic-tac-toe', 1);
   };
