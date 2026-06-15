@@ -153,7 +153,7 @@ export const SnakeGame: React.FC<SnakeProps> = ({ playerId, playerName }) => {
     return () => window.removeEventListener('keydown', onKey);
   }, [changeDirection]);
 
-  // Swipe
+  // Swipe — exclude overlay so its buttons still receive click events on mobile
   useSwipeGestures(containerRef, {
     onSwipeUp:    () => changeDirection('up'),
     onSwipeDown:  () => changeDirection('down'),
@@ -161,6 +161,7 @@ export const SnakeGame: React.FC<SnakeProps> = ({ playerId, playerName }) => {
     onSwipeRight: () => changeDirection('right'),
     minSwipeDistance: 25,
     preventDefault: true,
+    excludeSelector: '.snake-overlay',
   });
 
   // ── Multiplayer wiring ─────────────────────────────────────────────────
@@ -362,7 +363,7 @@ export const SnakeGame: React.FC<SnakeProps> = ({ playerId, playerName }) => {
                 </div>
               )}
               {isHost ? (
-                <button className="snake-action-btn" onClick={handleStart}>
+                <button className="snake-action-btn" onPointerDown={(e) => { e.stopPropagation(); handleStart(); }}>
                   {isInSession
                     ? `Start Game · ${allPlayers.length} player${allPlayers.length !== 1 ? 's' : ''}`
                     : 'Play Solo'}
@@ -396,7 +397,7 @@ export const SnakeGame: React.FC<SnakeProps> = ({ playerId, playerName }) => {
                   ))}
               </div>
               {isHost ? (
-                <button className="snake-action-btn" onClick={handleStart}>
+                <button className="snake-action-btn" onPointerDown={(e) => { e.stopPropagation(); handleStart(); }}>
                   Play Again
                 </button>
               ) : (
