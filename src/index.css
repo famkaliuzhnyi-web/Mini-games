@@ -20,7 +20,7 @@ html, body, #root {
    JetBrains Mono. Zero border radius. Uppercase labels.
 ═════════════════════════════════════════════════════════════════════════ */
 :root,
-[data-theme="forever-winter"] {
+[data-theme="cyberpunk"] {
   --font:                'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
   --radius:              0px;
   --radius-btn:          0px;
