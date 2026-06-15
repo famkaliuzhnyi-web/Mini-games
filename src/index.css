@@ -1,45 +1,4 @@
-/* ── Cyberpunk design tokens ──────────────────────────────────────────────── */
-:root {
-  /* Typeface */
-  --font:              'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
-
-  /* Layout */
-  --nav-height:        48px;
-
-  /* Backgrounds */
-  --color-bg:          #0a0a0a;
-  --color-surface:     #111111;
-  --color-surface-2:   #1a1a1a;
-  --color-surface-3:   #222222;
-
-  /* Accent (red) */
-  --color-accent:      #ff0040;
-  --color-accent-dim:  #660019;
-  --color-accent-glow: rgba(255, 0, 64, 0.18);
-  --color-accent-hover:#ff2255;
-
-  /* Text */
-  --color-text:        #e0e0e0;
-  --color-text-2:      #888888;
-  --color-text-3:      #444444;
-
-  /* Borders */
-  --color-border:      #2a2a2a;
-  --color-border-2:    #333333;
-
-  /* Semantic */
-  --color-success:     #00cc44;
-  --color-error:       #ff0040;
-  --color-warning:     #ffaa00;
-
-  /* Backwards-compat aliases (legacy components use these) */
-  --color-primary:     #0a0a0a;
-  --color-card:        #111111;
-  --color-text-secondary: #888888;
-  --font-primary:      var(--font);
-}
-
-/* ── Reset ───────────────────────────────────────────────────────────────── */
+/* ── Base reset ──────────────────────────────────────────────────────────── */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -50,6 +9,210 @@ html, body, #root {
   height: 100%;
 }
 
+/* ── Layout constant (independent of theme) ──────────────────────────────── */
+:root {
+  --nav-height: 48px;
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   FOREVER WINTER  (default)
+   Dark military terminal. Dirty-white text. Amber accent.
+   JetBrains Mono. Zero border radius. Uppercase labels.
+═════════════════════════════════════════════════════════════════════════ */
+:root,
+[data-theme="forever-winter"] {
+  --font:                'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+  --radius:              0px;
+  --radius-btn:          0px;
+  --radius-input:        0px;
+  --ui-text-transform:   uppercase;
+  --letter-spacing-ui:   0.08em;
+
+  --color-bg:            #050608;
+  --color-surface:       #0d0e10;
+  --color-surface-2:     #141618;
+  --color-surface-3:     #1c1e22;
+
+  --color-accent:        #c8a84b;
+  --color-accent-dim:    #4a3e1a;
+  --color-accent-glow:   rgba(200, 168, 75, 0.14);
+  --color-accent-hover:  #dbb955;
+
+  --color-text:          #c4c4b0;
+  --color-text-2:        #787868;
+  --color-text-3:        #3c3c30;
+
+  --color-border:        #222420;
+  --color-border-2:      #2e2e28;
+
+  --color-success:       #7aa860;
+  --color-error:         #b84040;
+  --color-warning:       #c8a84b;
+
+  /* Legacy aliases used by older components */
+  --color-primary:       var(--color-bg);
+  --color-card:          var(--color-surface);
+  --color-text-secondary: var(--color-text-2);
+  --font-primary:        var(--font);
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   XBOX
+   Dark charcoal. Xbox green (#107c10). Segoe UI. 4px radius.
+═════════════════════════════════════════════════════════════════════════ */
+[data-theme="xbox"] {
+  --font:                'Segoe UI', system-ui, -apple-system, sans-serif;
+  --radius:              4px;
+  --radius-btn:          4px;
+  --radius-input:        4px;
+  --ui-text-transform:   uppercase;
+  --letter-spacing-ui:   0.05em;
+
+  --color-bg:            #0e0e0e;
+  --color-surface:       #161616;
+  --color-surface-2:     #1e1e1e;
+  --color-surface-3:     #252525;
+
+  --color-accent:        #107c10;
+  --color-accent-dim:    #0a4e0a;
+  --color-accent-glow:   rgba(16, 124, 16, 0.18);
+  --color-accent-hover:  #14a214;
+
+  --color-text:          #f0f0f0;
+  --color-text-2:        #9a9a9a;
+  --color-text-3:        #555555;
+
+  --color-border:        #2d2d2d;
+  --color-border-2:      #3a3a3a;
+
+  --color-success:       #107c10;
+  --color-error:         #d13438;
+  --color-warning:       #ca5010;
+
+  --color-primary:       var(--color-bg);
+  --color-card:          var(--color-surface);
+  --color-text-secondary: var(--color-text-2);
+  --font-primary:        var(--font);
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   PLAYSTATION
+   Deep navy (#0a0e14). PS blue (#0075ce). System sans-serif. 8px radius.
+═════════════════════════════════════════════════════════════════════════ */
+[data-theme="playstation"] {
+  --font:                -apple-system, 'Helvetica Neue', system-ui, sans-serif;
+  --radius:              8px;
+  --radius-btn:          8px;
+  --radius-input:        6px;
+  --ui-text-transform:   none;
+  --letter-spacing-ui:   0;
+
+  --color-bg:            #0a0e14;
+  --color-surface:       #101620;
+  --color-surface-2:     #161e2a;
+  --color-surface-3:     #1c2535;
+
+  --color-accent:        #0075ce;
+  --color-accent-dim:    #003d70;
+  --color-accent-glow:   rgba(0, 117, 206, 0.2);
+  --color-accent-hover:  #0085ee;
+
+  --color-text:          #f0f4f8;
+  --color-text-2:        #7a90a8;
+  --color-text-3:        #3a4455;
+
+  --color-border:        #1e2a38;
+  --color-border-2:      #283545;
+
+  --color-success:       #00a86b;
+  --color-error:         #e63946;
+  --color-warning:       #f4a261;
+
+  --color-primary:       var(--color-bg);
+  --color-card:          var(--color-surface);
+  --color-text-secondary: var(--color-text-2);
+  --font-primary:        var(--font);
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   NINTENDO
+   Light (#f0f0f0). Nintendo red (#e60012). System sans-serif. Pill buttons.
+═════════════════════════════════════════════════════════════════════════ */
+[data-theme="nintendo"] {
+  --font:                system-ui, -apple-system, 'Helvetica Neue', sans-serif;
+  --radius:              12px;
+  --radius-btn:          100px;
+  --radius-input:        8px;
+  --ui-text-transform:   none;
+  --letter-spacing-ui:   0;
+
+  --color-bg:            #f0f0f0;
+  --color-surface:       #ffffff;
+  --color-surface-2:     #f5f5f5;
+  --color-surface-3:     #eaeaea;
+
+  --color-accent:        #e60012;
+  --color-accent-dim:    #ffd6d9;
+  --color-accent-glow:   rgba(230, 0, 18, 0.12);
+  --color-accent-hover:  #c8000f;
+
+  --color-text:          #1a1a1a;
+  --color-text-2:        #666666;
+  --color-text-3:        #aaaaaa;
+
+  --color-border:        #dedede;
+  --color-border-2:      #d0d0d0;
+
+  --color-success:       #3eb34f;
+  --color-error:         #e60012;
+  --color-warning:       #f7931e;
+
+  --color-primary:       var(--color-bg);
+  --color-card:          var(--color-surface);
+  --color-text-secondary: var(--color-text-2);
+  --font-primary:        var(--font);
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   STEAM
+   Dark navy-blue (#1b2838). Steam blue (#1b9fe8). System sans-serif. 3px radius.
+═════════════════════════════════════════════════════════════════════════ */
+[data-theme="steam"] {
+  --font:                system-ui, -apple-system, 'Helvetica Neue', sans-serif;
+  --radius:              3px;
+  --radius-btn:          3px;
+  --radius-input:        3px;
+  --ui-text-transform:   none;
+  --letter-spacing-ui:   0;
+
+  --color-bg:            #1b2838;
+  --color-surface:       #2a475e;
+  --color-surface-2:     #1b2838;
+  --color-surface-3:     #213247;
+
+  --color-accent:        #1b9fe8;
+  --color-accent-dim:    #0f4f78;
+  --color-accent-glow:   rgba(27, 159, 232, 0.18);
+  --color-accent-hover:  #22b6ff;
+
+  --color-text:          #c6d4df;
+  --color-text-2:        #8ba0b4;
+  --color-text-3:        #4a6880;
+
+  --color-border:        #3d5a73;
+  --color-border-2:      #4a6f8a;
+
+  --color-success:       #a4d007;
+  --color-error:         #f1404b;
+  --color-warning:       #e4800a;
+
+  --color-primary:       var(--color-bg);
+  --color-card:          var(--color-surface);
+  --color-text-secondary: var(--color-text-2);
+  --font-primary:        var(--font);
+}
+
+/* ── Global base ─────────────────────────────────────────────────────────── */
 body {
   font-family: var(--font);
   font-size: 14px;
@@ -66,8 +229,8 @@ body {
 h1, h2, h3, h4 {
   font-family: var(--font);
   font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
 }
 
 h1 { font-size: 2rem; }
@@ -88,7 +251,7 @@ input {
   background: var(--color-surface-2);
   color: var(--color-text);
   border: 1px solid var(--color-border-2);
-  border-radius: 0;
+  border-radius: var(--radius-input);
   padding: 0.6em 0.8em;
   outline: none;
   transition: border-color 0.15s;
@@ -103,9 +266,9 @@ button {
   font-family: var(--font);
   font-size: 0.875rem;
   font-weight: 600;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  border-radius: 0;
+  letter-spacing: var(--letter-spacing-ui);
+  text-transform: var(--ui-text-transform);
+  border-radius: var(--radius-btn);
   border: 1px solid var(--color-border-2);
   padding: 0.5em 1em;
   background: var(--color-surface-2);
@@ -134,5 +297,5 @@ button:disabled {
 /* ── Scrollbar ───────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: var(--color-bg); }
-::-webkit-scrollbar-thumb { background: var(--color-border-2); }
+::-webkit-scrollbar-thumb { background: var(--color-border-2); border-radius: var(--radius); }
 ::-webkit-scrollbar-thumb:hover { background: var(--color-accent); }

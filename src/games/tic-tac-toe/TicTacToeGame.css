@@ -155,11 +155,12 @@
   background: var(--color-accent);
   color: #fff;
   border: 1px solid var(--color-accent);
+  border-radius: var(--radius-btn);
   padding: 0.65em 2em;
   font-size: 0.85rem;
   font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-ui);
+  text-transform: var(--ui-text-transform);
   cursor: pointer;
   transition: background 0.15s;
 }
@@ -244,11 +245,12 @@
   background: var(--color-surface-3);
   color: var(--color-text);
   border: 1px solid var(--color-border-2);
+  border-radius: var(--radius-btn);
   padding: 0.4em 0.8em;
   font-size: 0.72rem;
   font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-ui);
+  text-transform: var(--ui-text-transform);
   cursor: pointer;
   transition: border-color 0.15s, color 0.15s;
 }

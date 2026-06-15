@@ -37,7 +37,6 @@ export const Profile: React.FC<ProfileProps> = ({
       }
     } catch (error) {
       console.error('Failed to update name:', error);
-      // Reset to original name on error
       setEditName(playerName);
     } finally {
       setIsSaving(false);
@@ -49,131 +48,107 @@ export const Profile: React.FC<ProfileProps> = ({
     setIsEditing(false);
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !isSaving) {
-      handleSave();
-    } else if (e.key === 'Escape') {
-      handleCancel();
-    }
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !isSaving) handleSave();
+    else if (e.key === 'Escape') handleCancel();
   };
 
   const profile = userService.loadProfile();
 
   return (
     <div className="profile">
-      <div className="profile-content">
-        <div className="profile-header">
-          <button className="profile-back-btn" onClick={onBack} aria-label="Go back">
-            ← Back
-          </button>
-          <h1>Profile</h1>
-        </div>
+      <div className="profile-header">
+        <button className="profile-back-btn" onClick={onBack} aria-label="Go back">
+          ← Back
+        </button>
+        <h1>Profile</h1>
+      </div>
 
-        <div className="profile-section">
-          <div className="profile-avatar">
-            <span className="avatar-emoji">👤</span>
-          </div>
-
-          <div className="profile-info">
-            <div className="profile-field">
-              <label>Player Name</label>
-              {isEditing ? (
-                <div className="edit-name-container">
-                  <input
-                    type="text"
-                    value={editName}
-                    onChange={(e) => setEditName(e.target.value)}
-                    onKeyDown={handleKeyPress}
-                    className="edit-name-input"
-                    maxLength={20}
-                    autoFocus
-                    disabled={isSaving}
-                  />
-                  <div className="edit-name-actions">
-                    <button 
-                      onClick={handleSave}
-                      disabled={isSaving || !editName.trim()}
-                      className="save-btn"
-                    >
-                      {isSaving ? 'Saving...' : 'Save'}
-                    </button>
-                    <button 
-                      onClick={handleCancel}
-                      disabled={isSaving}
-                      className="cancel-btn"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="display-name-container">
-                  <span className="display-name">{playerName}</span>
-                  <button 
-                    onClick={() => setIsEditing(true)}
-                    className="edit-btn"
-                    aria-label="Edit name"
-                  >
-                    ✏️ Edit
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {profile && (
-              <div className="profile-metadata">
-                <div className="metadata-item">
-                  <span className="metadata-label">Player ID:</span>
-                  <span className="metadata-value">{profile.playerId}</span>
-                </div>
-                <div className="metadata-item">
-                  <span className="metadata-label">Created:</span>
-                  <span className="metadata-value">
-                    {new Date(profile.createdAt).toLocaleDateString()}
-                  </span>
-                </div>
-                <div className="metadata-item">
-                  <span className="metadata-label">Last Updated:</span>
-                  <span className="metadata-value">
-                    {new Date(profile.updatedAt).toLocaleDateString()}
-                  </span>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="profile-field">
-            <label>Theme</label>
-            <div className="theme-selector">
-              {availableThemes.map((theme) => (
+      {/* Name + metadata */}
+      <div className="profile-card">
+        <div>
+          <div className="profile-card-label">Player Name</div>
+          {isEditing ? (
+            <div className="edit-name-container">
+              <input
+                type="text"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                onKeyDown={handleKeyDown}
+                className="edit-name-input"
+                maxLength={20}
+                autoFocus
+                disabled={isSaving}
+              />
+              <div className="edit-name-actions">
                 <button
-                  key={theme.name}
-                  onClick={() => setTheme(theme.name)}
-                  className={`theme-option ${currentTheme === theme.name ? 'active' : ''}`}
-                  disabled={isSaving}
+                  onClick={handleSave}
+                  disabled={isSaving || !editName.trim()}
+                  className="save-btn"
                 >
-                  <div className="theme-preview" data-theme={theme.name}>
-                    <div className="theme-preview-bg"></div>
-                    <div className="theme-preview-text"></div>
-                  </div>
-                  <div className="theme-info">
-                    <span className="theme-name">{theme.displayName}</span>
-                    <span className="theme-description">{theme.description}</span>
-                  </div>
+                  {isSaving ? 'Saving…' : 'Save'}
                 </button>
-              ))}
+                <button onClick={handleCancel} disabled={isSaving} className="cancel-btn">
+                  Cancel
+                </button>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="display-name-row">
+              <span className="display-name">{playerName}</span>
+              <button onClick={() => setIsEditing(true)} className="edit-btn" aria-label="Edit name">
+                Edit
+              </button>
+            </div>
+          )}
         </div>
 
-        <div className="profile-help">
-          <h3>💡 Profile Tips</h3>
-          <ul>
-            <li>Your name is saved automatically and will persist between visits</li>
-            <li>Choose a name that represents you in the games</li>
-            <li>You can change your name anytime from this profile page</li>
-            <li>Your game progress is linked to your player profile</li>
-          </ul>
+        {profile && (
+          <div className="profile-metadata">
+            <div className="metadata-item">
+              <span className="metadata-label">Player ID</span>
+              <span className="metadata-value">{profile.playerId}</span>
+            </div>
+            <div className="metadata-item">
+              <span className="metadata-label">Created</span>
+              <span className="metadata-value">{new Date(profile.createdAt).toLocaleDateString()}</span>
+            </div>
+            <div className="metadata-item">
+              <span className="metadata-label">Updated</span>
+              <span className="metadata-value">{new Date(profile.updatedAt).toLocaleDateString()}</span>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Theme picker */}
+      <div className="profile-card">
+        <div className="profile-card-label">Theme</div>
+        <div className="theme-selector">
+          {availableThemes.map((theme) => (
+            <button
+              key={theme.name}
+              onClick={() => setTheme(theme.name)}
+              className={`theme-option ${currentTheme === theme.name ? 'active' : ''}`}
+            >
+              <div
+                className="theme-swatch"
+                style={{ background: theme.swatchBg }}
+              >
+                <div
+                  className="theme-swatch-accent"
+                  style={{ background: theme.swatchAccent }}
+                />
+              </div>
+              <div className="theme-info">
+                <span className="theme-name">{theme.displayName}</span>
+                <span className="theme-description">{theme.description}</span>
+              </div>
+              {currentTheme === theme.name && (
+                <span className="theme-active-badge">Active</span>
+              )}
+            </button>
+          ))}
         </div>
       </div>
     </div>
