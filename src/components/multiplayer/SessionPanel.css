@@ -7,6 +7,7 @@
   background: var(--color-surface);
   border: 1px solid var(--color-border-2);
   border-top: 2px solid var(--color-accent);
+  border-radius: var(--radius);
   width: min(380px, 95vw);
   max-height: 90vh;
   overflow-y: auto;
