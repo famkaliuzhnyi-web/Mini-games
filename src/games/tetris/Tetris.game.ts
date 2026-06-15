@@ -86,7 +86,8 @@ export class TetrisGameLogic implements IGame<TetrisGameState, TetrisAction> {
     };
     const newBoards = { ...state.boards, [from.id]: board };
     const newScores = { ...state.scores, [from.id]: action.score };
-    let { winnerId, status } = state;
+    let winnerId = state.winnerId;
+    let status: TetrisGameState['status'] = state.status;
     if (!winnerId && action.score >= state.targetScore) {
       winnerId = from.id;
       status = 'finished';
@@ -104,7 +105,8 @@ export class TetrisGameLogic implements IGame<TetrisGameState, TetrisAction> {
     const board: PlayerBoard = { ...existing, score: action.score, board: action.board, gameOver: true };
     const newBoards = { ...state.boards, [from.id]: board };
     const newScores = { ...state.scores, [from.id]: action.score };
-    let { winnerId, status } = state;
+    let winnerId = state.winnerId;
+    let status: TetrisGameState['status'] = state.status;
     if (!winnerId) {
       const all = Object.values(newBoards);
       if (all.length > 0 && all.every(b => b.gameOver)) {

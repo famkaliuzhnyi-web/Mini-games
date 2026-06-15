@@ -19,6 +19,13 @@ interface GamesListProps {
 
 const AVAILABLE_GAMES: GameInfo[] = [
   {
+    id: 'tetris',
+    name: 'Tetris',
+    description: 'Race to 1500 pts — your own board, first to the target wins.',
+    emoji: '🟦',
+    category: 'Arcade',
+  },
+  {
     id: 'snake',
     name: 'Snake',
     description: 'Every player has their own snake. Eat food, grow long, survive.',
