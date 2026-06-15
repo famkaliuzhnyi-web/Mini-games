@@ -22,6 +22,9 @@ export interface Game2048Data extends Record<string, unknown> {
   previousGrid?: GameGrid;
   previousScore?: number;
   moves: number;
+  // Multiplayer fields
+  guestsCanPlay: boolean;
+  hostPlayerId?: string;
 }
 
 // Move result information

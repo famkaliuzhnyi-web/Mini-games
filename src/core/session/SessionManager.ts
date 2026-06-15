@@ -106,6 +106,13 @@ export class SessionManager {
     this.mesh.get(toPeerId)?.send({ type: 'game:snapshot', gameId, state });
   }
 
+  /**
+   * Host only: broadcast the current game state to all connected guests (e.g. new game started).
+   */
+  broadcastSnapshot(gameId: string, state: unknown): void {
+    this.broadcast({ type: 'game:snapshot', gameId, state });
+  }
+
   // ── Guest API ─────────────────────────────────────────────────────────────
 
   async joinSession(sessionId: string, player: Player): Promise<void> {

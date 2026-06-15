@@ -21,60 +21,17 @@ const AVAILABLE_GAMES: GameInfo[] = [
   {
     id: 'game2048',
     name: '2048',
-    description: 'Classic number puzzle - combine tiles to reach 2048!',
+    description: 'Chaos mode - everyone swipes, tiles merge! Host controls who plays.',
     emoji: '🔢',
     category: 'Puzzle'
   },
-
   {
     id: 'tic-tac-toe',
     name: 'Tic-Tac-Toe',
-    description: 'Classic 3x3 grid game - get three in a row to win!',
+    description: 'Two randomly chosen players duel - everyone else watches!',
     emoji: '⭕',
     category: 'Strategy'
   },
-  {
-    id: 'ping-pong',
-    name: 'Ping Pong',
-    description: 'Classic Pong game - control your paddle and beat the AI!',
-    emoji: '🏓',
-    category: 'Sports'
-  },
-  {
-    id: 'sudoku',
-    name: 'Sudoku',
-    description: 'Classic number puzzle with multiple difficulty levels',
-    emoji: '🧩',
-    category: 'Puzzle'
-  },
-  {
-    id: 'snake',
-    name: 'Snake',
-    description: 'Classic snake game - eat food, grow longer, avoid collisions!',
-    emoji: '🐍',
-    category: 'Arcade'
-  },
-  {
-    id: 'drawing',
-    name: 'Drawing',
-    description: 'Draw on 32x32 pixel canvas - multiplayer coming soon!',
-    emoji: '🎨',
-    category: 'Creative'
-  },
-  {
-    id: 'tetris',
-    name: 'Tetris',
-    description: 'Classic block puzzle game - arrange falling pieces to clear lines!',
-    emoji: '🧱',
-    category: 'Puzzle'
-  },
-  {
-    id: 'iot-scanner',
-    name: 'IoT Scanner',
-    description: 'Scan local network for IoT devices and manage them remotely!',
-    emoji: '🌐',
-    category: 'Utility'
-  }
 ];
 
 export const GamesList: React.FC<GamesListProps> = ({ onGameSelect }) => {

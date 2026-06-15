@@ -25,6 +25,10 @@ export class TicTacToeGame implements IGame<TicTacToeGameData, TicTacToeAction> 
   readonly id = 'tic-tac-toe';
 
   initialState(players: Player[]): TicTacToeGameData {
+    // Shuffle so X and O are randomly assigned each new game
+    const shuffled = players.length > 1
+      ? [...players].sort(() => Math.random() - 0.5)
+      : players;
     return {
       board: createEmptyBoard(),
       currentPlayer: 'X',
@@ -38,9 +42,8 @@ export class TicTacToeGame implements IGame<TicTacToeGameData, TicTacToeAction> 
       gameMode: players.length > 1 ? 'multiplayer' : 'single-player',
       multiplayer: {
         isMultiplayer: players.length > 1,
-        // X slot = host (players[0]), O slot = guest (players[1])
-        xPlayerId: players[0]?.id,
-        oPlayerId: players[1]?.id,
+        xPlayerId: shuffled[0]?.id,
+        oPlayerId: shuffled[1]?.id,
       },
     };
   }

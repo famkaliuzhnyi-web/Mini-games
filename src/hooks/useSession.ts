@@ -124,6 +124,10 @@ export function useSession() {
     manager.sendSnapshot(gameId, state, toPeerId);
   }, [manager]);
 
+  const broadcastSnapshot = useCallback((gameId: string, state: unknown) => {
+    manager.broadcastSnapshot(gameId, state);
+  }, [manager]);
+
   return {
     ...state,
     isInSession: state.status !== 'idle' && state.status !== 'error',
@@ -136,6 +140,7 @@ export function useSession() {
     sendAction,
     requestSnapshot,
     sendSnapshot,
+    broadcastSnapshot,
   };
 }
 
