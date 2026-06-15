@@ -1,87 +1,138 @@
+/* ── Cyberpunk design tokens ──────────────────────────────────────────────── */
 :root {
-  /* Default theme variables will be set by ThemeService */
-  font-family: var(--font-primary, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif);
-  line-height: 1.5;
-  font-weight: 400;
+  /* Typeface */
+  --font:              'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
 
-  color-scheme: light dark;
-  color: var(--color-text, #213547);
-  background-color: var(--color-primary, #ffffff);
+  /* Layout */
+  --nav-height:        48px;
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  /* Backgrounds */
+  --color-bg:          #0a0a0a;
+  --color-surface:     #111111;
+  --color-surface-2:   #1a1a1a;
+  --color-surface-3:   #222222;
+
+  /* Accent (red) */
+  --color-accent:      #ff0040;
+  --color-accent-dim:  #660019;
+  --color-accent-glow: rgba(255, 0, 64, 0.18);
+  --color-accent-hover:#ff2255;
+
+  /* Text */
+  --color-text:        #e0e0e0;
+  --color-text-2:      #888888;
+  --color-text-3:      #444444;
+
+  /* Borders */
+  --color-border:      #2a2a2a;
+  --color-border-2:    #333333;
+
+  /* Semantic */
+  --color-success:     #00cc44;
+  --color-error:       #ff0040;
+  --color-warning:     #ffaa00;
+
+  /* Backwards-compat aliases (legacy components use these) */
+  --color-primary:     #0a0a0a;
+  --color-card:        #111111;
+  --color-text-secondary: #888888;
+  --font-primary:      var(--font);
 }
 
-* {
+/* ── Reset ───────────────────────────────────────────────────────────────── */
+*, *::before, *::after {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-a {
-  font-weight: 500;
-  color: var(--color-accent, #646cff);
-  text-decoration: inherit;
-}
-a:hover {
-  color: var(--color-accent-hover, #747bff);
+html, body, #root {
+  height: 100%;
 }
 
 body {
-  margin: 0;
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.5;
+  background: var(--color-bg);
+  color: var(--color-text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   min-width: 320px;
-  min-height: 100vh;
-  background-color: var(--color-primary, #ffffff);
-  color: var(--color-text, #333333);
+  overflow-x: hidden;
 }
 
-h1 {
-  font-size: 2rem;
+/* ── Typography ──────────────────────────────────────────────────────────── */
+h1, h2, h3, h4 {
+  font-family: var(--font);
+  font-weight: 700;
+  letter-spacing: -0.02em;
   line-height: 1.1;
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid var(--color-border, #e0e0e0);
-  padding: 0.6em 1.2em;
-  font-size: 1em;
+h1 { font-size: 2rem; }
+h2 { font-size: 1.5rem; }
+h3 { font-size: 1.1rem; }
+
+a {
+  color: var(--color-accent);
+  text-decoration: none;
   font-weight: 500;
-  font-family: inherit;
-  background-color: var(--color-surface, #ffffff);
-  color: var(--color-text, #333);
+}
+a:hover { color: var(--color-accent-hover); }
+
+/* ── Inputs ──────────────────────────────────────────────────────────────── */
+input {
+  font-family: var(--font);
+  font-size: 1rem;
+  background: var(--color-surface-2);
+  color: var(--color-text);
+  border: 1px solid var(--color-border-2);
+  border-radius: 0;
+  padding: 0.6em 0.8em;
+  outline: none;
+  transition: border-color 0.15s;
+}
+input:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px var(--color-accent-glow);
+}
+
+/* ── Buttons (global baseline) ───────────────────────────────────────────── */
+button {
+  font-family: var(--font);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border-radius: 0;
+  border: 1px solid var(--color-border-2);
+  padding: 0.5em 1em;
+  background: var(--color-surface-2);
+  color: var(--color-text);
   cursor: pointer;
-  transition: all 0.25s ease;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
 }
-
 button:hover {
-  border-color: var(--color-accent, #646cff);
-  background-color: var(--color-card, #f8f9fa);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
 }
-
-button:focus,
+button:active {
+  background: var(--color-accent-dim);
+  color: var(--color-text);
+}
 button:focus-visible {
-  outline: 2px solid var(--color-accent, #646cff);
+  outline: 2px solid var(--color-accent);
   outline-offset: 2px;
 }
-
 button:disabled {
-  opacity: 0.6;
+  opacity: 0.35;
   cursor: not-allowed;
+  pointer-events: none;
 }
 
-input {
-  font-family: inherit;
-}
-
-/* Mobile-first responsive design */
-@media (min-width: 768px) {
-  h1 {
-    font-size: 2.5rem;
-  }
-}
-
-@media (min-width: 1024px) {
-  h1 {
-    font-size: 3.2rem;
-  }
-}
+/* ── Scrollbar ───────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: var(--color-bg); }
+::-webkit-scrollbar-thumb { background: var(--color-border-2); }
+::-webkit-scrollbar-thumb:hover { background: var(--color-accent); }

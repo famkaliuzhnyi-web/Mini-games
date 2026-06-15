@@ -1,0 +1,9 @@
+.game-shell {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--color-bg);
+  /* Respect iOS safe areas */
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}

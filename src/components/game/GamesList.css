@@ -1,253 +1,167 @@
 .games-list {
-  padding: 2rem 1rem;
-  max-width: 1200px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 2rem 1.25rem;
+  max-width: 900px;
   margin: 0 auto;
-  min-height: calc(100vh - 60px);
-  background: var(--color-primary, #ffffff);
+  width: 100%;
 }
 
 .games-list-header {
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: 2.5rem;
 }
 
 .games-list-header h1 {
-  font-size: 2.5rem;
+  font-size: 1.8rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text);
   margin-bottom: 0.5rem;
-  color: var(--color-text, #333);
+}
+
+.games-list-header h1 span {
+  color: var(--color-accent);
 }
 
 .games-list-header p {
-  font-size: 1.1rem;
-  color: var(--color-text-secondary, #666);
-  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-text-2);
+  letter-spacing: 0.05em;
 }
+
+/* ── Grid ────────────────────────────────────────────────────────────── */
 
 .games-grid {
   display: grid;
-  gap: 2rem;
-  margin-bottom: 3rem;
+  gap: 1rem;
+  flex: 1;
 }
 
-/* Horizontal layout mode (landscape orientation) */
 .games-list--horizontal .games-grid {
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
 }
 
-/* Vertical layout mode (portrait orientation) */
 .games-list--vertical .games-grid {
   grid-template-columns: 1fr 1fr;
-  max-width: 600px;
-  margin: 0 auto 3rem auto;
+  max-width: 560px;
+  margin: 0 auto;
 }
 
+/* ── Card ────────────────────────────────────────────────────────────── */
+
 .game-card {
-  background: var(--color-card, #ffffff);
-  border: 2px solid var(--color-border, #e0e0e0);
-  border-radius: 16px;
-  padding: 2rem;
-  text-align: center;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-border);
+  border-radius: 0;
+  padding: 1.5rem;
+  text-align: left;
   cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: border-color 0.15s, background 0.15s;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
 }
 
 .game-card:hover {
-  border-color: var(--color-accent, #2196F3);
-  transform: translateY(-4px);
-  box-shadow: 0 8px 25px rgba(33, 150, 243, 0.15);
+  border-color: var(--color-accent);
+  border-left-color: var(--color-accent);
+  background: var(--color-surface-2);
 }
 
-.game-card:active {
-  transform: translateY(-2px);
+.game-card:focus {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 0;
 }
 
 .game-emoji {
-  font-size: 4rem;
-  margin-bottom: 1rem;
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
   display: block;
 }
 
 .game-name {
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-bottom: 0.75rem;
-  color: var(--color-text, #333);
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text);
+  margin: 0;
 }
 
 .game-description {
-  color: var(--color-text-secondary, #666);
-  margin-bottom: 1rem;
-  line-height: 1.4;
+  font-size: 0.8rem;
+  color: var(--color-text-2);
+  line-height: 1.5;
+  margin: 0;
 }
 
 .game-category {
   display: inline-block;
-  background: var(--color-surface, #f0f0f0);
-  color: var(--color-text-muted, #666);
-  padding: 0.25rem 0.75rem;
-  border-radius: 12px;
-  font-size: 0.8rem;
-  font-weight: 500;
-  margin-bottom: 1rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-3);
+  margin-bottom: 0.25rem;
 }
 
 .game-play-btn {
-  background: var(--color-success, #4CAF50);
-  color: white;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-weight: 600;
-  margin-top: 1rem;
-  transition: background-color 0.2s ease;
+  margin-top: auto;
+  padding-top: 1rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  transition: color 0.15s;
 }
 
 .game-card:hover .game-play-btn {
-  background: #45a049;
+  color: var(--color-accent-hover);
 }
 
+/* ── Footer ──────────────────────────────────────────────────────────── */
+
 .games-list-footer {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-border);
   text-align: center;
-  margin-top: 3rem;
-  padding: 2rem;
-  background: var(--color-surface, #f8f9fa);
-  border-radius: 12px;
-  border: 1px solid var(--color-border, #e9ecef);
 }
 
 .footer-text {
-  color: var(--color-text-secondary, #666);
-  margin: 0;
-  font-size: 0.95rem;
-}
-
-.footer-text small {
-  color: var(--color-text-muted, #999);
-  font-size: 0.8rem;
+  color: var(--color-text-3);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  line-height: 1.8;
 }
 
 .footer-text .version-info {
-  color: var(--color-text-muted, #aaa);
-  font-size: 0.75rem;
-  font-weight: 500;
+  color: var(--color-text-3);
 }
 
-/* Mobile responsiveness */
-@media (max-width: 768px) {
-  .games-list {
-    padding: 1.5rem 0.75rem;
-  }
-  
-  .games-list-header h1 {
-    font-size: 2rem;
-  }
-  
-  .games-list-header p {
-    font-size: 1rem;
-  }
-  
-  /* Override layout modes for mobile - always use 2 columns for better space usage */
+/* ── Mobile ──────────────────────────────────────────────────────────── */
+
+@media (max-width: 600px) {
+  .games-list { padding: 1.25rem 0.75rem; }
+
+  .games-list-header { margin-bottom: 1.5rem; }
+  .games-list-header h1 { font-size: 1.4rem; }
+
   .games-list--horizontal .games-grid,
   .games-list--vertical .games-grid {
     grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    margin-bottom: 2rem;
-    max-width: none;
-  }
-  
-  .game-card {
-    padding: 1rem;
-  }
-  
-  .game-emoji {
-    font-size: 2.5rem;
-    margin-bottom: 0.75rem;
-  }
-  
-  .game-name {
-    font-size: 1.1rem;
-    margin-bottom: 0.5rem;
-  }
-  
-  .game-description {
-    font-size: 0.85rem;
-    margin-bottom: 0.75rem;
-  }
-  
-  .game-category {
-    font-size: 0.75rem;
-    padding: 0.2rem 0.6rem;
-    margin-bottom: 0.75rem;
-  }
-  
-  .game-play-btn {
-    padding: 0.5rem 1rem;
-    font-size: 0.85rem;
-    margin-top: 0.75rem;
-  }
-  
-  .games-list-footer {
-    margin-top: 2rem;
-    padding: 1.5rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .games-list {
-    padding: 1rem 0.5rem;
-  }
-  
-  .games-list-header h1 {
-    font-size: 1.75rem;
-    margin-bottom: 0.75rem;
-  }
-  
-  .games-list-header {
-    margin-bottom: 1.5rem;
-  }
-  
-  /* Keep mobile override for very small screens too */
-  .games-list--horizontal .games-grid,
-  .games-list--vertical .games-grid {
     gap: 0.75rem;
+    max-width: none;
+    margin: 0;
   }
-  
-  .game-card {
-    padding: 0.85rem;
-  }
-  
-  .game-emoji {
-    font-size: 2rem;
-    margin-bottom: 0.5rem;
-  }
-  
-  .game-name {
-    font-size: 1rem;
-    margin-bottom: 0.4rem;
-  }
-  
-  .game-description {
-    font-size: 0.8rem;
-    margin-bottom: 0.6rem;
-    line-height: 1.3;
-  }
-  
-  .game-category {
-    font-size: 0.7rem;
-    padding: 0.15rem 0.5rem;
-    margin-bottom: 0.6rem;
-  }
-  
-  .game-play-btn {
-    padding: 0.45rem 0.9rem;
-    font-size: 0.8rem;
-    margin-top: 0.6rem;
-  }
-}
 
-/* Focus styles for accessibility */
-.game-card:focus {
-  outline: 3px solid var(--color-accent, #2196F3);
-  outline-offset: 2px;
+  .game-card { padding: 1rem; }
+  .game-emoji { font-size: 1.5rem; margin-bottom: 0.4rem; }
+  .game-name { font-size: 0.9rem; }
+  .game-description { font-size: 0.75rem; }
 }

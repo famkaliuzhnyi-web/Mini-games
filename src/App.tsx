@@ -2,7 +2,7 @@ import './App.css';
 import { HashRouter, Routes, Route, useParams, useNavigate } from 'react-router-dom';
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { useGameSession } from './hooks/useGameSession';
-import { NameEntry, Profile, GameContainer, GamesList, Navigation, InstallPrompt, ErrorBoundary } from './components';
+import { NameEntry, Profile, GameContainer, GamesList, Navigation, InstallPrompt, ErrorBoundary, GameShell } from './components';
 import { ThemeService } from './services/ThemeService';
 import { UserService } from './services/UserService';
 import { SessionContext, useNavigationSync } from './hooks/useSession';
@@ -56,11 +56,13 @@ function GamePage() {
         onProfileClick={nav.showProfile}
         onNavigateToGame={nav.playGame}
       />
-      <GameContainer
-        gameId={nav.currentGame}
-        playerId={nav.playerId}
-        playerName={nav.playerName}
-      />
+      <GameShell>
+        <GameContainer
+          gameId={nav.currentGame}
+          playerId={nav.playerId}
+          playerName={nav.playerName}
+        />
+      </GameShell>
     </div>
   );
 }
