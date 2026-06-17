@@ -2,8 +2,11 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useGameSave } from '../../hooks/useGameSave';
 import { useCoinService } from '../../hooks/useCoinService';
 import { useGameAction, useGameSnapshot, useSession } from '../../hooks/useSession';
+import { useBots } from '../../hooks/useBots';
+import { useBotRunner } from '../../hooks/useBotRunner';
 import { TicTacToeGameController } from './controller';
 import { ticTacToeGame, buildInitialStats, type TicTacToeAction } from './TicTacToe.game';
+import { ticTacToeBot } from './TicTacToe.bot';
 import type { TicTacToeGameData } from './types';
 import type { Player } from '../../core';
 import './TicTacToeGame.css';
@@ -21,6 +24,8 @@ export const TicTacToeGame: React.FC<TicTacToeGameProps> = ({ playerId, playerNa
   const isInSession = session.isInSession;
   const isHost = session.role === 'host';
   const localPeer = session.localPlayer;
+  const { bots } = useBots();
+  const isHostForBots = !isInSession || isHost;
 
   const {
     gameState,
@@ -70,6 +75,8 @@ export const TicTacToeGame: React.FC<TicTacToeGameProps> = ({ playerId, playerNa
       lastModified: new Date().toISOString(),
     });
   }, [setGameState, awardGameCompletion]);
+
+  useBotRunner(bots, gameState.data, ticTacToeGame, ticTacToeBot, isHostForBots, applyAction);
 
   // ── Receive remote actions ────────────────────────────────────────────────
 
@@ -137,9 +144,12 @@ export const TicTacToeGame: React.FC<TicTacToeGameProps> = ({ playerId, playerNa
     const stats = buildInitialStats(current.data);
     const wasPlaying = current.data.gameStatus !== 'playing';
 
+    const botPlayers = bots.slice(0, 1).map(b => ({ id: b.id, name: b.name, joinedAt: 0 as const }));
     const players: Player[] = isInSession && localPeer
       ? [localPeer, ...session.peers]
-      : [];
+      : botPlayers.length > 0
+        ? [{ id: playerId, name: playerName, joinedAt: Date.now() }, ...botPlayers]
+        : [];
 
     const fresh = ticTacToeGame.initialState(players);
     const newData = { ...fresh, ...stats };

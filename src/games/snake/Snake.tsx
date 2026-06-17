@@ -2,9 +2,11 @@ import React, { useEffect, useRef, useCallback, useState } from 'react';
 import { useSession } from '../../hooks/useSession';
 import { useCoinService } from '../../hooks/useCoinService';
 import { useSwipeGestures } from '../../hooks/useSwipeGestures';
+import { useBots } from '../../hooks/useBots';
 import { GameButton } from '../../components/ui';
 import type { SnakeGameState, SnakeAction, Direction } from './types';
 import { snakeGame } from './Snake.game';
+import { snakeBot } from './Snake.bot';
 import {
   GRID_W, GRID_H, FOOD_COUNT, TICK_MS, DEAD_FADE_TICKS,
   pickRandomPositions, generateSnakeStarts, darken,
@@ -50,6 +52,9 @@ export const SnakeGame: React.FC<SnakeProps> = ({ playerId, playerName }) => {
   const isInSession = session.isInSession;
   const isHost = !isInSession || session.role === 'host';
   const localPlayer = session.localPlayer ?? { id: playerId, name: playerName, joinedAt: Date.now() };
+  const { bots } = useBots();
+  const botsRef = useRef(bots);
+  useEffect(() => { botsRef.current = bots; }, [bots]);
 
   const [displayState, setDisplayState] = useState<SnakeGameState>(() =>
     snakeGame.initialState([localPlayer]),
@@ -102,8 +107,17 @@ export const SnakeGame: React.FC<SnakeProps> = ({ playerId, playerName }) => {
         tickRef.current = null;
         return;
       }
-      const newFood = pickRandomPositions(FOOD_COUNT, cur.snakes, cur.food, cur.width, cur.height);
-      const next = snakeGame.reduce(cur, { type: 'tick', newFood }, localPlayer);
+
+      let state = cur;
+      for (const bot of botsRef.current) {
+        if (!state.snakes[bot.id]?.alive) continue;
+        const action = snakeBot.chooseAction(state, bot.id, bot.difficulty);
+        const withDir = snakeGame.reduce(state, action, { id: bot.id, name: bot.name, joinedAt: 0 });
+        if (withDir) state = withDir;
+      }
+
+      const newFood = pickRandomPositions(FOOD_COUNT, state.snakes, state.food, state.width, state.height);
+      const next = snakeGame.reduce(state, { type: 'tick', newFood }, localPlayer);
       if (!next) return;
       gameStateRef.current = next;
       setDisplayState(next);
@@ -114,9 +128,11 @@ export const SnakeGame: React.FC<SnakeProps> = ({ playerId, playerName }) => {
   // ── Start / new game ───────────────────────────────────────────────────
 
   const handleStart = useCallback(() => {
-    const allPlayers = isInSession
+    const humanPlayers = isInSession
       ? [localPlayer, ...session.peers]
       : [localPlayer];
+    const botPlayers = botsRef.current.map(b => ({ id: b.id, name: b.name, joinedAt: 0 as const }));
+    const allPlayers = [...humanPlayers, ...botPlayers];
 
     const snakeStarts = generateSnakeStarts(allPlayers, GRID_W, GRID_H);
     const food = pickRandomPositions(FOOD_COUNT, {}, [], GRID_W, GRID_H);

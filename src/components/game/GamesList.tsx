@@ -34,7 +34,7 @@ const AVAILABLE_GAMES: GameInfo[] = [
     description: 'Every player has their own snake. Eat food, grow long, survive.',
     icon: <Worm size={40} />,
     category: 'Arcade',
-    botSupported: false,
+    botSupported: true,
   },
   {
     id: 'game2048',
@@ -50,7 +50,7 @@ const AVAILABLE_GAMES: GameInfo[] = [
     description: 'Two randomly chosen players duel — everyone else watches!',
     icon: <Grid3X3 size={40} />,
     category: 'Strategy',
-    botSupported: false,
+    botSupported: true,
   },
   {
     id: 'uno',
