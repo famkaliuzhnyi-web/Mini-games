@@ -219,6 +219,33 @@
   white-space: nowrap;
 }
 
+/* ── Update section ────────────────────────────────────────────────────── */
+
+.update-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.update-version {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.update-status {
+  font-size: 0.78rem;
+  color: var(--color-text-2);
+  margin: 0;
+  letter-spacing: 0.02em;
+}
+
+.update-status--available {
+  color: var(--color-accent);
+}
+
 /* ── Theme selector ────────────────────────────────────────────────────── */
 
 .theme-selector {

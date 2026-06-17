@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { UserService } from '../../services/UserService';
 import { useTheme } from '../../hooks/useTheme';
+import { useAppUpdate } from '../../hooks/useAppUpdate';
+import packageJson from '../../../package.json';
 import './Profile.css';
 
 interface ProfileProps {
@@ -19,6 +21,7 @@ export const Profile: React.FC<ProfileProps> = ({
   const [isSaving, setIsSaving] = useState(false);
   const userService = UserService.getInstance();
   const { currentTheme, availableThemes, setTheme } = useTheme();
+  const { status: updateStatus, checkForUpdate, applyUpdate } = useAppUpdate();
 
   const handleSave = async () => {
     const trimmedName = editName.trim();
@@ -118,6 +121,36 @@ export const Profile: React.FC<ProfileProps> = ({
               <span className="metadata-value">{new Date(profile.updatedAt).toLocaleDateString()}</span>
             </div>
           </div>
+        )}
+      </div>
+
+      {/* App / updates */}
+      <div className="profile-card">
+        <div className="profile-card-label">App</div>
+        <div className="update-row">
+          <div className="update-version">
+            <span className="metadata-label">Version</span>
+            <span className="metadata-value">{packageJson.version}</span>
+          </div>
+          {updateStatus === 'available' ? (
+            <button className="save-btn" onClick={applyUpdate}>
+              Update &amp; Reload
+            </button>
+          ) : (
+            <button
+              className="edit-btn"
+              onClick={checkForUpdate}
+              disabled={updateStatus === 'checking'}
+            >
+              {updateStatus === 'checking' ? 'Checking…' : 'Check for Updates'}
+            </button>
+          )}
+        </div>
+        {updateStatus === 'latest' && (
+          <p className="update-status">Already on the latest version.</p>
+        )}
+        {updateStatus === 'available' && (
+          <p className="update-status update-status--available">New version ready — click to apply.</p>
         )}
       </div>
 

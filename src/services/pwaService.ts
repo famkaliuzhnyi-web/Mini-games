@@ -20,6 +20,8 @@ export class PWAService {
   private deferredPrompt: BeforeInstallPromptEvent | null = null;
   private isInstallable = false;
   private isInstalled = false;
+  private registration: ServiceWorkerRegistration | null = null;
+  private waitingWorker: ServiceWorker | null = null;
 
   constructor() {
     this.init();
@@ -45,22 +47,21 @@ export class PWAService {
           scope: getAbsolutePath('/'),
           updateViaCache: 'none', // Don't cache the service worker file itself
         });
-        
+
+        this.registration = registration;
         console.log('Service Worker registered successfully:', registration);
 
         // Handle service worker updates
         registration.addEventListener('updatefound', () => {
           console.log('Service Worker update found');
           const newWorker = registration.installing;
-          
+
           if (newWorker) {
             newWorker.addEventListener('statechange', () => {
               if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                 console.log('New service worker available, refresh to use it');
-                // Notify user about the update and offer to refresh
+                this.waitingWorker = newWorker;
                 window.dispatchEvent(new CustomEvent('sw-update-available'));
-                
-                // Show update notification
                 this.showUpdateNotification();
               }
             });
@@ -258,8 +259,51 @@ export class PWAService {
     if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
       navigator.serviceWorker.controller.postMessage({ type: 'SKIP_WAITING' });
     }
-    
+
     // Reload with cache bypass
+    window.location.reload();
+  }
+
+  public hasUpdate(): boolean {
+    return this.waitingWorker !== null;
+  }
+
+  /**
+   * Explicitly check for an update. Resolves true if a new version is ready,
+   * false if already on the latest version.
+   */
+  public checkForUpdate(): Promise<boolean> {
+    if (this.waitingWorker) return Promise.resolve(true);
+    if (!this.registration) return Promise.resolve(false);
+
+    return new Promise((resolve) => {
+      let resolved = false;
+
+      const done = (found: boolean) => {
+        if (!resolved) {
+          resolved = true;
+          window.removeEventListener('sw-update-available', handleUpdate);
+          resolve(found);
+        }
+      };
+
+      const handleUpdate = () => done(true);
+      window.addEventListener('sw-update-available', handleUpdate);
+
+      this.registration!.update()
+        .then(() => {
+          // Give the new worker time to reach 'installed' state after updatefound
+          setTimeout(() => done(false), 2000);
+        })
+        .catch(() => done(false));
+    });
+  }
+
+  /** Skip waiting and reload to apply the queued update immediately. */
+  public applyUpdate(): void {
+    if (this.waitingWorker) {
+      this.waitingWorker.postMessage({ type: 'SKIP_WAITING' });
+    }
     window.location.reload();
   }
 }
