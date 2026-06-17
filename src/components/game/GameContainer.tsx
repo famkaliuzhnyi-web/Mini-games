@@ -3,6 +3,7 @@ import { Game2048 } from '../../games/game2048';
 import { TicTacToeGame } from '../../games/tic-tac-toe';
 import { SnakeGame } from '../../games/snake';
 import { TetrisGame } from '../../games/tetris';
+import { UnoGame } from '../../games/uno';
 import './GameContainer.css';
 
 interface GameContainerProps {
@@ -18,6 +19,7 @@ export const GameContainer: React.FC<GameContainerProps> = ({ gameId, playerId, 
       case 'tic-tac-toe': return <TicTacToeGame playerId={playerId} playerName={playerName} />;
       case 'snake':       return <SnakeGame playerId={playerId} playerName={playerName} />;
       case 'tetris':      return <TetrisGame playerId={playerId} playerName={playerName} />;
+      case 'uno':         return <UnoGame playerId={playerId} playerName={playerName} />;
       default:
         return (
           <div className="game-not-found">
