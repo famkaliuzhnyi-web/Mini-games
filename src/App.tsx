@@ -110,6 +110,11 @@ function JoinPage() {
     }
   };
 
+  // Auto-join when name is already known on mount
+  useEffect(() => {
+    if (playerName && phase === 'name') attemptJoin(playerName);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   if (!playerName) {
     return (
       <NameEntry
@@ -119,11 +124,6 @@ function JoinPage() {
         }}
       />
     );
-  }
-
-  if (phase === 'name') {
-    // Name already known — proceed automatically
-    useEffect(() => { attemptJoin(playerName); }, []); // eslint-disable-line react-hooks/exhaustive-deps
   }
 
   if (phase === 'joining') {
