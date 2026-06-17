@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Home, Coins, Users, UserPlus } from 'lucide-react';
 import { useCoinService } from '../../hooks/useCoinService';
 import { useSession } from '../../hooks/useSession';
 import { SessionPanel } from '../multiplayer/SessionPanel';
@@ -42,12 +43,14 @@ export const Navigation: React.FC<NavigationProps> = ({
             aria-label={showHomeButton ? 'Go home' : 'Games (current page)'}
             disabled={!showHomeButton}
           >
-            🏠 Games
+            <Home size={15} strokeWidth={2.5} />
+            Games
           </button>
 
           <div className="nav-right">
             <div className="nav-coins" title="Your coin balance">
-              🪙 {(balance ?? 0).toLocaleString()}
+              <Coins size={14} strokeWidth={2} />
+              {(balance ?? 0).toLocaleString()}
             </div>
 
             <div className="nav-user">
@@ -81,7 +84,9 @@ export const Navigation: React.FC<NavigationProps> = ({
                 aria-label="Multiplayer session"
                 title={session.isInSession ? `Session active (${allPlayers.length} players)` : 'Start a multiplayer session'}
               >
-                {session.isInSession ? `👥 ${allPlayers.length}` : '+'}
+                {session.isInSession
+                  ? <><Users size={14} strokeWidth={2} /> {allPlayers.length}</>
+                  : <UserPlus size={14} strokeWidth={2} />}
               </button>
             </div>
           </div>
