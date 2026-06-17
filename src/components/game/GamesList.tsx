@@ -52,6 +52,13 @@ const AVAILABLE_GAMES: GameInfo[] = [
     category: 'Strategy',
     botSupported: false,
   },
+  {
+    id: 'uno',
+    name: 'UNO',
+    description: 'Match colors and numbers. Play action cards. First to empty your hand wins!',
+    emoji: '🃏',
+    category: 'Card',
+  },
 ];
 
 export const GamesList: React.FC<GamesListProps> = ({ onGameSelect }) => {

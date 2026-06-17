@@ -1,0 +1,403 @@
+.uno-game {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font);
+  position: relative;
+  user-select: none;
+}
+
+/* ── Opponents ────────────────────────────────────────────────────────── */
+
+.uno-opponents {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  min-height: 80px;
+}
+
+.uno-opponent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  border-radius: var(--radius);
+  border: 2px solid var(--color-border);
+  background: var(--color-surface-2);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  min-width: 70px;
+}
+
+.uno-opponent--active {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 12px var(--color-accent-glow);
+}
+
+.uno-opponent-name {
+  font-size: 0.7rem;
+  text-transform: var(--ui-text-transform);
+  letter-spacing: var(--letter-spacing-ui);
+  color: var(--color-text-2);
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.uno-opponent-cards {
+  display: flex;
+  flex-direction: row;
+  gap: 2px;
+}
+
+.uno-opponent-badges {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.uno-badge-uno {
+  background: #d93025;
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 900;
+  padding: 1px 5px;
+  border-radius: var(--radius-btn);
+  letter-spacing: 0.1em;
+}
+
+/* ── Table (center) ───────────────────────────────────────────────────── */
+
+.uno-table {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex: 1;
+  padding: 12px;
+}
+
+.uno-table-piles {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 24px;
+}
+
+.uno-pile-label {
+  font-size: 0.65rem;
+  text-transform: var(--ui-text-transform);
+  letter-spacing: var(--letter-spacing-ui);
+  color: var(--color-text-2);
+  text-align: center;
+  margin-top: 4px;
+}
+
+.uno-discard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.uno-draw-pile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+}
+
+.uno-draw-pile-stack {
+  position: relative;
+  width: 60px;
+  height: 90px;
+}
+
+.uno-draw-pile-stack .uno-card--face-down:nth-child(2) {
+  position: absolute;
+  top: -3px;
+  left: -3px;
+}
+
+.uno-draw-pile-stack .uno-card--face-down:nth-child(3) {
+  position: absolute;
+  top: -6px;
+  left: -6px;
+}
+
+.uno-direction-indicator {
+  font-size: 1.4rem;
+  color: var(--color-accent);
+  line-height: 1;
+}
+
+.uno-status {
+  font-size: 0.8rem;
+  text-transform: var(--ui-text-transform);
+  letter-spacing: var(--letter-spacing-ui);
+  color: var(--color-text-2);
+  text-align: center;
+}
+
+.uno-status--your-turn {
+  color: var(--color-accent);
+  font-weight: 700;
+}
+
+/* ── Hand area ────────────────────────────────────────────────────────── */
+
+.uno-hand-area {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  overflow-x: auto;
+  padding: 16px 8px 8px;
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  gap: 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-2) transparent;
+}
+
+.uno-hand {
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+  padding: 0 4px;
+}
+
+.uno-draw-btn {
+  flex-shrink: 0;
+  align-self: center;
+  margin-left: 12px;
+  background: var(--color-surface-3);
+  color: var(--color-text);
+  border: 2px solid var(--color-border-2);
+  border-radius: var(--radius-btn);
+  font-family: var(--font);
+  font-size: 0.7rem;
+  text-transform: var(--ui-text-transform);
+  letter-spacing: var(--letter-spacing-ui);
+  padding: 8px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.uno-draw-btn:hover {
+  border-color: var(--color-accent);
+  background: var(--color-accent-dim);
+}
+
+.uno-draw-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* ── Cards ────────────────────────────────────────────────────────────── */
+
+.uno-card {
+  width: 60px;
+  height: 90px;
+  border-radius: 10px;
+  border: 3px solid rgba(255, 255, 255, 0.25);
+  background: var(--card-bg, #333);
+  color: #fff;
+  font-weight: 900;
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  cursor: default;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  transition: transform 0.15s, box-shadow 0.15s;
+  user-select: none;
+}
+
+.uno-card--red    { --card-bg: #d93025; }
+.uno-card--yellow { --card-bg: #e8a000; }
+.uno-card--green  { --card-bg: #1e8e3e; }
+.uno-card--blue   { --card-bg: #1967d2; }
+.uno-card--wild   {
+  background: conic-gradient(#d93025 0 25%, #e8a000 25% 50%, #1e8e3e 50% 75%, #1967d2 75%);
+}
+
+.uno-card--face-down {
+  background: #1a1a2e !important;
+  --card-bg: #1a1a2e;
+}
+
+.uno-card--face-down::after {
+  content: 'UNO';
+  color: rgba(255, 255, 255, 0.15);
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+}
+
+.uno-card--playable {
+  transform: translateY(-10px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  border-color: rgba(255, 255, 255, 0.7);
+}
+
+.uno-card--playable:hover {
+  transform: translateY(-14px);
+}
+
+.uno-card-value {
+  font-size: 1.1rem;
+  font-weight: 900;
+  line-height: 1;
+  text-align: center;
+  pointer-events: none;
+}
+
+.uno-card-value--action {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ── Overlays ─────────────────────────────────────────────────────────── */
+
+.uno-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background: rgba(0, 0, 0, 0.75);
+  z-index: 10;
+  text-align: center;
+  padding: 24px;
+}
+
+.uno-overlay-title {
+  font-size: 1.5rem;
+  font-weight: 900;
+  text-transform: var(--ui-text-transform);
+  letter-spacing: var(--letter-spacing-ui);
+  color: var(--color-text);
+}
+
+.uno-overlay-subtitle {
+  font-size: 0.9rem;
+  color: var(--color-text-2);
+}
+
+.uno-overlay-btn {
+  background: var(--color-accent);
+  color: var(--color-bg);
+  border: none;
+  border-radius: var(--radius-btn);
+  font-family: var(--font);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: var(--ui-text-transform);
+  letter-spacing: var(--letter-spacing-ui);
+  padding: 10px 24px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.uno-overlay-btn:hover {
+  background: var(--color-accent-hover);
+}
+
+/* ── Color picker ─────────────────────────────────────────────────────── */
+
+.uno-color-picker-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.uno-color-picker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border-2);
+  border-radius: var(--radius);
+  padding: 24px;
+}
+
+.uno-color-picker-title {
+  font-size: 0.8rem;
+  text-transform: var(--ui-text-transform);
+  letter-spacing: var(--letter-spacing-ui);
+  color: var(--color-text-2);
+}
+
+.uno-color-options {
+  display: flex;
+  gap: 16px;
+}
+
+.uno-color-option {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  transition: transform 0.15s, border-color 0.15s;
+}
+
+.uno-color-option:hover {
+  transform: scale(1.15);
+  border-color: rgba(255, 255, 255, 0.8);
+}
+
+.uno-color-option--red    { background: #d93025; }
+.uno-color-option--yellow { background: #e8a000; }
+.uno-color-option--green  { background: #1e8e3e; }
+.uno-color-option--blue   { background: #1967d2; }
+
+/* ── Mobile ───────────────────────────────────────────────────────────── */
+
+@media (max-width: 600px) {
+  .uno-card {
+    width: 44px;
+    height: 66px;
+    font-size: 0.95rem;
+    border-radius: 7px;
+  }
+
+  .uno-card-value {
+    font-size: 0.85rem;
+  }
+
+  .uno-card-value--action {
+    font-size: 0.55rem;
+  }
+
+  .uno-opponent .uno-card {
+    width: 30px;
+    height: 45px;
+    font-size: 0.6rem;
+    border-radius: 5px;
+  }
+
+  .uno-draw-pile-stack {
+    width: 44px;
+    height: 66px;
+  }
+}
