@@ -3,6 +3,7 @@
  */
 
 export { TicTacToeGame, default } from './TicTacToeGame';
+export { ticTacToeBot } from './TicTacToe.bot';
 export { TicTacToeGameController } from './controller';
 export type { 
   TicTacToeGameData, 
