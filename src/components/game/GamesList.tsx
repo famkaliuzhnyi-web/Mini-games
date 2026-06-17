@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Blocks, Worm, Hash, Grid3X3, Gamepad2 } from 'lucide-react';
+import { Blocks, Worm, Hash, Grid3X3, Gamepad2, CreditCard } from 'lucide-react';
 import './GamesList.css';
 import packageJson from '../../../package.json';
 import { useWindowResize } from '../../hooks/useWindowResize';
@@ -56,8 +56,9 @@ const AVAILABLE_GAMES: GameInfo[] = [
     id: 'uno',
     name: 'UNO',
     description: 'Match colors and numbers. Play action cards. First to empty your hand wins!',
-    emoji: '🃏',
+    icon: <CreditCard size={40} />,
     category: 'Card',
+    botSupported: true,
   },
 ];
 
