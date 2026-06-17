@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { Home, Coins, Users, UserPlus } from 'lucide-react';
+import { Bot, Home, Coins, Users, UserPlus } from 'lucide-react';
 import { useCoinService } from '../../hooks/useCoinService';
 import { useSession } from '../../hooks/useSession';
+import { useBots } from '../../hooks/useBots';
 import { SessionPanel } from '../multiplayer/SessionPanel';
+import { BotPanel } from '../multiplayer/BotPanel';
 import { getProfileInitials } from '../../utils/nameUtils';
 import './Navigation.css';
 
@@ -24,7 +26,9 @@ export const Navigation: React.FC<NavigationProps> = ({
 }) => {
   const { balance } = useCoinService();
   const session = useSession();
+  const { bots } = useBots();
   const [sessionPanelOpen, setSessionPanelOpen] = useState(false);
+  const [botPanelOpen, setBotPanelOpen] = useState(false);
 
   const allPlayers = [
     ...(session.localPlayer ? [session.localPlayer] : []),
@@ -78,6 +82,21 @@ export const Navigation: React.FC<NavigationProps> = ({
                 </button>
               )}
 
+              {bots.map(bot => (
+                <div key={bot.id} className="nav-bot-avatar" title={`${bot.name} (${bot.difficulty})`}>
+                  {getProfileInitials(bot.name)}
+                </div>
+              ))}
+
+              <button
+                className={`nav-bot-btn ${bots.length > 0 ? 'active' : ''}`}
+                onClick={() => setBotPanelOpen(true)}
+                aria-label="Bot opponents"
+                title={bots.length > 0 ? `${bots.length} bot${bots.length > 1 ? 's' : ''} active` : 'Add bot opponents'}
+              >
+                {bots.length > 0 ? <><Bot size={14} strokeWidth={2} /> {bots.length}</> : <Bot size={14} strokeWidth={2} />}
+              </button>
+
               <button
                 className={`nav-multiplayer-btn ${session.isInSession ? 'active' : ''}`}
                 onClick={() => setSessionPanelOpen(true)}
@@ -100,6 +119,8 @@ export const Navigation: React.FC<NavigationProps> = ({
           onClose={() => setSessionPanelOpen(false)}
         />
       )}
+
+      {botPanelOpen && <BotPanel onClose={() => setBotPanelOpen(false)} />}
     </>
   );
 };

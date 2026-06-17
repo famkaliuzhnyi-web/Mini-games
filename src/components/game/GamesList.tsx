@@ -12,6 +12,7 @@ export interface GameInfo {
   description: string;
   icon: React.ReactNode;
   category?: string;
+  botSupported?: boolean;
 }
 
 interface GamesListProps {
@@ -25,6 +26,7 @@ const AVAILABLE_GAMES: GameInfo[] = [
     description: 'Race to 1500 pts — your own board, first to the target wins.',
     icon: <Blocks size={40} />,
     category: 'Arcade',
+    botSupported: false,
   },
   {
     id: 'snake',
@@ -32,6 +34,7 @@ const AVAILABLE_GAMES: GameInfo[] = [
     description: 'Every player has their own snake. Eat food, grow long, survive.',
     icon: <Worm size={40} />,
     category: 'Arcade',
+    botSupported: false,
   },
   {
     id: 'game2048',
@@ -39,6 +42,7 @@ const AVAILABLE_GAMES: GameInfo[] = [
     description: 'Chaos mode — everyone swipes, tiles merge! Host controls who plays.',
     icon: <Hash size={40} />,
     category: 'Puzzle',
+    botSupported: false,
   },
   {
     id: 'tic-tac-toe',
@@ -46,6 +50,7 @@ const AVAILABLE_GAMES: GameInfo[] = [
     description: 'Two randomly chosen players duel — everyone else watches!',
     icon: <Grid3X3 size={40} />,
     category: 'Strategy',
+    botSupported: false,
   },
 ];
 
